@@ -12,6 +12,8 @@ error messages when a choice fails to parse. FOLLOW(k) and LA(k) should be
 computed, but they are not.
 """
 from __future__ import print_function, division, absolute_import, unicode_literals
+import logging
+log = logging.getLogger('grako.grammars')
 import re
 from copy import deepcopy
 from keyword import iskeyword
@@ -19,23 +21,33 @@ import time
 from .util import simplify, indent, trim
 from .rendering import Renderer, render
 from .buffering import Buffer
-from .exceptions import *  # @UnusedWildImport
 from .ast import AST
-from .contexts import ParseContext
+from .contexts import ParseContext, ParseInfo
+from .exceptions import (FailedParse,
+                         FailedToken,
+                         FailedPattern,
+                         FailedLookahead,
+                         FailedRef,
+                         FailedCut,
+                         GrammarError)
+
 
 def check(result):
     assert isinstance(result, _Grammar), str(result)
 
+
 def dot(x, y, k):
-    return set([ (a + b)[:k] for a in x for b in y])
+    return set([(a + b)[:k] for a in x for b in y])
+
 
 def urepr(obj):
     return repr(obj).lstrip('u')
 
+
 class ModelContext(ParseContext):
-    def __init__(self, rules, text, filename, trace):
-        super(ModelContext, self).__init__(trace=trace)
-        self.rules = {rule.name :rule for rule in rules}
+    def __init__(self, rules, text, filename, trace, **kwargs):
+        super(ModelContext, self).__init__(trace=trace, **kwargs)
+        self.rules = {rule.name: rule for rule in rules}
         self._buffer = Buffer(text, filename=filename)
         self._buffer.goto(0)
 
@@ -49,6 +61,7 @@ class ModelContext(ParseContext):
 
     def _find_rule(self, name):
         return self.rules[name]
+
 
 class _Grammar(Renderer):
     def __init__(self):
@@ -65,7 +78,7 @@ class _Grammar(Renderer):
         return self._first_set
 
     def _validate(self, rules):
-        pass
+        return True
 
     def _first(self, k, F):
         return set()
@@ -100,7 +113,7 @@ class _DecoratorGrammar(_Grammar):
         return self.exp.parse(ctx)
 
     def _validate(self, rules):
-        self.exp._validate(rules)
+        return self.exp._validate(rules)
 
     def _first(self, k, F):
         return self.exp._first(k, F)
@@ -112,15 +125,20 @@ class _DecoratorGrammar(_Grammar):
 
 
 class GroupGrammar(_DecoratorGrammar):
+    def parse(self, ctx):
+        ctx._push_cst()
+        try:
+            value = self.exp.parse(ctx)
+        finally:
+            ctx._pop_cst()
+        ctx._add_cst_node(value)
+
     def __str__(self):
         return '(%s)' % str(self.exp).strip()
 
-    def render_fields(self, fields):
-        fields.update(exp=indent(render(self.exp)))
-
     template = '''\
                 with self._group():
-                {exp}
+                {exp:1::}
                     _e = self.cst
                 '''
 
@@ -195,13 +213,11 @@ class LookaheadGrammar(_DecoratorGrammar):
             ctx.goto(p)
             ctx._pop_ast()  # simply discard
 
-    def render_fields(self, fields):
-        fields.update(exp=indent(render(self.exp)))
-
     template = '''\
                 with self._if():
-                {exp}\
+                {exp:1::}\
                 '''
+
 
 class LookaheadNotGrammar(_DecoratorGrammar):
     def __str__(self):
@@ -220,13 +236,9 @@ class LookaheadNotGrammar(_DecoratorGrammar):
         finally:
             ctx._pop_ast()  # simply discard
 
-
-    def render_fields(self, fields):
-        fields.update(exp=indent(render(self.exp)))
-
     template = '''\
                 with self._ifnot():
-                {exp}\
+                {exp:1::}\
                 '''
 
 
@@ -247,8 +259,7 @@ class SequenceGrammar(_Grammar):
         return [r for r in result if r is not None]
 
     def _validate(self, rules):
-        for s in self.sequence:
-            s._validate(rules)
+        return all(s._validate(rules) for s in self.sequence)
 
     def _first(self, k, F):
         result = {()}
@@ -296,8 +307,7 @@ class ChoiceGrammar(_Grammar):
         raise FailedParse(ctx.buf, 'one of {%s}' % firstset)
 
     def _validate(self, rules):
-        for o in self.options:
-            o._validate(rules)
+        return all(o._validate(rules) for o in self.options)
 
     def _first(self, k, F):
         result = set()
@@ -345,31 +355,28 @@ class ChoiceGrammar(_Grammar):
 
 class RepeatGrammar(_DecoratorGrammar):
     def parse(self, ctx):
-        result = []
-        while True:
-            p = ctx.buf.pos
-            try:
-                tree = self.exp.parse(ctx)
-                if tree is not None:
-                    result.append(tree)
-            except FailedParse:
-                ctx.buf.goto(p)
-                break
+        ctx._push_cst()
+        try:
+            f = lambda: self.exp.parse(ctx)
+            result = ctx._repeat(f)
+            cst = ctx.cst
+        finally:
+            ctx._pop_cst()
+        ctx._add_cst_node(cst)
         return result
 
-
     def _first(self, k, F):
+        efirst = self.exp._first(k, F)
         result = {()}
         for _i in range(k):
-            result = dot(result, self.exp._first(k, F), k)
+            result = dot(result, efirst, k)
         return {()} | result
 
     def __str__(self):
         return '{%s}' % str(self.exp)
 
     def render_fields(self, fields):
-        fields.update(n=self.counter(),
-                      innerexp=indent(render(self.exp)))
+        fields.update(n=self.counter())
 
     def render(self, **fields):
         if {()} in self.exp.firstset:
@@ -378,7 +385,7 @@ class RepeatGrammar(_DecoratorGrammar):
 
     template = '''
                 def repeat{n}():
-                {innerexp}
+                {exp:1::}
                     return _e
                 _e = self._repeat(repeat{n})\
                 '''
@@ -386,26 +393,34 @@ class RepeatGrammar(_DecoratorGrammar):
 
 class RepeatOneGrammar(RepeatGrammar):
     def parse(self, ctx):
-        head = self.exp.parse(ctx)
-        return [head] + super(RepeatOneGrammar, self).parse(ctx)
+        ctx._push_cst()
+        try:
+            with ctx._try():
+                head = self.exp.parse(ctx)
+            f = lambda: self.exp.parse(ctx)
+            result = [head] + ctx._repeat(f)
+            cst = ctx.cst
+        finally:
+            ctx._pop_cst()
+        ctx._add_cst_node(cst)
+        return result
 
     def _first(self, k, F):
+        efirst = self.exp._first(k, F)
         result = {()}
         for _i in range(k):
-            result = dot(result, self.exp._first(k, F), k)
+            result = dot(result, efirst, k)
         return result
 
     def __str__(self):
         return '{%s}+' % str(self.exp)
 
     def render_fields(self, fields):
-        fields.update(n=self.counter(),
-                      exp=render(self.exp),
-                      innerexp=indent(render(self.exp)))
+        fields.update(n=self.counter())
 
     template = '''
                 def repeat{n}():
-                {innerexp}
+                {exp:1::}
                     return _e
                 _e = self._repeat(repeat{n}, plus=True)\
                 '''
@@ -436,13 +451,10 @@ class OptionalGrammar(_DecoratorGrammar):
     def __str__(self):
         return '[%s]' % str(self.exp)
 
-    def render_fields(self, fields):
-        fields.update(exp=indent(render(self.exp)))
-
     template = '''\
                 with self._optional():
                     _e = None
-                {exp}\
+                {exp:1::}\
                 '''
 
 
@@ -480,12 +492,11 @@ class NamedGrammar(_DecoratorGrammar):
         name = self.name
         if iskeyword(name):
             name += '_'
-        fields.update(
-                      n=self.counter(),
+        fields.update(n=self.counter(),
                       name=name,
-                      exp=render(self.exp),
                       force_list=', force_list=True' if self.force_list else ''
                       )
+
     template = '''
                 {exp}
                 self.ast.add('{name}', _e{force_list})\
@@ -503,7 +514,7 @@ class OverrideGrammar(_DecoratorGrammar):
 
     template = '''
                 {exp}
-                self.ast['@'] = _e\
+                self._add_ast_node('@', _e)\
                 '''
 
 
@@ -539,7 +550,9 @@ class RuleRefGrammar(_Grammar):
 
     def _validate(self, rules):
         if self.name not in rules:
-            raise GrammarError("ERROR: Reference to unknown rule '%s'." % self.name)
+            log.error("Reference to unknown rule '%s'." % self.name)
+            return False
+        return True
 
     def _first(self, k, F):
         self._first_set = F.get(self.name, set())
@@ -594,6 +607,8 @@ class RuleGrammar(NamedGrammar):
                 node = ctx.cst
             elif '@' in node:
                 node = node['@']
+            elif ctx.parseinfo:
+                node.add('parseinfo', ParseInfo(ctx._buffer, name, pos, ctx._pos))
             if self.ast_name:
                 node = AST([(self.ast_name, node)])
         finally:
@@ -601,7 +616,6 @@ class RuleGrammar(NamedGrammar):
         result = (node, ctx.pos)
         cache[key] = result
         return result
-
 
     def _first(self, k, F):
         if self._first_set:
@@ -619,18 +633,17 @@ class RuleGrammar(NamedGrammar):
             ast_name_clause = '\nself.ast = AST(%s=self.ast)\n' % self.ast_name_
         else:
             ast_name_clause = ''
-        fields.update(
-                      name=name,
-                      exp=indent(render(self.exp)),
+        fields.update(name=name,
                       ast_name_clause=ast_name_clause
                       )
 
     template = '''
                 def _{name}_(self):
                     _e = None
-                {exp}{ast_name_clause}
+                {exp:1::}{ast_name_clause}
 
                 '''
+
 
 class Grammar(Renderer):
     def __init__(self, name, rules):
@@ -638,13 +651,13 @@ class Grammar(Renderer):
         assert isinstance(rules, list), str(rules)
         self.name = name
         self.rules = rules
-        self._validate()
+        if not self._validate():
+            raise GrammarError('Unknown rules, no parser generated.')
         self._first_sets = self._calc_first_sets()
 
     def _validate(self):
         ruledict = {r.name for r in self.rules}
-        for rule in self.rules:
-            rule._validate(ruledict)
+        return all(rule._validate(ruledict) for rule in self.rules)
 
     @property
     def first_sets(self):
@@ -662,16 +675,13 @@ class Grammar(Renderer):
             rule._first_set = F[rule.name]
         return F
 
-    def parse(self, text, start=None, filename=None, trace=False,):
+    def parse(self, text, start=None, filename=None, trace=False, **kwargs):
         try:
-            try:
-                ctx = ModelContext(self.rules, text, filename, trace=trace)
-                start_rule = ctx._find_rule(start) if start else self.rules[0]
-                return start_rule.parse(ctx)
-            except FailedCut as e:
-                raise e.nested
-        except:
-            raise
+            ctx = ModelContext(self.rules, text, filename, trace=trace, **kwargs)
+            start_rule = ctx._find_rule(start) if start else self.rules[0]
+            return start_rule.parse(ctx)
+        except FailedCut as e:
+            raise e.nested
 
     def __str__(self):
         return '\n\n'.join(str(rule) for rule in self.rules) + '\n'
@@ -684,7 +694,6 @@ class Grammar(Renderer):
                       abstract_rules=abstract_rules,
                       version=time.strftime('%y.%j.%H.%M.%S', time.gmtime())
                       )
-
 
     abstract_rule_template = '''
             def {name}(self, ast):
@@ -723,7 +732,7 @@ class Grammar(Renderer):
                     import json
                     with open(filename) as f:
                         text = f.read()
-                    parser = {name}ParserBase(simple=True)
+                    parser = {name}ParserBase(parseinfo=False)
                     ast = parser.parse(text, startrule, filename=filename)
                     print('AST:')
                     print(ast)
