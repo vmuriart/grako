@@ -1,0 +1,10 @@
+\.hgingore$
+\.(pyc|pyo|swp|orig)$
+^\.
+^tmp/
+^MANIFEST$
+^dist$
+^build$
+^examples/.*/grako$
+genparser.py$
+parser_base.py$
