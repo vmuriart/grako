@@ -83,6 +83,14 @@ class Buffer(object):
             return None
         return self.text[self._pos]
 
+    def at(self, p):
+        if p >= self._len:
+            return None
+        return self.text[p]
+
+    def peek(self, n):
+        return self.at(self._pos + n)
+
     def next(self):
         if self._pos >= self._len:
             return None
@@ -106,16 +114,15 @@ class Buffer(object):
 
     def eatcomments(self):
         if self.comments_re is not None:
-            opts = regexp.MULTILINE if '\n' in self.comments_re else 0
-            while self.matchre(self.comments_re, opts):
+            while self.matchre(self.comments_re, regexp.MULTILINE):
                 pass
 
     def next_token(self):
         p = None
         while self._pos != p:
             p = self._pos
-            self.eatwhitespace()
             self.eatcomments()
+            self.eatwhitespace()
 
     def skip_to(self, c):
         p = self._pos
