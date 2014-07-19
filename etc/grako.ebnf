@@ -1,0 +1,256 @@
+grammar::Grammar
+    =
+    @:{rule}+ $
+    ;
+
+
+paramdef
+    =
+        '::' ~ params:params
+    |
+        '('
+        ~
+        (
+              kwparams:kwparams
+            | params:params ',' ~ kwparams:kwparams
+            | params:params
+        )
+        ')'
+    ;
+
+
+rule::Rule
+    =
+    name:new_name ~ [>paramdef] ['<' ~ base:known_name] '=' ~ rhs:expre ';' ~
+    ;
+
+
+params
+    =
+    @+:literal {',' ~  @+:literal}
+    ;
+
+
+kwparams
+    =
+    @+:pair {',' ~ @+:pair}
+    ;
+
+
+pair
+    =
+    @+:word '=' ~ @+:literal
+    ;
+
+
+expre
+    =
+    choice | sequence
+    ;
+
+
+choice::Choice
+    =
+    @+:sequence {'|' ~ @+:sequence}+
+    ;
+
+
+sequence::Sequence
+    =
+    {element}+
+    ;
+
+
+element
+    =
+    rule_include | named | override | term
+    ;
+
+
+rule_include::RuleInclude
+    =
+    '>' ~ @:known_name
+    ;
+
+
+named
+    =
+    named_list | named_single
+    ;
+
+
+named_list::NamedList
+    =
+    name:name '+:' ~ exp:element
+    ;
+
+
+named_single::Named
+    =
+    name:name ':' ~ exp:element
+    ;
+
+
+override
+    =
+    override_list | override_single | override_single_deprecated
+    ;
+
+
+override_list::OverrideList
+    =
+    '@+:' ~ @:element
+    ;
+
+
+override_single::Override
+    =
+    '@:' ~ @:element
+    ;
+
+
+override_single_deprecated::Override
+    =
+    '@' ~ @:element
+    ;
+
+
+term
+    =
+      void
+    | group
+    | positive_closure
+    | closure
+    | optional
+    | special
+    | kif
+    | knot
+    | atom
+    ;
+
+
+group::Group
+    =
+    '(' ~ @:expre ')' ~
+    ;
+
+
+positive_closure::PositiveClosure
+    =
+    '{' @:expre '}' ('-' | '+') ~
+    ;
+
+
+closure::Closure
+    =
+    '{' @:expre '}' ['*'] ~
+    ;
+
+
+optional::Optional
+    =
+    '[' ~ @:expre ']' ~
+    ;
+
+
+special::Special
+    =
+    '?(' ~ @:/(.*)/ ')?' ~
+    ;
+
+
+kif::Lookahead
+    =
+    '&' ~ @:term
+    ;
+
+
+knot::NegativeLookahead
+    =
+    '!' ~ @:term
+    ;
+
+
+atom
+    =
+    cut | cut_deprecated | token | call | pattern | eof
+    ;
+
+
+call::RuleRef
+    =
+    word
+    ;
+
+
+void::Void
+    =
+    '()' ~
+    ;
+
+
+cut::Cut
+    =
+    '~' ~
+    ;
+
+
+cut_deprecated::Cut
+    =
+    '>>' ~
+    ;
+
+
+new_name
+    =
+    name ~
+    ;
+
+
+known_name
+    =
+    name ~
+    ;
+
+
+name
+    =
+    word
+    ;
+
+
+literal
+    =
+    token | number | word
+    ;
+
+
+token::Token
+    =
+    ('"' ~ @:/([^"\n]|\\"|\\\\)*/ '"' | "'" ~ @:/([^'\n]|\\'|\\\\)*/ "'") ~
+    ;
+
+
+number::Token
+    =
+    /[0-9]+/
+    ;
+
+
+word
+    =
+    /[-_A-Za-z0-9]+/
+    ;
+
+
+pattern::Pattern
+    =
+      '?/' ~ @:?/(.|\n)+?(?=/\?)/?? ?//\?+/?? ~
+    | '/' ~ @:?/(.|\n)+?(?=/)/? '/' ~
+    ;
+
+
+eof::EOF
+    =
+    '$' ~
+    ;
