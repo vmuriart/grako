@@ -12,6 +12,8 @@ from grako.util import asjson, asjsons, Mapping
 from grako.exceptions import SemanticError
 from grako.ast import AST
 
+from . import synth
+
 EOLCOL = 50
 
 
@@ -185,26 +187,13 @@ class ModelBuilderSemantics(object):
         self.nodetypes = dict()
 
         for t in types or ():
-            self._register_nodetype(t)
-
-    def _register_nodetype(self, nodetype):
-        self.nodetypes[nodetype.__name__] = nodetype
-
-    def _get_nodetype(self, typename):
-        typename = str(typename)
-        if typename in self.nodetypes:
-            return self.nodetypes[typename]
-
-        # synthethize a new type
-        nodetype = type(typename, (self.baseType,), {})
-        self._register_nodetype(nodetype)
-        return nodetype
+            synth.register_nodetype(t)
 
     def _default(self, ast, *args, **kwargs):
         if not args:
             return ast
         name = args[0]
-        nodetype = self._get_nodetype(name)
+        nodetype = synth.get_nodetype(name, self.baseType)
         try:
             return nodetype(ast=ast, ctx=self.ctx)
         except Exception as e:
