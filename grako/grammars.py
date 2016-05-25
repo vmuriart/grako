@@ -874,10 +874,11 @@ class Grammar(Model):
 
         directives = ''
         for directive, value in self.directives.items():
-            fmt = {}
-            fmt['name'] = directive
-            fmt['frame'] = '/' if directive in regex_directives else ''
-            fmt['value'] = ustr(value) if directive in ustr_directives else value
+            fmt = dict(
+                name=directive,
+                frame='/' if directive in regex_directives else '',
+                value=ustr(value) if directive in ustr_directives else value,
+            )
             directives += '@@{name} :: {frame}{value}{frame}\n'.format(**fmt)
         if directives:
             directives += '\n'
