@@ -12,17 +12,16 @@ import shutil
 import sys
 import unittest
 
+from grako.codegen import codegen
+from grako.grammars import COMMENTS_RE, EOL_COMMENTS_RE
 from grako.model import DepthFirstWalker
 from grako.parser import GrakoGrammarGenerator, GrakoParser
 from grako.semantics import GrakoSemantics
-from grako.grammars import COMMENTS_RE, EOL_COMMENTS_RE
-from grako.codegen import codegen
 
 sys.path.append('tmp')
 
 
 class BootstrapTests(unittest.TestCase):
-
     def test_bootstrap(self):
         print()
 
@@ -49,7 +48,8 @@ class BootstrapTests(unittest.TestCase):
         with open('tmp/01.ebnf', 'w') as f:
             f.write(generated_grammar1)
 
-        print('-' * 20, 'phase 02 - parse previous output with the parser generator')
+        print('-' * 20,
+              'phase 02 - parse previous output with the parser generator')
         with open('tmp/01.ebnf', 'r') as f:
             text = str(f.read())
         g = GrakoGrammarGenerator('GrakoBootstrap')
@@ -73,7 +73,7 @@ class BootstrapTests(unittest.TestCase):
         g = GrakoGrammarGenerator('GrakoBootstrap')
         g.parse(text)
         parser = g.ast['start']
-    #    pprint(parser.first_sets, indent=2, depth=3)
+        # pprint(parser.first_sets, indent=2, depth=3)
         generated_grammar4 = str(parser)
         with open('tmp/04.ebnf', 'w') as f:
             f.write(generated_grammar4)
@@ -176,6 +176,7 @@ def suite():
 
 def main():
     unittest.TextTestRunner(verbosity=2).run(suite())
+
 
 if __name__ == '__main__':
     main()

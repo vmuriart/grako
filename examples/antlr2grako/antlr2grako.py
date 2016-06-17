@@ -8,8 +8,9 @@ import sys
 from os import path
 
 from antlr_parser import ANTLRParser as ANTLRParserBase
-from grako.buffering import Buffer
 from semantics import ANTLRSemantics
+
+from grako.buffering import Buffer
 
 COMMENTS_RE = r'/\*(?:.|\n)*?\*/|//[^\n]*?\n'
 

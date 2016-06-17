@@ -1,22 +1,24 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-import sys
-import collections
-import json
-import datetime
 import codecs
+import collections
+import datetime
 import itertools
+import json
 import keyword
+import sys
 
 try:
     import regex as re
+
     WHITESPACE_RE = re.compile(r'\p{IsPattern_White_Space}+', re.UNICODE)
 except ImportError:
     import re
+
     WHITESPACE_RE = re.compile(r'\s+', re.UNICODE)
 RE_FLAGS = re.UNICODE | re.MULTILINE
-
 
 PY3 = sys.version_info[0] >= 3
 PY33 = PY3 and sys.version_info[1] >= 3
@@ -27,6 +29,7 @@ if PY3:
     unicode = None
     if PY33:
         from collections import abc
+
         Mapping = abc.Mapping
     else:
         Mapping = collections.Mapping
@@ -89,7 +92,8 @@ def ustr(s):
     elif isinstance(s, str):
         return unicode(s, 'utf-8')
     else:
-        return ustr(s.__str__())  # FIXME: last case resource!  We don't know unicode, period.
+        return ustr(
+            s.__str__())  # FIXME: last case resource!  We don't know unicode, period.
 
 
 def urepr(obj):
@@ -119,6 +123,7 @@ def eval_escapes(s):
     codec, because that provides no way to handle non-ASCII characters that are
     literally present in the string.
     """
+
     # by Rob Speer
 
     def decode_match(match):
@@ -156,7 +161,8 @@ def trim(text, tabwidth=4):
         stripped = line.lstrip()
         if stripped:
             indent = min(indent, len(line) - len(stripped))
-    trimmed = [lines[0].strip()] + [line[indent:].rstrip() for line in lines[1:]]
+    trimmed = [lines[0].strip()] + [line[indent:].rstrip() for line in
+                                    lines[1:]]
     i = 0
     while i < len(trimmed) and not trimmed[i]:
         i += 1
@@ -184,7 +190,8 @@ def notnone(value, default=None):
 
 
 def timestamp():
-    return '.'.join('%2.2d' % t for t in datetime.datetime.utcnow().utctimetuple()[:-2])
+    return '.'.join(
+        '%2.2d' % t for t in datetime.datetime.utcnow().utctimetuple()[:-2])
 
 
 def asjson(obj, seen=None):

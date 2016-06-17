@@ -12,23 +12,21 @@ computed, but they are not.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import sys
-import os
 import functools
+import os
+import sys
 from collections import defaultdict, Mapping
 from copy import copy
 
-from grako.util import indent, trim, ustr, urepr, strtype, compress_seq, chunks
-from grako.util import re, RE_FLAGS
-from grako.exceptions import FailedRef, GrammarError
 from grako.ast import AST
 from grako.buffering import Buffer
 from grako.contexts import ParseContext
+from grako.exceptions import FailedRef, GrammarError
 from grako.model import Node
-
+from grako.util import indent, trim, ustr, urepr, strtype, compress_seq, chunks
+from grako.util import re, RE_FLAGS
 
 PEP8_LLEN = 72
-
 
 COMMENTS_RE = r'\(\*((?:.|\n)*?)\*\)'
 EOL_COMMENTS_RE = r'#([^\n]*?)$'
@@ -85,7 +83,8 @@ class GrakoBuffer(Buffer):
 
 
 class GrakoContext(ParseContext):
-    def parse(self, text, rule='start', filename=None, parseinfo=True, **kwargs):
+    def parse(self, text, rule='start', filename=None, parseinfo=True,
+              **kwargs):
         if not isinstance(text, Buffer):
             text = GrakoBuffer(
                 text,
@@ -128,7 +127,7 @@ class Model(Node):
         return [
             c for c in globals().values()
             if isinstance(c, type) and issubclass(c, Model)
-        ]
+            ]
 
     def __init__(self, ast=None, ctx=None):
         super(Model, self).__init__(ast=ast, ctx=ctx)
@@ -173,7 +172,8 @@ class Model(Node):
             return ''
 
         return '\n'.join(
-            '(* %s *)\n' % '\n'.join(c).replace('(*', '').replace('*)', '').strip()
+            '(* %s *)\n' % '\n'.join(c).replace('(*', '').replace('*)',
+                                                                  '').strip()
             for c in comments
         )
 
@@ -382,7 +382,8 @@ class Choice(Model):
                     ctx.last_node = o.parse(ctx)
                     return ctx.last_node
 
-            lookahead = ' '.join(ustr(urepr(f[0])) for f in self.lookahead if f)
+            lookahead = ' '.join(
+                ustr(urepr(f[0])) for f in self.lookahead if f)
             if lookahead:
                 ctx._error('expecting one of {%s}' % lookahead)
             ctx._error('no available options')
@@ -596,7 +597,8 @@ class RuleRef(Model):
 
     def _validate(self, rules):
         if self.name not in rules:
-            print("Reference to unknown rule '%s'." % self.name, file=sys.stderr)
+            print("Reference to unknown rule '%s'." % self.name,
+                  file=sys.stderr)
             return False
         return True
 
@@ -686,7 +688,7 @@ class Rule(_Decorator):
         if params and kwparams:
             params = '(%s, %s)' % (params, kwparams)
         elif kwparams:
-                params = '(%s)' % (kwparams)
+            params = '(%s)' % (kwparams)
         elif params:
             if len(self.params) == 1:
                 params = '::%s' % params
@@ -713,7 +715,8 @@ class Rule(_Decorator):
 
 
 class BasedRule(Rule):
-    def __init__(self, ast, name, exp, base, params, kwparams, decorators=None):
+    def __init__(self, ast, name, exp, base, params, kwparams,
+                 decorators=None):
         super(BasedRule, self).__init__(
             ast,
             name,
@@ -895,7 +898,7 @@ class Grammar(Model):
         keywords = '\n\n' + keywords + '\n' if keywords else ''
 
         rules = (
-            '\n\n'.join(ustr(rule)
-                        for rule in self.rules)
-        ).rstrip() + '\n'
+                    '\n\n'.join(ustr(rule)
+                                for rule in self.rules)
+                ).rstrip() + '\n'
         return directives + keywords + rules

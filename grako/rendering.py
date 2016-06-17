@@ -22,7 +22,8 @@ def render(item, join='', **fields):
     elif isinstance(item, Renderer):
         return item.render(join=join, **fields)
     elif isiter(item):
-        return join.join(render(e, **fields) for e in iter(item) if e is not None)
+        return join.join(
+            render(e, **fields) for e in iter(item) if e is not None)
     elif isinstance(item, (int, float)):
         return item
     else:
@@ -58,7 +59,8 @@ class RenderingFormatter(string.Formatter):
             fmt = '%s'
 
         if isiter(value):
-            return indent(sep.join(fmt % self.render(v) for v in value), ind, mult)
+            return indent(sep.join(fmt % self.render(v) for v in value), ind,
+                          mult)
         else:
             return indent(fmt % self.render(value), ind, mult)
 
@@ -114,7 +116,8 @@ class Renderer(object):
 
     def render(self, template=None, **fields):
         fields.update(__class__=self.__class__.__name__)
-        fields.update({k: v for k, v in vars(self).items() if not k.startswith('_')})
+        fields.update(
+            {k: v for k, v in vars(self).items() if not k.startswith('_')})
 
         override = self.render_fields(fields)
         if override is not None:

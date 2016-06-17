@@ -3,16 +3,18 @@
 Parse and translate an EBNF grammar into a Python parser for
 the described language.
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-import codecs
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import argparse
+import codecs
 import os
 import sys
 
 from grako._version import __version__
-from grako.util import eval_escapes
 from grako.exceptions import GrakoException
 from grako.parser import GrakoGrammarGenerator
+from grako.util import eval_escapes
 
 # we hook the tool to the Python code generator as the default
 from grako.codegen import pythoncg
@@ -23,7 +25,6 @@ DESCRIPTION = (
     ' in a variation of EBNF as input, and outputs a memoizing'
     ' PEG/Packrat parser in Python.'
 )
-
 
 argparser = argparse.ArgumentParser(prog='grako',
                                     description=DESCRIPTION
@@ -82,12 +83,16 @@ argparser.add_argument('-w', '--whitespace',
                        )
 
 
-def genmodel(name=None, grammar=None, trace=False, filename=None, colorize=False, **kwargs):
-    parser = GrakoGrammarGenerator(name, filename=filename, trace=trace, colorize=colorize, **kwargs)
-    return parser.parse(grammar, filename=filename, colorize=colorize, **kwargs)
+def genmodel(name=None, grammar=None, trace=False, filename=None,
+             colorize=False, **kwargs):
+    parser = GrakoGrammarGenerator(name, filename=filename, trace=trace,
+                                   colorize=colorize, **kwargs)
+    return parser.parse(grammar, filename=filename, colorize=colorize,
+                        **kwargs)
 
 
-def gencode(name=None, grammar=None, trace=False, filename=None, codegen=pythoncg):
+def gencode(name=None, grammar=None, trace=False, filename=None,
+            codegen=pythoncg):
     model = genmodel(name, grammar, filename=filename, trace=trace)
     return codegen(model)
 
@@ -174,12 +179,16 @@ def main(codegen=pythoncg, outer_version=''):
             print(result)
 
         print('-' * 72, file=sys.stderr)
-        print('{:12,d}  lines in grammar'.format(len(grammar.split())), file=sys.stderr)
-        print('{:12,d}  rules in grammar'.format(len(model.rules)), file=sys.stderr)
-        print('{:12,d}  nodes in AST'.format(model.nodecount()), file=sys.stderr)
+        print('{:12,d}  lines in grammar'.format(len(grammar.split())),
+              file=sys.stderr)
+        print('{:12,d}  rules in grammar'.format(len(model.rules)),
+              file=sys.stderr)
+        print('{:12,d}  nodes in AST'.format(model.nodecount()),
+              file=sys.stderr)
     except GrakoException as e:
         _error(e)
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()

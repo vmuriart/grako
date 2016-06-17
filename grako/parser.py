@@ -14,6 +14,7 @@ in the .grammars module.
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+
 from grako.bootstrap import GrakoBootstrapParser
 from grako.grammars import GrakoContext
 from grako.semantics import GrakoASTSemantics, GrakoSemantics
@@ -33,7 +34,8 @@ class GrakoParser(GrakoParserBase):
 
 
 class GrakoGrammarGenerator(GrakoParserBase):
-    def __init__(self, grammar_name=None, semantics=None, parseinfo=True, **kwargs):
+    def __init__(self, grammar_name=None, semantics=None, parseinfo=True,
+                 **kwargs):
         if semantics is None:
             semantics = GrakoSemantics(grammar_name)
         super(GrakoGrammarGenerator, self).__init__(

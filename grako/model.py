@@ -6,11 +6,12 @@ Base definitions for models of programs.
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+
 import collections
 
-from grako.util import asjson, asjsons, Mapping, builtins
-from grako.exceptions import SemanticError
 from grako.ast import AST
+from grako.exceptions import SemanticError
+from grako.util import asjson, asjsons, Mapping, builtins
 
 EOLCOL = 50
 
@@ -33,7 +34,8 @@ class Node(object):
         attributes = ast or {}
         # asume that kwargs contains node attributes of interest
         if isinstance(ast, Mapping):
-            attributes.update({k: v for k, v in kwargs.items() if v is not None})
+            attributes.update(
+                {k: v for k, v in kwargs.items() if v is not None})
 
         self._parent = None
         self._adopt_children(attributes)
@@ -138,7 +140,7 @@ class Node(object):
             k: v
             for k, v in vars(self).items()
             if not k.startswith('_')
-        }
+            }
 
     def __json__(self):
         result = collections.OrderedDict(
@@ -189,6 +191,7 @@ class ModelBuilderSemantics(object):
         nodes using the class name given as first parameter to a grammar
         rule, and synthesizes the class/type if it's not known.
     """
+
     def __init__(self, context=None, baseType=Node, types=None):
         self.ctx = context
         self.baseType = baseType

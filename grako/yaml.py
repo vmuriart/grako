@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division, absolute_import, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 # This code was copied from post from coldfix in Stack Overflow:
 #
@@ -12,8 +13,8 @@ from collections import OrderedDict
 from grako.ast import AST
 
 
-def dump(data, stream=None, Dumper=yaml.SafeDumper, object_pairs_hook=OrderedDict, **kwds):
-
+def dump(data, stream=None, Dumper=yaml.SafeDumper,
+         object_pairs_hook=OrderedDict, **kwds):
     class OrderedDumper(Dumper):
         pass
 
@@ -35,7 +36,6 @@ def dump(data, stream=None, Dumper=yaml.SafeDumper, object_pairs_hook=OrderedDic
 
 
 def load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
-
     class OrderedLoader(Loader):
         pass
 

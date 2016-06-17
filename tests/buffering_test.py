@@ -14,7 +14,6 @@ from grako.buffering import Buffer
 
 
 class BufferingTests(unittest.TestCase):
-
     def setUp(self):
         testfile = os.path.splitext(__file__)[0] + '.py'
         with open(testfile) as f:
@@ -26,8 +25,8 @@ class BufferingTests(unittest.TestCase):
         for p, c in enumerate(self.text):
             bl, bc = self.buf.line_info(p)[1:3]
             d = self.buf.next()
-#            print('tx', line, col, c.encode('string-escape'))
-#            print('bu', bl, bc, d.encode('string-escape'))
+            # print('tx', line, col, c.encode('string-escape'))
+            # print('bu', bl, bc, d.encode('string-escape'))
             self.assertEqual(bl, line)
             self.assertEqual(bc, col)
             self.assertEqual(d, c)
@@ -40,8 +39,8 @@ class BufferingTests(unittest.TestCase):
     def test_next_consisntency(self):
         while not self.buf.atend():
             bl, bc = self.buf.line_info()[1:3]
-#            print('li', bl, bc)
-#            print('bu', self.buf.line, self.buf.col)
+            # print('li', bl, bc)
+            # print('bu', self.buf.line, self.buf.col)
             self.assertEqual(bl, self.buf.line)
             self.assertEqual(bc, self.buf.col)
             self.buf.next()
@@ -50,8 +49,8 @@ class BufferingTests(unittest.TestCase):
         for _ in range(100):
             self.buf.goto(random.randrange(len(self.text)))
             bl, bc = self.buf.line_info()[1:3]
-#            print('li', bl, bc)
-#            print('bu', self.buf.line, self.buf.col)
+            # print('li', bl, bc)
+            # print('bu', self.buf.line, self.buf.col)
             self.assertEqual(bl, self.buf.line)
             self.assertEqual(bc, self.buf.col)
 
@@ -71,7 +70,7 @@ class BufferingTests(unittest.TestCase):
             self.assertEqual(info.col, col)
             self.assertEqual(info.start, start)
             self.assertEqual(info.text, lines[line])
-            col = col + 1
+            col += 1
             if char == '\n':
                 line += 1
                 col = 0
@@ -98,6 +97,7 @@ def suite():
 
 def main():
     unittest.TextTestRunner(verbosity=2).run(suite())
+
 
 if __name__ == '__main__':
     main()

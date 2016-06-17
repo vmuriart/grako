@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-from datetime import datetime
 from collections import OrderedDict as odict
+from datetime import datetime
 
+from grako.codegen.cgbase import ModelRenderer, CodeGenerator
+from grako.exceptions import CodegenError
+from grako.model import Node
 from grako.util import (
     compress_seq,
     indent,
     re,
     safe_name,
 )
-from grako.model import Node
-from grako.exceptions import CodegenError
-from grako.codegen.cgbase import ModelRenderer, CodeGenerator
 
 
 def codegen(model):
@@ -42,7 +43,8 @@ class Rule(ModelRenderer):
             params = indent(params, 3)
             params = params + '\n' + indent(')', 2)
 
-            kwargs = '\n' + indent(kwargs + '\n**kwargs', indent=17, multiplier=1)
+            kwargs = '\n' + indent(kwargs + '\n**kwargs', indent=17,
+                                   multiplier=1)
         else:
             kwargs = '**kwargs'
             params = '*args, **kwargs)'
@@ -73,15 +75,15 @@ class Grammar(ModelRenderer):
 
     def render_fields(self, fields):
         model_rules = odict([
-            (self.object_model_typename(rule), rule)
-            for rule in self.node.rules
-        ])
+                                (self.object_model_typename(rule), rule)
+                                for rule in self.node.rules
+                                ])
         del model_rules[None]
         model_rules = list(model_rules.values())
 
         model_class_declarations = [
             self.get_renderer(rule).render() for rule in model_rules
-        ]
+            ]
         model_class_declarations = '\n\n\n'.join(model_class_declarations)
 
         version = datetime.now().strftime('%Y.%m.%d.%H')

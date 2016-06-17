@@ -3,7 +3,8 @@
 Define the AST class, a direct descendant of dict that's used during parsing
 to store the values of named elements of grammar rules.
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from grako.util import strtype, asjson, is_list, PY3, Mapping
 
@@ -87,10 +88,7 @@ class AST(dict):
         return self.set(key, value, force_list=True)
 
     def copy(self):
-        return AST(
-            (k, v[:] if is_list(v) else v)
-            for k, v in self.items()
-        )
+        return AST((k, v[:] if is_list(v) else v) for k, v in self.items())
 
     def __iter__(self):
         return iter(self._order)
@@ -113,10 +111,8 @@ class AST(dict):
     def __setattr__(self, name, value):
         if self._closed and name not in vars(self):
             raise AttributeError(
-                '%s attributes are fixed. Cannot set attribute %s.'
-                %
-                (self.__class__.__name__, name)
-            )
+                '%s attributes are fixed. Cannot set attribute %s.' %
+                (self.__class__.__name__, name))
         super(AST, self).__setattr__(name, value)
 
     def __getattr__(self, name):
@@ -132,7 +128,7 @@ class AST(dict):
             return False
 
     def __reduce__(self):
-        return (AST, (), None, None, iter(self.items()))
+        return AST, (), None, None, iter(self.items())
 
     def _safekey(self, key):
         while self.__hasattribute__(key):
@@ -154,13 +150,9 @@ class AST(dict):
 
     def __json__(self):
         # preserve order
-        return {
-            asjson(k): asjson(v)
-            for k, v in self.items() if not k.startswith('_')
-        }
+        return {asjson(k): asjson(v)
+                for k, v in self.items() if not k.startswith('_')}
 
     def __repr__(self):
-        return "%s(%s)" % (
-            self.__class__.__name__,
-            super(AST, self).__repr__()
-        )
+        return "%s(%s)" % (self.__class__.__name__,
+                           super(AST, self).__repr__())

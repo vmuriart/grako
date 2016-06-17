@@ -4,9 +4,10 @@ from __future__ import (absolute_import, division, print_function,
 
 import sys
 
+import regex_parser
+
 import grako
 from grako.codegen import codegen
-import regex_parser
 
 PARSER_FILENAME = 'genparser.py'
 

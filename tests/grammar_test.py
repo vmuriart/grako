@@ -4,13 +4,13 @@ from __future__ import (absolute_import, division, print_function,
 
 import unittest
 
+from grako.codegen import codegen
 from grako.exceptions import FailedSemantics, FailedParse
 from grako.grammars import ModelContext
+from grako.model import ModelBuilderSemantics
 from grako.parser import GrakoGrammarGenerator
 from grako.tool import genmodel
 from grako.util import trim, ustr, PY3
-from grako.codegen import codegen
-from grako.model import ModelBuilderSemantics
 
 
 class GrammarTests(unittest.TestCase):
@@ -151,15 +151,25 @@ class GrammarTests(unittest.TestCase):
 
         model = genmodel("test", grammar)
         context = ModelContext(model.rules, whitespace='', nameguard=False)
-        ast = model.parse('*abc', "document", context=context, semantics=StatefulSemantics(context), whitespace='', nameguard=False)
+        ast = model.parse('*abc', "document", context=context,
+                          semantics=StatefulSemantics(context), whitespace='',
+                          nameguard=False)
         self.assertEqual(ast, "<ul><li>abc</li></ul>")
-        ast = model.parse('*abc\n', "document", context=context, semantics=StatefulSemantics(context), whitespace='', nameguard=False)
+        ast = model.parse('*abc\n', "document", context=context,
+                          semantics=StatefulSemantics(context), whitespace='',
+                          nameguard=False)
         self.assertEqual("<ul><li>abc</li></ul>", ast)
-        ast = model.parse('*abc\n*def\n', "document", context=context, semantics=StatefulSemantics(context), whitespace='', nameguard=False)
+        ast = model.parse('*abc\n*def\n', "document", context=context,
+                          semantics=StatefulSemantics(context), whitespace='',
+                          nameguard=False)
         self.assertEqual("<ul><li>abc</li><li>def</li></ul>", ast)
-        ast = model.parse('**abc', "document", context=context, semantics=StatefulSemantics(context), whitespace='', nameguard=False)
+        ast = model.parse('**abc', "document", context=context,
+                          semantics=StatefulSemantics(context), whitespace='',
+                          nameguard=False)
         self.assertEqual("<ul><li><ul><li>abc</li></ul></li></ul>", ast)
-        ast = model.parse('*abc\n**def\n', "document", context=context, semantics=StatefulSemantics(context), whitespace='', nameguard=False)
+        ast = model.parse('*abc\n**def\n', "document", context=context,
+                          semantics=StatefulSemantics(context), whitespace='',
+                          nameguard=False)
         self.assertEqual("<ul><li>abc<ul><li>def</li></ul></li></ul>", ast)
 
     def test_optional_closure(self):
@@ -532,7 +542,6 @@ class GrammarTests(unittest.TestCase):
             self.assertEqual(target, value)
 
         class TC36Semantics(object):
-
             """Check all rule parameters for expected types and values"""
 
             def rule_positional(self, ast, p1, p2, p3, p4):
@@ -644,6 +653,7 @@ class GrammarTests(unittest.TestCase):
 
         class UnicharsSemantics(object):
             """Check all rule parameters for expected types and values"""
+
             def rule_positional(self, ast, p1):
                 assert_equal("ÄÖÜäöüß", p1)
                 return ast
@@ -977,6 +987,7 @@ def suite():
 
 def main():
     unittest.TextTestRunner(verbosity=2).run(suite())
+
 
 if __name__ == '__main__':
     main()

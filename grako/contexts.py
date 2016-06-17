@@ -2,17 +2,14 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import sys
 import functools
+import sys
 from collections import namedtuple
 from contextlib import contextmanager
 
-from grako.util import notnone, ustr, prune_dict, is_list, info, safe_name
-from grako.ast import AST
 from grako import buffering
-
 from grako import color
-
+from grako.ast import AST
 from grako.exceptions import (
     FailedCut,
     FailedLeftRecursion,
@@ -24,9 +21,9 @@ from grako.exceptions import (
     FailedToken,
     OptionSucceeded
 )
+from grako.util import notnone, ustr, prune_dict, is_list, info, safe_name
 
 __all__ = ['ParseInfo', 'ParseContext']
-
 
 ParseInfo = namedtuple(
     'ParseInfo',
@@ -49,7 +46,9 @@ def graken(*params, **kwparams):
             # that the parser generator added
             name = name[1:-1]
             return self._call(rule, name, params, kwparams)
+
         return wrapper
+
     return decorator
 
 
@@ -342,7 +341,8 @@ class ParseContext(object):
     def _rulestack(self):
         stack = self.trace_separator.join(self._rule_stack)
         if len(stack) > self.trace_length:
-            stack = '...' + stack[-self.trace_length:].lstrip(self.trace_separator)
+            stack = '...' + stack[-self.trace_length:].lstrip(
+                self.trace_separator)
         return stack
 
     def _find_rule(self, name):
@@ -379,7 +379,8 @@ class ParseContext(object):
             self._trace('%s   \n%s%s \n',
                         event + ' ' + self._rulestack(),
                         color.Style.DIM + fname,
-                        color.Style.NORMAL + self._buffer.lookahead().rstrip('\r\n')
+                        color.Style.NORMAL + self._buffer.lookahead().rstrip(
+                            '\r\n')
                         )
 
     def _trace_match(self, token, name=None, failed=False):
@@ -388,7 +389,7 @@ class ParseContext(object):
             if self.trace_filename:
                 fname = self._buffer.line_info().filename + '\n'
             name = '/%s/' % name if name else ''
-            fgcolor = color.Fore.GREEN + '< 'if not failed else color.Fore.RED + '! '
+            fgcolor = color.Fore.GREEN + '< ' if not failed else color.Fore.RED + '! '
             self._trace(
                 color.Style.BRIGHT + fgcolor + '"%s" %s\n%s%s\n',
                 token,
@@ -421,7 +422,8 @@ class ParseContext(object):
         try:
             self._trace_event(color.Fore.YELLOW + color.Style.BRIGHT + '>')
             self._last_node = None
-            node, newpos, newstate = self._invoke_rule(rule, name, params, kwparams)
+            node, newpos, newstate = self._invoke_rule(rule, name, params,
+                                                       kwparams)
             self._goto(newpos)
             self._state = newstate
             self._trace_event(color.Fore.GREEN + color.Style.BRIGHT + '<')
@@ -472,7 +474,8 @@ class ParseContext(object):
             node = self._invoke_semantic_rule(name, node, params, kwparams)
             result = (node, self._pos, self._state)
 
-            result = self._left_recurse(rule, name, pos, key, result, params, kwparams)
+            result = self._left_recurse(rule, name, pos, key, result, params,
+                                        kwparams)
 
             if self._memoization() and not self._in_recursive_loop():
                 cache[key] = result
@@ -527,8 +530,8 @@ class ParseContext(object):
         cache = self._memoization_cache
         last_pos = pos
         if (
-            [name] == self._recursive_head[-1:] and
-            self._recursive_head[-1:] != self._recursive_eval[-1:]
+                        [name] == self._recursive_head[-1:] and
+                        self._recursive_head[-1:] != self._recursive_eval[-1:]
         ):
             # Repeatedly apply the rule until it can't consume any
             # more. We store the last good result each time. Prior

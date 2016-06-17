@@ -11,7 +11,6 @@ try:
 except:
     raise
 
-
 __all__ = ['draw']
 
 
@@ -65,7 +64,7 @@ class GraphvizWalker(NodeWalker):
         self.graph.add_node(id, **attr)
         n = self.graph.get_node(id)
         n.attr['label'] = name
-#        n.attr['shape'] = 'circle'
+        #        n.attr['shape'] = 'circle'
         return n
 
     def tnode(self, name, **attr):

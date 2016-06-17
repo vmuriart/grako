@@ -16,9 +16,8 @@ Parser.parse() will take the text to parse directly, or an instance of the
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from grako.exceptions import FailedRef
 from grako.contexts import ParseContext, graken
-
+from grako.exceptions import FailedRef
 
 graken = graken
 

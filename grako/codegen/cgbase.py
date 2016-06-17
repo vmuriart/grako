@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-from grako.model import Node
 from grako.codegen import CodegenError
+from grako.model import Node
 from grako.rendering import render, Renderer, RenderingFormatter
 
 
@@ -16,14 +17,17 @@ class DelegatingRenderingFormatter(RenderingFormatter):
     def render(self, item, join='', **fields):
         result = self.delegate.render(item, join=join, **fields)
         if result is None:
-            result = super(DelegatingRenderingFormatter, self).render(item, join=join, **fields)
+            result = super(DelegatingRenderingFormatter, self).render(item,
+                                                                      join=join,
+                                                                      **fields)
         return result
 
     def convert_field(self, value, conversion):
         if isinstance(value, Node):
             return self.render(value)
         else:
-            return super(DelegatingRenderingFormatter, self).convert_field(value, conversion)
+            return super(DelegatingRenderingFormatter, self).convert_field(
+                value, conversion)
 
 
 class ModelRenderer(Renderer):
@@ -60,7 +64,8 @@ class ModelRenderer(Renderer):
 
     def render(self, template=None, **fields):
         if isinstance(self.node, Node):
-            fields.update({k: v for k, v in vars(self.node).items() if not k.startswith('_')})
+            fields.update({k: v for k, v in vars(self.node).items() if
+                           not k.startswith('_')})
         else:
             fields.update(value=self.node)
         return super(ModelRenderer, self).render(template=template, **fields)
@@ -78,6 +83,7 @@ class CodeGenerator(object):
     ``ModelRenderer`` class with the same name as each model's node and
     uses it to render the node.
     """
+
     def __init__(self, modules=None):
         self.formatter = DelegatingRenderingFormatter(self)
         self._renderers = {}

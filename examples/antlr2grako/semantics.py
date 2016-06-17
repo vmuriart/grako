@@ -43,6 +43,7 @@ class ANTLRSemantics(object):
                 return ''.join(flatten(e) for e in s if e is not None)
             else:
                 return s
+
         text = flatten(ast)
         return model.Comment(text)
 

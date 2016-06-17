@@ -13,8 +13,8 @@ import os
 from bisect import bisect_left
 from collections import namedtuple
 
-from grako.util import ustr, strtype, re as regexp, WHITESPACE_RE, RE_FLAGS
 from grako.exceptions import ParseError
+from grako.util import ustr, strtype, re as regexp, WHITESPACE_RE, RE_FLAGS
 
 # TODO: There could be a file buffer using random access
 
@@ -22,9 +22,7 @@ __all__ = ['Buffer']
 
 RETYPE = type(regexp.compile('.'))
 
-
 PosLine = namedtuple('PosLine', ['pos', 'line'])
-
 
 LineInfo = namedtuple(
     'LineInfo',

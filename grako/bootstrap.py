@@ -11,11 +11,11 @@
 # the file is generated.
 
 
-from __future__ import print_function, division, absolute_import, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from grako.parsing import graken, Parser
-from grako.util import re, RE_FLAGS, generic_main  # noqa
-
+from grako.util import generic_main  # noqa
 
 __version__ = (2016, 5, 26, 15, 5, 16, 3)
 
@@ -62,6 +62,7 @@ class GrakoBootstrapParser(Parser):
 
         def block2():
             self._directive_()
+
         self._closure(block2)
         self.name_last_node('directives')
         self._keywords_()
@@ -69,6 +70,7 @@ class GrakoBootstrapParser(Parser):
 
         def block5():
             self._rule_()
+
         self._positive_closure(block5)
         self.name_last_node('rules')
         self._check_eof()
@@ -95,7 +97,8 @@ class GrakoBootstrapParser(Parser):
                                 self._token('eol_comments')
                             with self._option():
                                 self._token('whitespace')
-                            self._error('expecting one of: comments eol_comments whitespace')
+                            self._error(
+                                'expecting one of: comments eol_comments whitespace')
                     self.name_last_node('name')
                     self._cut()
                     self._cut()
@@ -112,7 +115,8 @@ class GrakoBootstrapParser(Parser):
                                 self._token('ignorecase')
                             with self._option():
                                 self._token('left_recursion')
-                            self._error('expecting one of: ignorecase left_recursion nameguard')
+                            self._error(
+                                'expecting one of: ignorecase left_recursion nameguard')
                     self.name_last_node('name')
                     self._cut()
                     with self._group():
@@ -153,7 +157,6 @@ class GrakoBootstrapParser(Parser):
 
     @graken()
     def _keywords_(self):
-
         def block0():
             self._token('@@keyword')
             self._cut()
@@ -171,7 +174,9 @@ class GrakoBootstrapParser(Parser):
                             with self._option():
                                 self._token('=')
                             self._error('expecting one of: : =')
+
             self._closure(block1)
+
         self._closure(block0)
 
     @graken()
@@ -211,9 +216,9 @@ class GrakoBootstrapParser(Parser):
 
     @graken('Rule')
     def _rule_(self):
-
         def block1():
             self._decorator_()
+
         self._closure(block1)
         self.name_last_node('decorators')
         self._name_()
@@ -289,26 +294,27 @@ class GrakoBootstrapParser(Parser):
             with self._ifnot():
                 self._token('=')
             self._cut()
+
         self._closure(block1)
 
     @graken()
     def _params_only_(self):
-
         def sep0():
             self._token(',')
 
         def block0():
             self._literal_()
+
         self._positive_closure(block0, prefix=sep0)
 
     @graken()
     def _kwparams_(self):
-
         def sep0():
             self._token(',')
 
         def block0():
             self._pair_()
+
         self._positive_closure(block0, prefix=sep0)
 
     @graken()
@@ -342,13 +348,14 @@ class GrakoBootstrapParser(Parser):
             self._cut()
             self._sequence_()
             self.add_last_node_to_name('@')
+
         self._positive_closure(block1)
 
     @graken('Sequence')
     def _sequence_(self):
-
         def block1():
             self._element_()
+
         self._positive_closure(block1)
         self.name_last_node('sequence')
 
@@ -904,7 +911,6 @@ def main(
         ignorecase=None,
         left_recursion=True,
         **kwargs):
-
     with open(filename) as f:
         text = f.read()
     whitespace = whitespace or None
@@ -920,8 +926,10 @@ def main(
         **kwargs)
     return ast
 
+
 if __name__ == '__main__':
     import json
+
     ast = generic_main(main, GrakoBootstrapParser, name='GrakoBootstrap')
     print('AST:')
     print(ast)

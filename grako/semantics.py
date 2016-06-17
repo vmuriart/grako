@@ -1,16 +1,16 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from collections import OrderedDict
 
-from grako.util import simplify_list, eval_escapes, warning
-from grako.util import re, RE_FLAGS
 from grako import grammars
 from grako.exceptions import FailedSemantics
 from grako.model import ModelBuilderSemantics
+from grako.util import re, RE_FLAGS
+from grako.util import simplify_list, eval_escapes, warning
 
 
 class GrakoASTSemantics(object):
-
     def group(self, ast, *args):
         return simplify_list(ast)
 
@@ -59,7 +59,8 @@ class GrakoSemantics(ModelBuilderSemantics):
         return int(ast)
 
     def cut_deprecated(self, ast, *args):
-        warning('The use of >> for cut is deprecated. Use the ~ symbol instead.')
+        warning(
+            'The use of >> for cut is deprecated. Use the ~ symbol instead.')
         return grammars.Cut()
 
     def override_single_deprecated(self, ast, *args):
@@ -105,11 +106,13 @@ class GrakoSemantics(ModelBuilderSemantics):
             self.known_name(name)
 
         if not base:
-            rule = grammars.Rule(ast, name, exp, params, kwparams, decorators=decorators)
+            rule = grammars.Rule(ast, name, exp, params, kwparams,
+                                 decorators=decorators)
         else:
             self.known_name(base)
             base_rule = self.rules[base]
-            rule = grammars.BasedRule(ast, name, exp, base_rule, params, kwparams, decorators=decorators)
+            rule = grammars.BasedRule(ast, name, exp, base_rule, params,
+                                      kwparams, decorators=decorators)
 
         self.rules[name] = rule
         return rule
