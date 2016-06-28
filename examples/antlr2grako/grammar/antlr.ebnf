@@ -6,8 +6,7 @@
     License to keep in the spirit of ANTLR.
 *)
 
-grammar
-    =
+grammar =
     [('lexer'|'parser')] 'grammar'  name:name ';'
     [options]
     [header]
@@ -20,48 +19,39 @@ grammar
     $
     ;
 
-options
-    =
+options =
     'options'  '{' {option}+ '}' ~
     ;
 
-option
-    =
+option =
     id '='   (id|string|char|int|'*') ';' ~
     ;
 
-imports
-    =
+imports =
     'import'  name {',' name} ';'
     ;
 
-header
-    =
+header =
     '@header' block
     ;
 
-members
-    =
+members =
     '@members' block
     ;
 
-tokens
-    =
+tokens =
     'tokens'  '{' {token}+ '}'
     ;
 
-token
-    =
+token =
     name:token_name ['='  ~ exp:token_value ] ';' ~
     ;
 
-token_value
-    =
+token_value =
     literal
     ;
 
-scope
-    =
+scope =
     'scope' ~
     (
       block ['scope'  id {',' id} ';' ]
@@ -70,20 +60,17 @@ scope
     )
     ;
 
-action
-    =
+action =
     '@'  ('lexer'|'parser'|id)
     ['::'  id]
     block
     ;
 
-block
-    =
+block =
     '{' {block|/[^{}]*/} '}'
     ;
 
-rule
-    =
+rule =
     ['protected'|'public'|'private'|'fragment']
     name:id ['!'] [arg]
     ['returns' arg]
@@ -95,8 +82,7 @@ rule
     [exceptions]
     ;
 
-arg
-    =
+arg =
     '[' ~
         {
             arg
@@ -106,29 +92,24 @@ arg
     ']'
     ;
 
-exceptions
-    =
+exceptions =
     {'catch'  arg block}
     ['finally'  block]
     ;
 
-alternatives
-    =
+alternatives =
     options+:alternative {'|'  options+:alternative}
     ;
 
-alternative
-    =
+alternative =
     @:elements ['->'  rewrite]
     ;
 
-elements
-    =
+elements =
     {element}*
     ;
 
-element
-    =
+element =
       named
     | predicate_or_action
     | optional
@@ -137,31 +118,26 @@ element
     | atom
     ;
 
-named
-    =
+named =
     name:id (force_list:'+='| '=')   exp:atom
     ;
 
-predicate_or_action
-    =
+predicate_or_action =
       gated_predicate
     | semantic_predicate
     | semantic_action
     ;
 
 
-gated_predicate
-    =
+gated_predicate =
     block '?=>' ~
     ;
 
-semantic_predicate
-    =
+semantic_predicate =
     block '?' ~
     ;
 
-semantic_action
-    =
+semantic_action =
     '{'
         {
             semantic_action
@@ -171,13 +147,11 @@ semantic_action
     '}'
     ;
 
-syntactic_predicate
-    =
+syntactic_predicate =
     @:subexp '=>' ~
     ;
 
-optional
-    =
+optional =
     (
         '(' @:alternatives ')'
     |
@@ -186,8 +160,7 @@ optional
     '?' ~
     ;
 
-closure
-    =
+closure =
     (
         '(' @:alternatives ')'
     |
@@ -196,8 +169,7 @@ closure
     '*' ~
     ;
 
-positive_closure
-    =
+positive_closure =
     (
         '(' @:alternatives ')'
     |
@@ -206,8 +178,7 @@ positive_closure
     '+' ~
     ;
 
-atom
-    =
+atom =
     @:(
       eof
     | negative
@@ -222,46 +193,38 @@ atom
     [annotation]
     ;
 
-annotation
-    =
+annotation =
     '<' id '=' id '>'
     ;
 
-eof
-    =
+eof =
     'EOF'
     ;
 
-range
-    =
+range =
     first:char '..'  last:char
     ;
 
-newrange
-    =
+newrange =
     NEWRANGE
     ;
 
-NEWRANGE
-    =
+NEWRANGE =
     '[' @:?/([^\]]|\\])+/? ']'
     ;
 
-subexp
-    =
+subexp =
     '('
         [options ':' ~ ]
         @:alternatives
     ')'
     ;
 
-negative
-    =
+negative =
     '~'  @:atom
     ;
 
-non_terminal
-    =
+non_terminal =
     @:(
       token_ref
     | rule_ref
@@ -269,83 +232,68 @@ non_terminal
     [arg]
     ;
 
-terminal
-    =
+terminal =
       char
     | string
     | any
     ;
 
-any
-    =
+any =
     '.' ~
     ;
 
 
-rewrite
-    =
+rewrite =
     {rewrite_term}*
     ;
 
-rewrite_term
-    =
+rewrite_term =
       '^(' {rewrite_term}+ ')'
     | ?/[^|;^)]*/?
     ;
 
-rule_ref
-    =
+rule_ref =
     lower_name
     ;
 
-token_ref
-    =
+token_ref =
     upper_name
     ;
 
-token_name
-    =
+token_name =
     upper_name
     ;
 
-literal
-    =
+literal =
     id | string | int
     ;
 
 
-id
-    =
+id =
     name
     ;
 
-name
-    =
+name =
     ?/[a-zA-Z][A-Za-z0-9_]*/?
     ;
 
-lower_name
-    =
+lower_name =
     ?/[a-z][A-Za-z0-9_]*/?
     ;
 
-upper_name
-    =
+upper_name =
     ?/[A-Z][A-Za-z0-9_]*/?
     ;
 
-char
-    =
+char =
     string
     ;
 
-string
-    =
+string =
     STRING
     ;
 
-STRING
-    =
+STRING =
     '"'  @:{?/[^"\n\\]/?|ESC} '"'
     |
     "'"  @:{?/[^'\n\\]/?|ESC} "'"
@@ -353,13 +301,11 @@ STRING
     '<<' @:?/(?:(?!'^').)*/? '>>'
     ;
 
-int
-    =
+int =
     ?/[0-9]+/?
     ;
 
-ESC
-    =
+ESC =
     ?/\\['"\\nrtbfv]/?
     |
     ?/\\u[a-fA-F0-9]{4}/?

@@ -6,20 +6,41 @@
    is not skipped when invoking them;
  *)
 
-START = EXPRE $ ;
+START =
+        EXPRE $
+        ;
 
-EXPRE = CHOICE | SEQUENCE ;
+EXPRE =
+        CHOICE
+    |   SEQUENCE
+        ;
 
-CHOICE = opts+:SEQUENCE {'|' ~ opts+:SEQUENCE}+ ;
+CHOICE =
+        opts+:SEQUENCE {'|' ~ opts+:SEQUENCE}+
+        ;
 
-SEQUENCE = terms:{TERM}+ ;
+SEQUENCE =
+        terms:{TERM}+
+        ;
 
-TERM = CLOSURE | ATOM ;
+TERM =
+        CLOSURE
+    |   ATOM
+        ;
 
-CLOSURE = @:ATOM '*' ~  ;
+CLOSURE =
+        @:ATOM '*' ~
+        ;
 
-ATOM = SUBEXP | LITERAL ;
+ATOM =
+        SUBEXP
+    |   LITERAL
+        ;
 
-SUBEXP = '(' ~ @:EXPRE ')' ;
+SUBEXP =
+        '(' ~ @:EXPRE ')'
+        ;
 
-LITERAL = ?/(?:\\;|[^|*\\()])+/? ;
+LITERAL =
+        ?/(?:\\;|[^|*\\()])+/?
+        ;
