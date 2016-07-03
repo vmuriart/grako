@@ -3,6 +3,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import unittest
+import os
+import sys
 
 from grako.codegen import codegen
 from grako.exceptions import FailedSemantics, FailedParse
@@ -11,6 +13,12 @@ from grako.model import ModelBuilderSemantics
 from grako.parser import GrakoGrammarGenerator
 from grako.tool import genmodel
 from grako.util import trim, ustr, PY3
+
+TEST_DIR = os.path.dirname(__file__)
+REPO_DIR = os.path.dirname(TEST_DIR)
+
+TMP_DIR = os.path.join(REPO_DIR, 'tmp/')
+sys.path.append(TMP_DIR)
 
 
 class GrammarTests(unittest.TestCase):
@@ -677,7 +685,7 @@ class GrammarTests(unittest.TestCase):
 
         code = codegen(m)
         import codecs
-        with codecs.open("tc36unicharstest.py", "w", "utf-8") as f:
+        with codecs.open(TMP_DIR + "tc36unicharstest.py", "w", "utf-8") as f:
             f.write(code)
         import tc36unicharstest
         tc36unicharstest
