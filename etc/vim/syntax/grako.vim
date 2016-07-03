@@ -1,17 +1,3 @@
-" Vim syntax file
-" Language:         EBNF/Grako
-" Maintainer:       Hans Fugal, Apalala
-" Last Change:      $Date: 2014/07/16 15:36:00 $
-" Version:          1.0.0
-" With thanks to Michael Brailsford for the BNF syntax file.
-
-" Quit when a syntax file was already loaded
-if version < 600
-  syntax clear
-elseif exists("b:current_syntax")
-  finish
-endif
-
 syn match ebnfInclude /#[ \t\n]*[A-Za-z0-9_-]\+/  skipwhite skipempty nextgroup=ebnfParamStart
 syn match ebnfRuleInclude />[ \t\n]*[A-Za-z0-9_-]\+/  skipwhite skipempty
 syn match ebnfMetaIdentifier /[A-Za-z0-9_-]\+/ skipwhite skipempty nextgroup=ebnfSeparator

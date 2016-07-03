@@ -11,12 +11,9 @@ import codecs
 import os
 import sys
 
-from grako._version import __version__
 from grako.exceptions import GrakoException
 from grako.parser import GrakoGrammarGenerator
 from grako.util import eval_escapes
-
-# we hook the tool to the Python code generator as the default
 from grako.codegen import pythoncg
 from grako.codegen import objectmodel
 
@@ -102,12 +99,6 @@ def _error(*args, **kwargs):
 
 
 def main(codegen=pythoncg, outer_version=''):
-    argparser.add_argument(
-        '-v', '--version',
-        help='provide version information and exit',
-        action='version',
-        version=outer_version + __version__
-    )
     try:
         args = argparser.parse_args()
     except Exception as e:
@@ -136,9 +127,6 @@ def main(codegen=pythoncg, outer_version=''):
     if sum([draw, pretty, object_model]) > 1:
         _error('only one of --draw, --pretty, --object_model allowed')
         sys.exit(2)
-
-    # if name is None:
-    #    name = os.path.splitext(os.path.basename(filename))[0]
 
     if outfile and os.path.isfile(outfile):
         os.unlink(outfile)
@@ -170,8 +158,7 @@ def main(codegen=pythoncg, outer_version=''):
             result = codegen(model)
 
         if draw:
-            from grako import diagrams
-            diagrams.draw(outfile, model)
+            pass
         elif outfile:
             with codecs.open(outfile, 'w', encoding='utf-8') as f:
                 f.write(result)
