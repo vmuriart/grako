@@ -11,7 +11,7 @@ Parser is also in charge of dealing with comments, with the help of
 the .buffering module.
 
 Parser.parse() will take the text to parse directly, or an instance of the
-.buffeing.Buffer class.
+.buffering.Buffer class.
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
