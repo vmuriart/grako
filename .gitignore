@@ -1,0 +1,13 @@
+# PyCharm
+.idea/
+
+*.pyc
+docs/build
+dist
+MANIFEST
+.coverage
+.tox/
+.cache/
+*.egg-info/
+coverage.xml
+*.class
