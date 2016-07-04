@@ -4,11 +4,10 @@ from __future__ import (absolute_import, division, print_function,
 
 import functools
 
-from grako import _version
 from grako import tool
 from grako.codegen import pythoncg
 
-__version__ = _version.__version__
+__version__ = '3.9.1'
 
 genmodel = tool.genmodel
 gencode = functools.partial(tool.gencode, codegen=pythoncg)
