@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-import parser_base
+from . import parser_base
 from grako.ast import AST
 
 def test_basic():
