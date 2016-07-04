@@ -456,30 +456,32 @@ class ParseContext(object):
         try:
             if name[0].islower():
                 self._next_token()
+            try:
+                rule(self)
 
-            rule(self)
+                node = self.ast
+                if not node:
+                    node = self.cst
+                elif '@' in node:
+                    node = node['@']  # override the AST
+                elif self.parseinfo:
+                    node._parseinfo = self._get_parseinfo(
+                        node,
+                        name,
+                        pos
+                    )
 
-            node = self.ast
-            if not node:
-                node = self.cst
-            elif '@' in node:
-                node = node['@']  # override the AST
-            elif self.parseinfo:
-                node._parseinfo = self._get_parseinfo(
-                    node,
-                    name,
-                    pos
-                )
+                node = self._invoke_semantic_rule(name, node, params, kwparams)
+                result = (node, self._pos, self._state)
 
-            node = self._invoke_semantic_rule(name, node, params, kwparams)
-            result = (node, self._pos, self._state)
+                result = self._left_recurse(rule, name, pos, key, result,
+                                            params, kwparams)
 
-            result = self._left_recurse(rule, name, pos, key, result, params,
-                                        kwparams)
-
-            if self._memoization() and not self._in_recursive_loop():
-                cache[key] = result
-            return result
+                if self._memoization() and not self._in_recursive_loop():
+                    cache[key] = result
+                return result
+            except FailedSemantics as e:
+                self._error(str(e), FailedParse)
         except FailedParse as e:
             if self._memoization():
                 cache[key] = e
@@ -557,14 +559,11 @@ class ParseContext(object):
 
     def _invoke_semantic_rule(self, name, node, params, kwparams):
         semantic_rule, postproc = self._find_semantic_rule(name)
-        try:
-            if semantic_rule:
-                node = semantic_rule(node, *(params or ()), **(kwparams or {}))
-            if postproc is not None:
-                postproc(self, node)
-            return node
-        except FailedSemantics as e:
-            self._error(str(e), FailedParse)
+        if semantic_rule:
+            node = semantic_rule(node, *(params or ()), **(kwparams or {}))
+        if postproc is not None:
+            postproc(self, node)
+        return node
 
     def _token(self, token):
         self._next_token()
@@ -765,5 +764,7 @@ class ParseContext(object):
 
     def _check_name(self):
         name = self.last_node
-        if (self.ignorecase and name.upper() or name) in self.keywords:
+        if self.ignorecase or self._buffer.ignorecase:
+            name = name.upper()
+        if name in self.keywords:
             raise FailedKeywordSemantics('"%s" is a reserved word' % name)
