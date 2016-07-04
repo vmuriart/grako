@@ -38,8 +38,6 @@ class GrakoGrammarGenerator(GrakoParserBase):
                  **kwargs):
         if semantics is None:
             semantics = GrakoSemantics(grammar_name)
-        super(GrakoGrammarGenerator, self).__init__(
-            semantics=semantics,
-            parseinfo=True,
-            **kwargs
-        )
+        super(GrakoGrammarGenerator, self).__init__(semantics=semantics,
+                                                    parseinfo=True,
+                                                    **kwargs)

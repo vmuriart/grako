@@ -13,8 +13,7 @@ from grako.util import indent, isiter, strtype, trim, ustr
 
 
 def render(item, join='', **fields):
-    """ Render the given item
-    """
+    """ Render the given item    """
     if item is None:
         return ''
     elif isinstance(item, strtype):
@@ -39,7 +38,7 @@ class RenderingFormatter(string.Formatter):
             return super(RenderingFormatter, self).format_field(
                 self.render(value),
                 spec
-            )
+                )
 
         ind, sep, fmt = spec.split(':')
         if sep == '\\n':

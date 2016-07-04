@@ -28,10 +28,8 @@ class GrakoASTSemantics(object):
 
 class GrakoSemantics(ModelBuilderSemantics):
     def __init__(self, grammar_name):
-        super(GrakoSemantics, self).__init__(
-            baseType=grammars.Model,
-            types=grammars.Model.classes()
-        )
+        super(GrakoSemantics, self).__init__(baseType=grammars.Model,
+                                             types=grammars.Model.classes())
         self.grammar_name = grammar_name
         self.rules = OrderedDict()
 
@@ -59,8 +57,8 @@ class GrakoSemantics(ModelBuilderSemantics):
         return int(ast)
 
     def cut_deprecated(self, ast, *args):
-        warning(
-            'The use of >> for cut is deprecated. Use the ~ symbol instead.')
+        warning('The use of >> for cut is deprecated. '
+                'Use the ~ symbol instead.')
         return grammars.Cut()
 
     def override_single_deprecated(self, ast, *args):
@@ -127,9 +125,7 @@ class GrakoSemantics(ModelBuilderSemantics):
     def grammar(self, ast, *args):
         directives = OrderedDict((d.name, d.value) for d in ast.directives)
         keywords = set(ast.keywords or [])
-        return grammars.Grammar(
-            self.grammar_name,
-            list(self.rules.values()),
-            directives=directives,
-            keywords=keywords
-        )
+        return grammars.Grammar(self.grammar_name,
+                                list(self.rules.values()),
+                                directives=directives,
+                                keywords=keywords)

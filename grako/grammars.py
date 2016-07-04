@@ -42,13 +42,12 @@ def pythonize_name(name):
 
 
 class GrakoBuffer(Buffer):
-    def __init__(
-            self,
-            text,
-            filename=None,
-            comments_re=None,
-            eol_comments_re=None,
-            **kwargs):
+    def __init__(self,
+                 text,
+                 filename=None,
+                 comments_re=None,
+                 eol_comments_re=None,
+                 **kwargs):
         super(GrakoBuffer, self).__init__(
             text,
             filename=filename,
@@ -86,27 +85,21 @@ class GrakoContext(ParseContext):
     def parse(self, text, rule='start', filename=None, parseinfo=True,
               **kwargs):
         if not isinstance(text, Buffer):
-            text = GrakoBuffer(
-                text,
-                filename=filename,
-                **kwargs
-            )
-        return super(GrakoContext, self).parse(
-            text,
-            rule,
-            filename=filename,
-            parseinfo=parseinfo,
-            **kwargs
-        )
+            text = GrakoBuffer(text,
+                               filename=filename,
+                               **kwargs)
+        return super(GrakoContext, self).parse(text,
+                                               rule,
+                                               filename=filename,
+                                               parseinfo=parseinfo,
+                                               **kwargs)
 
 
 class ModelContext(GrakoContext):
     def __init__(self, rules, semantics=None, trace=False, **kwargs):
-        super(ModelContext, self).__init__(
-            semantics=semantics,
-            trace=trace,
-            **kwargs
-        )
+        super(ModelContext, self).__init__(semantics=semantics,
+                                           trace=trace,
+                                           **kwargs)
         self.rules = {rule.name: rule for rule in rules}
 
     @property
@@ -124,10 +117,8 @@ class ModelContext(GrakoContext):
 class Model(Node):
     @staticmethod
     def classes():
-        return [
-            c for c in globals().values()
-            if isinstance(c, type) and issubclass(c, Model)
-            ]
+        return [c for c in globals().values()
+                if isinstance(c, type) and issubclass(c, Model)]
 
     def __init__(self, ast=None, ctx=None):
         super(Model, self).__init__(ast=ast, ctx=ctx)
@@ -171,11 +162,10 @@ class Model(Node):
         if not comments:
             return ''
 
-        return '\n'.join(
-            '(* %s *)\n' % '\n'.join(c).replace('(*', '').replace('*)',
-                                                                  '').strip()
-            for c in comments
-        )
+        return '\n'.join('(* %s *)\n' % '\n'.join(c)
+                         .replace('(*', '')
+                         .replace('*)', '').strip()
+                         for c in comments)
 
     def nodecount(self):
         return 1
@@ -884,8 +874,7 @@ class Grammar(Model):
                 value=(
                     urepr(value) if directive in string_directives
                     else ustr(value) if directive in ustr_directives
-                    else value
-                ),
+                    else value),
             )
             directives += '@@{name} :: {frame}{value}{frame}\n'.format(**fmt)
         if directives:
@@ -897,8 +886,5 @@ class Grammar(Model):
         ).strip()
         keywords = '\n\n' + keywords + '\n' if keywords else ''
 
-        rules = (
-                    '\n\n'.join(ustr(rule)
-                                for rule in self.rules)
-                ).rstrip() + '\n'
+        rules = ('\n\n'.join(ustr(r) for r in self.rules)).rstrip() + '\n'
         return directives + keywords + rules

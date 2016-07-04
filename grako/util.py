@@ -83,8 +83,8 @@ def ustr(s):
     elif isinstance(s, str):
         return unicode(s, 'utf-8')
     else:
-        return ustr(
-            s.__str__())  # FIXME: last case resource!  We don't know unicode, period.
+        # FIXME: last case resource!  We don't know unicode, period.
+        return ustr(s.__str__())
 
 
 def urepr(obj):
@@ -130,15 +130,12 @@ def simplify_list(x):
 
 
 def isiter(value):
-    return (
-        isinstance(value, collections.Iterable) and
-        not isinstance(value, strtype)
-    )
+    return (isinstance(value, collections.Iterable) and
+            not isinstance(value, strtype))
 
 
 def trim(text, tabwidth=4):
-    """
-    Trim text of common, leading whitespace.
+    """Trim text of common, leading whitespace.
 
     Based on the trim algorithm of PEP 257:
         http://www.python.org/dev/peps/pep-0257/
@@ -161,8 +158,7 @@ def trim(text, tabwidth=4):
 
 
 def indent(text, indent=1, multiplier=4):
-    """ Indent the given block of text by indent*4 spaces
-    """
+    """Indent the given block of text by indent*4 spaces"""
     if text is None:
         return ''
     text = ustr(text)
@@ -212,7 +208,7 @@ def asjsons(obj):
 
 
 def prune_dict(d, predicate):
-    """ Remove all items x where predicate(x, d[x]) """
+    """Remove all items x where predicate(x, d[x])"""
 
     keys = [k for k, v in d.items() if predicate(k, v)]
     for k in keys:
@@ -246,8 +242,7 @@ def generic_main(custom_main, ParserClass, name='Unknown'):
 
     addarg('-c', '--color',
            help='use color in traces (requires the colorama library)',
-           action='store_true'
-           )
+           action='store_true')
     addarg('-l', '--list', action=ListRules, nargs=0,
            help="list all rules and exit")
     addarg('-n', '--no-nameguard', action='store_true',
@@ -268,13 +263,12 @@ def generic_main(custom_main, ParserClass, name='Unknown'):
 
     args = argp.parse_args()
     try:
-        return custom_main(
-            args.file,
-            args.startrule,
-            trace=args.trace,
-            whitespace=args.whitespace,
-            nameguard=not args.no_nameguard,
-            colorize=args.color
-        )
+        return custom_main(args.file,
+                           args.startrule,
+                           trace=args.trace,
+                           whitespace=args.whitespace,
+                           nameguard=not args.no_nameguard,
+                           colorize=args.color
+                           )
     except KeyboardInterrupt:
         pass

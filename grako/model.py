@@ -17,8 +17,7 @@ EOLCOL = 50
 
 
 class Node(object):
-    """ Base class for model nodes
-    """
+    """ Base class for model nodes    """
 
     inline = True
 
@@ -215,9 +214,8 @@ class ModelBuilderSemantics(object):
                 context = vars(constructor)
             except Exception as e:
                 raise SemanticError(
-                    'Could not find constructor for %s (%s): %s'
-                    % (typename, type(constructor).__name__, str(e))
-                )
+                    "Couldn't find constructor for %s (%s): %s"
+                    % (typename, type(constructor).__name__, str(e)))
             if name in context:
                 constructor = context[name]
             else:
@@ -242,7 +240,5 @@ class ModelBuilderSemantics(object):
             else:
                 return constructor(ast, *args[1:], **kwargs)
         except Exception as e:
-            raise SemanticError(
-                'Could not call constructor for %s: %s'
-                % (name, str(e))
-            )
+            raise SemanticError('Could not call constructor for %s: %s'
+                                % (name, str(e)))

@@ -17,67 +17,64 @@ from grako.util import eval_escapes
 from grako.codegen import pythoncg
 from grako.codegen import objectmodel
 
-DESCRIPTION = (
-    'Grako (for "grammar compiler") takes a grammar'
-    ' in a variation of EBNF as input, and outputs a memoizing'
-    ' PEG/Packrat parser in Python.'
-)
+DESCRIPTION = ('Grako (for "grammar compiler") takes a grammar '
+               'in a variation of EBNF as input, and outputs a memoizing '
+               'PEG/Packrat parser in Python.')
 
-argparser = argparse.ArgumentParser(prog='grako',
-                                    description=DESCRIPTION
-                                    )
-argparser.add_argument('-c', '--color',
-                       help='use color in traces (requires the colorama library)',
-                       action='store_true'
-                       )
-argparser.add_argument('-d', '--draw',
-                       help='generate a diagram of the grammar (requires --output)',
-                       action='store_true'
-                       )
-argparser.add_argument('filename',
-                       metavar='GRAMMAR',
-                       help='The filename of the Grako grammar'
-                       )
-argparser.add_argument('-g', '--object-model',
-                       help='generate object model from the class names given as rule arguments',
-                       dest="object_model",
-                       action='store_true',
-                       default=False
-                       )
-argparser.add_argument('-l', '--no-left-recursion',
-                       help='turns left-recusion support off',
-                       dest="left_recursion",
-                       action='store_false',
-                       default=True
-                       )
-argparser.add_argument('-m', '--name',
-                       nargs=1,
-                       metavar='NAME',
-                       help='Name for the grammar (defaults to GRAMMAR base name)'
-                       )
-argparser.add_argument('-n', '--no-nameguard',
-                       help='allow tokens that are prefixes of others',
-                       dest="nameguard",
-                       action='store_false',
-                       default=True
-                       )
-argparser.add_argument('-o', '--output',
-                       metavar='FILE',
-                       help='output file (default is stdout)'
-                       )
-argparser.add_argument('-p', '--pretty',
-                       help='prettify the input grammar',
-                       action='store_true'
-                       )
-argparser.add_argument('-t', '--trace',
-                       help='produce verbose parsing output',
-                       action='store_true'
-                       )
-argparser.add_argument('-w', '--whitespace',
-                       metavar='CHARACTERS',
-                       help='characters to skip during parsing (use "" to disable)',
-                       default=None
-                       )
+argparser = argparse.ArgumentParser(
+    prog='grako', description=DESCRIPTION)
+argparser.add_argument(
+    '-c', '--color',
+    help='use color in traces (requires the colorama library)',
+    action='store_true')
+argparser.add_argument(
+    '-d', '--draw',
+    help='generate a diagram of the grammar (requires --output)',
+    action='store_true')
+argparser.add_argument(
+    'filename',
+    metavar='GRAMMAR',
+    help='The filename of the Grako grammar')
+argparser.add_argument(
+    '-g', '--object-model',
+    help='generate object model from the class names given as rule arguments',
+    dest="object_model",
+    action='store_true',
+    default=False)
+argparser.add_argument(
+    '-l', '--no-left-recursion',
+    help='turns left-recusion support off',
+    dest="left_recursion",
+    action='store_false',
+    default=True)
+argparser.add_argument(
+    '-m', '--name',
+    nargs=1,
+    metavar='NAME',
+    help='Name for the grammar (defaults to GRAMMAR base name)')
+argparser.add_argument(
+    '-n', '--no-nameguard',
+    help='allow tokens that are prefixes of others',
+    dest="nameguard",
+    action='store_false',
+    default=True)
+argparser.add_argument(
+    '-o', '--output',
+    metavar='FILE',
+    help='output file (default is stdout)')
+argparser.add_argument(
+    '-p', '--pretty',
+    help='prettify the input grammar',
+    action='store_true')
+argparser.add_argument(
+    '-t', '--trace',
+    help='produce verbose parsing output',
+    action='store_true')
+argparser.add_argument(
+    '-w', '--whitespace',
+    metavar='CHARACTERS',
+    help='characters to skip during parsing (use "" to disable)',
+    default=None)
 
 
 def genmodel(name=None, grammar=None, trace=False, filename=None,
@@ -147,7 +144,9 @@ def main(codegen=pythoncg, outer_version=''):
             colorize=colorize
         )
         model.whitespace = whitespace
-        model.nameguard = False if not nameguard else None  # None allows grammar specified or the default of True
+
+        # None allows grammar specified or the default of True
+        model.nameguard = False if not nameguard else None
         model.left_recursion = left_recursion
 
         if pretty:
