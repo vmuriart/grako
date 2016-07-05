@@ -14,14 +14,11 @@ from grako.exceptions import (FailedCut,
                               FailedKeywordSemantics,
                               FailedToken,
                               OptionSucceeded)
-from grako.util import notnone, prune_dict, is_list
+from grako.util import prune_dict, is_list
 
 __all__ = ['ParseInfo', 'ParseContext']
 
 ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
-
-
-
 
 
 class Closure(list):
@@ -111,8 +108,6 @@ class ParseContext(object):
 
         if trace is not None:
             self.trace = trace
-        if semantics is not None:
-            self.semantics = semantics
 
         if colorize is not None:
             self.colorize = colorize
@@ -125,7 +120,7 @@ class ParseContext(object):
                 filename=filename,
                 comments_re=comments_re or self.comments_re,
                 eol_comments_re=eol_comments_re or self.eol_comments_re,
-                whitespace=notnone(whitespace, default=self.whitespace),
+                whitespace=self.whitespace if whitespace is None else whitespace,
                 ignorecase=ignorecase,
                 nameguard=nameguard,
                 namechars=namechars or self.namechars,
@@ -161,8 +156,7 @@ class ParseContext(object):
                 semantics=semantics,
                 trace=trace or self.trace,
                 whitespace=whitespace if whitespace is not None else self.whitespace,
-                **kwargs
-            )
+                **kwargs)
             rule = self._find_rule(rule_name)
             result = rule()
             self.ast[rule_name] = result

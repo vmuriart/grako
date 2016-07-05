@@ -8,10 +8,9 @@ about source lines and content.
 """
 from __future__ import absolute_import, division, unicode_literals
 
-from bisect import bisect_left
 from collections import namedtuple
 
-from grako.util import ustr, strtype, re as regexp, WHITESPACE_RE, RE_FLAGS
+from grako.util import ustr, re as regexp, WHITESPACE_RE, RE_FLAGS
 
 __all__ = ['Buffer']
 
@@ -53,8 +52,6 @@ class Buffer(object):
         self.comment_recovery = comment_recovery
         self.namechars = namechars
         self._namechar_set = set(namechars)
-        if namechars:
-            self.nameguard = True
 
         self._pos = 0
         self._len = 0
@@ -83,13 +80,6 @@ class Buffer(object):
             return WHITESPACE_RE
         elif isinstance(whitespace, RETYPE):
             return whitespace
-        elif whitespace:
-            if not isinstance(whitespace, strtype):
-                # a list or a set?
-                whitespace = ''.join(c for c in whitespace)
-            return regexp.compile(
-                '[%s]+' % regexp.escape(whitespace), RE_FLAGS
-            )
         else:
             return None
 
@@ -122,42 +112,13 @@ class Buffer(object):
     def pos(self, p):
         self.goto(p)
 
-    @property
-    def line(self):
-        n = bisect_left(self._linecache, PosLine(self._pos, 0))
-        return self._linecache[n - 1][1]
-
-    @property
-    def col(self):
-        n = bisect_left(self._linecache, PosLine(self._pos, 0))
-        start = self._linecache[n - 1][0]
-        return self._pos - start - 1
-
     def at_end(self):
         return self._pos >= self._len
-
-    def at_eol(self):
-        return self.at_end() or self.current() in '\r\n'
 
     def current(self):
         if self._pos >= self._len:
             return None
         return self.text[self._pos]
-
-    def at(self, p):
-        if p >= self._len:
-            return None
-        return self.text[p]
-
-    def peek(self, n=1):
-        return self.at(self._pos + n)
-
-    def next(self):
-        if self._pos >= self._len:
-            return None
-        c = self.text[self._pos]
-        self._pos += 1
-        return c
 
     def goto(self, p):
         self._pos = max(0, min(len(self.text), p))
@@ -183,31 +144,6 @@ class Buffer(object):
             p = self._pos
             self.eat_eol_comments()
             self.eat_whitespace()
-
-    def skip_to(self, c):
-        p = self._pos
-        le = self._len
-        while p < le and self.text[p] != c:
-            p += 1
-        self.goto(p)
-        return p
-
-    def skip_past(self, c):
-        self.skip_to(c)
-        self.next()
-        return self.pos
-
-    def skip_to_eol(self):
-        return self.skip_to('\n')
-
-    def scan_space(self, offset=0):
-        return (
-            self.whitespace_re and
-            self._scanre(self.whitespace_re, offset=offset) is not None
-        )
-
-    def is_space(self):
-        return self.scan_space()
 
     def is_name_char(self, c):
         return c is not None and c.isalnum() or c in self._namechar_set
@@ -278,39 +214,3 @@ class Buffer(object):
         cache.append(PosLine(i, n))
         self._linecache = cache
         self._linecount = n
-
-    def line_info(self, pos=None):
-        if pos is None:
-            pos = self._pos
-
-        nmax = len(self._linecache) - 1
-        if pos >= self._len:
-            return LineInfo(self.filename, nmax, 0, self._len, self._len, '')
-
-        n = bisect_left(self._linecache, PosLine(pos, 0))
-        start, line = self._linecache[n - 1]
-        start += 1
-        end = self._linecache[n].pos + 1
-        col = pos - start
-
-        text = self.text[start:end]
-        n = min(len(self._line_index) - 1, line)
-        filename, line = self._line_index[n]
-
-        return LineInfo(filename, line, col, start, end, text)
-
-    def lookahead(self):
-        if self.at_end():
-            return ''
-        info = self.line_info()
-        text = info.text[info.col:info.col + 1 + 80]
-        text = text.split('\n')[0]
-        return '<%d:%d>%s' % (info.line + 1, info.col + 1, text)
-
-    def get_line(self, n=None):
-        if n is None:
-            n = self.line
-        start, line = self._linecache[n][:2]
-        assert line == n
-        end, _ = self._linecache[n + 1]
-        return self.text[start + 1:end]
