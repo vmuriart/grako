@@ -207,9 +207,8 @@ class Parser(object):
             self._add_cst_node(cst)
 
     def _closure(self, block):
-        self._concrete_stack.append(None)
+        self._concrete_stack.append([])  # different than others
         try:
-            self._concrete_stack[-1] = []
             self._repeater(block)
             cst = list(self._concrete_stack[-1])
         finally:
@@ -221,7 +220,6 @@ class Parser(object):
     def _positive_closure(self, block, prefix=None):
         self._concrete_stack.append(None)
         try:
-            self._concrete_stack[-1] = None
             with self._try():
                 block()
             self._concrete_stack[-1] = [self._concrete_stack[-1]]
