@@ -53,7 +53,6 @@ class Parser(object):
         self._reset(text=text)
         rule = self._find_rule(rule_name)
         result = rule()
-        self._clear_cache()
         return result
 
     def goto(self, pos):
@@ -70,10 +69,6 @@ class Parser(object):
     @property
     def _pos(self):
         return self._buffer.pos
-
-    def _clear_cache(self):
-        self._memoization_cache = dict()
-        self._recursive_results = dict()
 
     def _next_token(self):
         self._buffer.next_token()
