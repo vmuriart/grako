@@ -20,8 +20,8 @@ class Parser(object):
 
         self._buffer = None
 
-        self.memoize_lookaheads = True
-        self.left_recursion = True
+        self.memoize_lookaheads = False
+        self.left_recursion = False
 
         self._ast_stack = [AST()]
         self._concrete_stack = [None]
