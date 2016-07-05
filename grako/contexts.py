@@ -6,14 +6,9 @@ from contextlib import contextmanager
 
 from grako import buffering
 from grako.ast import AST
-from grako.exceptions import (FailedCut,
-                              FailedLeftRecursion,
-                              FailedParse,
-                              FailedPattern,
-                              FailedSemantics,
-                              FailedKeywordSemantics,
-                              FailedToken,
-                              OptionSucceeded)
+from grako.exceptions import (
+    FailedCut, FailedLeftRecursion, FailedParse, FailedPattern, FailedToken,
+    FailedSemantics, FailedKeywordSemantics, OptionSucceeded)
 from grako.util import prune_dict, is_list
 
 __all__ = ['ParseInfo', 'ParseContext']

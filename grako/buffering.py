@@ -17,41 +17,27 @@ __all__ = ['Buffer']
 RETYPE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
-LineInfo = namedtuple('LineInfo',
-                      ['filename', 'line', 'col', 'start', 'end', 'text'])
+LineInfo = namedtuple(
+    'LineInfo', ['filename', 'line', 'col', 'start', 'end', 'text'])
 
 
 class Buffer(object):
-    def __init__(self,
-                 text,
-                 filename=None,
-                 whitespace=None,
-                 tabwidth=None,
-                 comments_re=None,
-                 eol_comments_re=None,
-                 ignorecase=False,
-                 trace=False,
-                 nameguard=None,
-                 comment_recovery=False,
-                 namechars='',
-                 **kwargs):
+    def __init__(self, text, whitespace=None, eol_comments_re=None,
+                 ignorecase=False):
         self.original_text = text
         self.text = ustr(text)
-        self.filename = filename or ''
-
         self.whitespace = whitespace
-
-        self.tabwidth = tabwidth
-        self.comments_re = comments_re
         self.eol_comments_re = eol_comments_re
         self.ignorecase = ignorecase
-        self.trace = True
-        self.nameguard = (nameguard
-                          if nameguard is not None
-                          else bool(self.whitespace_re))
-        self.comment_recovery = comment_recovery
-        self.namechars = namechars
-        self._namechar_set = set(namechars)
+
+        self.filename = ''
+        self.tabwidth = None
+        self.comments_re = None
+        self.trace = False
+        self.nameguard = bool(self.whitespace_re)
+        self.comment_recovery = False
+        self.namechars = ''
+        self._namechar_set = set('')
 
         self._pos = 0
         self._len = 0
