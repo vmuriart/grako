@@ -13,12 +13,27 @@ the .buffering module.
 Parser.parse() will take the text to parse directly, or an instance of the
 .buffering.Buffer class.
 """
-from __future__ import absolute_import, division, unicode_literals
+from __future__ import absolute_import, unicode_literals
 
-from grako.contexts import ParseContext, graken
-from grako.exceptions import FailedRef
+import functools
 
-graken = graken
+from grako.contexts import ParseContext
+
+
+# decorator for rule implementation methods
+def graken(*params, **kwparams):
+    def decorator(rule):
+        @functools.wraps(rule)
+        def wrapper(self):
+            name = rule.__name__
+            # remove the single leading and trailing underscore
+            # that the parser generator added
+            name = name[1:-1]
+            return self._call(rule, name, params, kwparams)
+
+        return wrapper
+
+    return decorator
 
 
 class Parser(ParseContext):
@@ -26,7 +41,3 @@ class Parser(ParseContext):
         rule = getattr(self, '_' + name + '_', None)
         if isinstance(rule, type(self._find_rule)):
             return rule
-        rule = getattr(self, name, None)
-        if isinstance(rule, type(self._find_rule)):
-            return rule
-        self._error(name, etype=FailedRef)
