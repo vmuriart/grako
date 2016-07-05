@@ -38,9 +38,8 @@ class Parser(object):
 
     def parse(self, text, rule_name='start'):
         self._reset(text=text)
-        rule = self._find_rule(rule_name)
-        result = rule()
-        return result
+        rule = getattr(self, '_' + rule_name + '_', None)
+        return rule()
 
     def _add_cst_node(self, node):
         if node is None:
@@ -70,26 +69,25 @@ class Parser(object):
         # unicode or list
         return list(node) if isinstance(node, list) else node
 
-    def _find_rule(self, name):
-        return getattr(self, '_' + name + '_', None)
-
-    def _error(self, item, etype=FailedParse):
+    @staticmethod
+    def _error(item, etype=FailedParse):
         raise etype(item)
 
     def _call(self, rule, name):
         pos = self._buffer.pos
+        self.last_node = None
         try:
-            self.last_node = None
             node, newpos = self._invoke_rule(rule, name)
-            self._buffer.goto(newpos)
-            self._add_cst_node(node)
-            self.last_node = node
-            return node
         except FailedPattern:
             self._error('Expecting <%s>' % name)
         except FailedParse:
             self._buffer.goto(pos)
             raise
+        else:
+            self._buffer.goto(newpos)
+            self._add_cst_node(node)
+            self.last_node = node
+            return node
 
     def _invoke_rule(self, rule, name):
         cache = self._memoization_cache
@@ -150,7 +148,7 @@ class Parser(object):
         try:
             yield
             cst = self._concrete_stack[-1]
-        except:
+        except Exception:
             self._buffer.goto(p)
             raise
         finally:
