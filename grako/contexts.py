@@ -292,11 +292,7 @@ class ParseContext(object):
         return None
 
     def _error(self, item, etype=FailedParse):
-        raise etype(
-            self._buffer,
-            list(reversed(self._rule_stack[:])),
-            item
-        )
+        raise etype(self._buffer, list(reversed(self._rule_stack[:])), item)
 
     def _fail(self):
         self._error('fail')
@@ -347,8 +343,6 @@ class ParseContext(object):
                 node = self.ast
                 if not node:
                     node = self.cst
-                elif '@' in node:
-                    node = node['@']  # override the AST
                 elif self.parseinfo:
                     node._parseinfo = self._get_parseinfo(node, name, pos)
 
@@ -371,9 +365,7 @@ class ParseContext(object):
 
     def _set_left_recursion_guard(self, name, key):
         exception = FailedLeftRecursion(
-            self._buffer,
-            list(reversed(self._rule_stack[:])),
-            name)
+            self._buffer, list(reversed(self._rule_stack[:])), name)
 
         # Alessandro Warth et al say that we can deal with
         # direct and indirect left-recursion by seeding the
@@ -458,11 +450,6 @@ class ParseContext(object):
             with self._try():
                 yield
             raise OptionSucceeded()
-        except FailedCut:
-            raise
-        except FailedParse as e:
-            if self._is_cut_set():
-                raise FailedCut(e)
         finally:
             self._pop_cut()
 
@@ -481,17 +468,6 @@ class ParseContext(object):
         with self._choice():
             with self._option():
                 yield
-
-    @contextmanager
-    def _group(self):
-        self._push_cst()
-        try:
-            yield
-            cst = self.cst
-        finally:
-            self._pop_cst()
-        self._extend_cst(cst)
-        self.last_node = cst
 
     @contextmanager
     def _ignore(self):
