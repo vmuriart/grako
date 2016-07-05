@@ -47,6 +47,7 @@ def ustr(s):
         # FIXME: last case resource!  We don't know unicode, period.
         return ustr(s.__str__())
 
+
 def prune_dict(d, predicate):
     """Remove all items x where predicate(x, d[x])"""
 
