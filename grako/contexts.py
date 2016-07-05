@@ -26,43 +26,28 @@ class Closure(list):
 
 
 class ParseContext(object):
-    def __init__(self,
-                 semantics=None,
-                 parseinfo=False,
-                 trace=False,
-                 encoding='utf-8',
-                 comments_re=None,
-                 eol_comments_re=None,
-                 whitespace=None,
-                 ignorecase=False,
-                 nameguard=None,
-                 memoize_lookaheads=True,
-                 left_recursion=True,
-                 trace_length=72,
-                 trace_separator=':',
-                 trace_filename=False,
-                 colorize=False,
-                 keywords=None,
-                 namechars='',
-                 **kwargs):
+    def __init__(self, eol_comments_re=None, whitespace=None, ignorecase=False,
+                 keywords=None):
 
-        self._buffer = None
-        self.semantics = semantics
-        self.encoding = encoding
-        self.parseinfo = parseinfo
-        self.trace = trace
-        self.trace_length = trace_length
-        self.trace_separator = trace_separator
-        self.trace_filename = trace_filename
-
-        self.comments_re = comments_re
         self.eol_comments_re = eol_comments_re
         self.whitespace = whitespace
         self.ignorecase = ignorecase
-        self.nameguard = nameguard
-        self.memoize_lookaheads = memoize_lookaheads
-        self.left_recursion = left_recursion
-        self.namechars = namechars
+        self.keywords = set(keywords or [])
+
+        self._buffer = None
+        self.semantics = None
+        self.encoding = 'utf-8'
+        self.parseinfo = False
+        self.trace = False
+        self.trace_length = 72
+        self.trace_separator = ':'
+        self.trace_filename = False
+
+        self.comments_re = None
+        self.nameguard = None
+        self.memoize_lookaheads = True
+        self.left_recursion = True
+        self.namechars = ''
 
         self._ast_stack = [AST()]
         self._concrete_stack = [None]
@@ -78,16 +63,14 @@ class ParseContext(object):
         self._recursive_eval = []
         self._recursive_head = []
 
-        self.colorize = colorize
-        self.keywords = set(keywords or [])
+        self.colorize = False
 
     def _reset(self, text=None):
 
-        buffer = buffering.Buffer(text,
-                                  eol_comments_re=self.eol_comments_re,
-                                  whitespace=self.whitespace,
-                                  ignorecase=self.ignorecase)
-        self._buffer = buffer
+        self._buffer = buffering.Buffer(text,
+                                        eol_comments_re=self.eol_comments_re,
+                                        whitespace=self.whitespace,
+                                        ignorecase=self.ignorecase)
         self._ast_stack = [AST()]
         self._concrete_stack = [None]
         self._rule_stack = []
