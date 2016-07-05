@@ -18,7 +18,6 @@ class Parser(object):
 
         self._buffer = None
 
-        self._ast_stack = [dict()]
         self._concrete_stack = [None]
         self._rule_stack = []
         self._memoization_cache = dict()
@@ -30,7 +29,7 @@ class Parser(object):
     def _reset(self, text=None):
         self._buffer = Buffer(text, whitespace=self.whitespace,
                               eol_comments_re=self.eol_comments_re)
-        self._ast_stack = [dict()]
+
         self._concrete_stack = [None]
         self._rule_stack = []
         self._memoization_cache = dict()
@@ -54,22 +53,6 @@ class Parser(object):
 
     def _next_token(self):
         self._buffer.next_token()
-
-    @property
-    def ast(self):
-        return self._ast_stack[-1]
-
-    @ast.setter
-    def ast(self, value):
-        self._ast_stack[-1] = value
-
-    def _push_ast(self):
-        self._push_cst()
-        self._ast_stack.append(dict())
-
-    def _pop_ast(self):
-        self._pop_cst()
-        return self._ast_stack.pop()
 
     @property
     def cst(self):
@@ -152,14 +135,14 @@ class Parser(object):
             return memo
 
         self._set_left_recursion_guard(name, key)
-        self._push_ast()
+        self._push_cst()
         try:
             if name[0].islower():
                 self._next_token()
             try:
                 rule(self)
 
-                node = self.ast
+                node = {}  # used to be ast get
                 if not node:
                     node = self.cst
 
@@ -174,7 +157,7 @@ class Parser(object):
             cache[key] = e
             raise
         finally:
-            self._pop_ast()
+            self._pop_cst()
 
     def _set_left_recursion_guard(self, name, key):
         exception = FailedLeftRecursion(self._buffer,
@@ -213,21 +196,17 @@ class Parser(object):
     def _try(self):
         p = self._pos
         s = self._state
-        ast_copy = self.ast.copy()
-        self._push_ast()
+        self._push_cst()
         self.last_node = None
         try:
-            self.ast = ast_copy
             yield
-            ast = self.ast
             cst = self.cst
         except:
             self.goto(p)
             self._state = s
             raise
         finally:
-            self._pop_ast()
-        self.ast = ast
+            self._pop_cst()
         self._extend_cst(cst)
         self.last_node = cst
 
