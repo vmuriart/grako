@@ -302,12 +302,7 @@ class ParseContext(object):
         self._error('fail')
 
     def _get_parseinfo(self, node, name, start):
-        return ParseInfo(
-            self._buffer,
-            name,
-            start,
-            self._pos
-        )
+        return ParseInfo(self._buffer, name, start, self._pos)
 
     def _call(self, rule, name, params, kwparams):
         self._rule_stack.append(name)
@@ -355,11 +350,7 @@ class ParseContext(object):
                 elif '@' in node:
                     node = node['@']  # override the AST
                 elif self.parseinfo:
-                    node._parseinfo = self._get_parseinfo(
-                        node,
-                        name,
-                        pos
-                    )
+                    node._parseinfo = self._get_parseinfo(node, name, pos)
 
                 result = (node, self._pos, self._state)
 

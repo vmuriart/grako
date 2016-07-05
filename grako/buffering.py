@@ -89,8 +89,6 @@ class Buffer(object):
         self._line_index = index
 
     def _preprocess_block(self, name, block, **kwargs):
-        if self.tabwidth is not None:
-            block = block.replace('\t', ' ' * self.tabwidth)
         lines = self.split_block_lines(name, block)
         index = self._block_index(name, len(lines))
         return self.process_block(name, lines, index, **kwargs)
