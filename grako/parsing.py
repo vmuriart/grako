@@ -7,7 +7,7 @@ import functools
 from grako.buffering import Buffer
 from grako.exceptions import (
     FailedLeftRecursion, FailedParse, FailedPattern, FailedToken,
-    FailedSemantics, FailedKeywordSemantics, OptionSucceeded)
+    OptionSucceeded)
 
 
 @contextmanager
@@ -117,17 +117,15 @@ class Parser(object):
         try:
             if name[0].islower():
                 self._buffer.next_token()
-            try:
-                rule(self)
-                node = self._concrete_stack[-1]
-                result = node, self._buffer.pos
-                cache[key] = result
-                return result
-            except FailedSemantics as e:
-                self._error(str(e))
+            rule(self)
         except FailedParse as e:
             cache[key] = e
             raise
+        else:
+            node = self._concrete_stack[-1]
+            result = node, self._buffer.pos
+            cache[key] = result
+            return result
         finally:
             self._concrete_stack.pop()
 
@@ -245,4 +243,4 @@ class Parser(object):
     def _check_name(self):
         name = self.last_node.upper()  # bcuz ignorecase == True
         if name in self.keywords:
-            raise FailedKeywordSemantics('"%s" is a reserved word' % name)
+            raise FailedParse('"%s" is a reserved word' % name)
