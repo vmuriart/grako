@@ -129,7 +129,7 @@ class Parser(object):
                 raise memo
             return memo
 
-        self._memoization_cache[key] = FailedLeftRecursion(name)  #left rec grd
+        self._memoization_cache[key] = FailedLeftRecursion(name)  # left rc grd
         self._push_cst()
         try:
             if name[0].islower():

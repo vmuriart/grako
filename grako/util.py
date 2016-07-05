@@ -12,7 +12,6 @@ if PY3:
     def ustr(s):
         return str(s)
 
-
     unicode = None
 
 else:
@@ -21,7 +20,6 @@ else:
             return s
         elif isinstance(s, str):
             return unicode(s, 'utf-8')
-
 
     unicode = unicode
 
