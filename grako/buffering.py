@@ -18,12 +18,10 @@ PY3 = sys.version_info[0] == 3
 if PY3:
     unicode = None
 
-
     def ustr(s):
         return str(s)
 else:
     unicode = unicode
-
 
     def ustr(s):
         if isinstance(s, unicode):
