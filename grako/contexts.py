@@ -9,6 +9,14 @@ from grako.exceptions import (
     FailedSemantics, FailedKeywordSemantics, OptionSucceeded)
 
 
+@contextmanager
+def suppress(*exceptions):
+    try:
+        yield
+    except exceptions:
+        pass
+
+
 class Parser(object):
     def __init__(self, eol_comments_re=None, whitespace=None, keywords=None):
 
@@ -41,12 +49,6 @@ class Parser(object):
     @cst.setter
     def cst(self, value):
         self._concrete_stack[-1] = value
-
-    def _push_cst(self):
-        self._concrete_stack.append(None)
-
-    def _pop_cst(self):
-        return self._concrete_stack.pop()
 
     def _add_cst_node(self, node):
         if node is None:
@@ -107,9 +109,8 @@ class Parser(object):
             if isinstance(memo, Exception):
                 raise memo
             return memo
-
         self._memoization_cache[key] = FailedLeftRecursion(name)  # left rc grd
-        self._push_cst()
+        self._concrete_stack.append(None)
         try:
             if name[0].islower():
                 self._buffer.next_token()
@@ -125,7 +126,7 @@ class Parser(object):
             cache[key] = e
             raise
         finally:
-            self._pop_cst()
+            self._concrete_stack.pop()
 
     def _token(self, token):
         self._buffer.next_token()
@@ -151,7 +152,7 @@ class Parser(object):
     @contextmanager
     def _try(self):
         p = self._buffer.pos
-        self._push_cst()
+        self._concrete_stack.append(None)
         self.last_node = None
         try:
             yield
@@ -160,28 +161,24 @@ class Parser(object):
             self._buffer.goto(p)
             raise
         finally:
-            self._pop_cst()
+            self._concrete_stack.pop()
         self._extend_cst(cst)
         self.last_node = cst
 
     @contextmanager
     def _option(self):
         self.last_node = None
-        try:
+        with suppress(FailedParse):
             with self._try():
                 yield
             raise OptionSucceeded()
-        except FailedParse:
-            pass
 
     @contextmanager
     def _choice(self):
         self.last_node = None
         with self._try():
-            try:
+            with suppress(OptionSucceeded):
                 yield
-            except OptionSucceeded:
-                pass
 
     @contextmanager
     def _optional(self):
@@ -192,16 +189,16 @@ class Parser(object):
 
     @contextmanager
     def _ignore(self):
-        self._push_cst()
+        self._concrete_stack.append(None)
         try:
             self.cst = None
             yield
         finally:
-            self._pop_cst()
+            self._concrete_stack.pop()
 
     def _repeater(self, block, prefix=None):
         while True:
-            self._push_cst()
+            self._concrete_stack.append(None)
             try:
                 p = self._buffer.pos
                 with self._try():
@@ -217,23 +214,23 @@ class Parser(object):
             except FailedParse:
                 break
             finally:
-                self._pop_cst()
+                self._concrete_stack.pop()
             self._add_cst_node(cst)
 
     def _closure(self, block):
-        self._push_cst()
+        self._concrete_stack.append(None)
         try:
             self.cst = []
             self._repeater(block)
             cst = list(self.cst)
         finally:
-            self._pop_cst()
+            self._concrete_stack.pop()
         self._add_cst_node(cst)
         self.last_node = cst
         return cst
 
     def _positive_closure(self, block, prefix=None):
-        self._push_cst()
+        self._concrete_stack.append(None)
         try:
             self.cst = None
             with self._try():
@@ -242,7 +239,7 @@ class Parser(object):
             self._repeater(block, prefix=prefix)
             cst = list(self.cst)
         finally:
-            self._pop_cst()
+            self._concrete_stack.pop()
         self._add_cst_node(cst)
         self.last_node = cst
         return cst
