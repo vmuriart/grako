@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, unicode_literals
 from contextlib import contextmanager
 
 from grako.buffering import Buffer
-from grako.ast import AST
 from grako.exceptions import (
     FailedLeftRecursion, FailedParse, FailedPattern, FailedToken,
     FailedSemantics, FailedKeywordSemantics, OptionSucceeded)
@@ -19,7 +18,7 @@ class Parser(object):
 
         self._buffer = None
 
-        self._ast_stack = [AST()]
+        self._ast_stack = [dict()]
         self._concrete_stack = [None]
         self._rule_stack = []
         self._memoization_cache = dict()
@@ -31,7 +30,7 @@ class Parser(object):
     def _reset(self, text=None):
         self._buffer = Buffer(text, whitespace=self.whitespace,
                               eol_comments_re=self.eol_comments_re)
-        self._ast_stack = [AST()]
+        self._ast_stack = [dict()]
         self._concrete_stack = [None]
         self._rule_stack = []
         self._memoization_cache = dict()
@@ -66,7 +65,7 @@ class Parser(object):
 
     def _push_ast(self):
         self._push_cst()
-        self._ast_stack.append(AST())
+        self._ast_stack.append(dict())
 
     def _pop_ast(self):
         self._pop_cst()
