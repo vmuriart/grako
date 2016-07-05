@@ -6,19 +6,11 @@ Line analysis and caching are done so the parser can freely move with goto(p)
 to any position in the parsed text, and still recover accurate information
 about source lines and content.
 """
-from __future__ import absolute_import, division, unicode_literals
-
-from collections import namedtuple
+from __future__ import absolute_import, unicode_literals
 
 from grako.util import ustr, re as regexp, RE_FLAGS
 
-__all__ = ['Buffer']
-
 RETYPE = type(regexp.compile('.'))
-
-PosLine = namedtuple('PosLine', ['pos', 'line'])
-LineInfo = namedtuple(
-    'LineInfo', ['filename', 'line', 'col', 'start', 'end', 'text'])
 
 
 class Buffer(object):
@@ -54,16 +46,12 @@ class Buffer(object):
         self.goto(self.pos + n)
 
     def eat_whitespace(self):
-        if self.whitespace_re is not None:
-            while self.matchre(self.whitespace_re):
-                pass
+        while self.matchre(self.whitespace_re):
+            pass
 
     def eat_eol_comments(self):
-        if self.eol_comments_re is not None:
-            while True:
-                comment = self.matchre(self.eol_comments_re)
-                if not comment:
-                    break
+        while self.matchre(self.eol_comments_re):
+            pass
 
     def next_token(self):
         p = None
