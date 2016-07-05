@@ -74,18 +74,11 @@ class Buffer(object):
         self.text = ''.join(lines)
         self._line_index = index
 
-    def _preprocess_block(self, name, block, **kwargs):
-        lines = self.split_block_lines(name, block)
-        index = self._block_index(name, len(lines))
-        return self.process_block(name, lines, index, **kwargs)
-
-    def _block_index(self, name, n):
-        return list(zip(n * [name], range(n)))
-
-    def split_block_lines(self, name, block, **kwargs):
-        return block.splitlines(True)
-
-    def process_block(self, name, lines, index, **kwargs):
+    def _preprocess_block(self, filename, block):
+        lines = block.splitlines(True)
+        n = len(lines)
+        # index = [(u'', 0), (u'', 1)]
+        index = list(zip(n * [filename], range(n)))
         return lines, index
 
     @property
