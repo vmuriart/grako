@@ -54,10 +54,6 @@ class FailedParseBase(ParseError):
         self.pos = buf.pos
         self.item = item
 
-    @property
-    def message(self):
-        return self.item
-
 
 class FailedParse(FailedParseBase):
     pass
@@ -68,19 +64,11 @@ class FailedToken(FailedParse):
         super(FailedToken, self).__init__(buf, stack, token)
         self.token = token
 
-    @property
-    def message(self):
-        return "expecting %s" % repr(self.token).lstrip('u')
-
 
 class FailedPattern(FailedParse):
     def __init__(self, buf, stack, pattern):
         super(FailedPattern, self).__init__(buf, stack, pattern)
         self.pattern = pattern
-
-    @property
-    def message(self):
-        return "expecting %s" % repr(self.pattern).strip('u')
 
 
 class FailedMatch(FailedParse):
@@ -88,19 +76,11 @@ class FailedMatch(FailedParse):
         super(FailedMatch, self).__init__(buf, item)
         self.name = name
 
-    @property
-    def message(self):
-        return "expecting %s" % repr(self.name).strip('u')
-
 
 class FailedRef(FailedParseBase):
     def __init__(self, buf, stack, name):
         super(FailedRef, self).__init__(buf, stack, name)
         self.name = name
-
-    @property
-    def message(self):
-        return "could not resolve reference to rule '%s'" % self.name
 
 
 class FailedCut(FailedParse):
@@ -109,24 +89,14 @@ class FailedCut(FailedParse):
         self.pos = nested.pos
         self.nested = nested
 
-    @property
-    def message(self):
-        return self.nested.message
-
 
 class FailedChoice(FailedParse):
-    @property
-    def message(self):
-        return 'no viable option'
+    pass
 
 
 class FailedLookahead(FailedParse):
-    @property
-    def message(self):
-        return 'failed lookahead'
+    pass
 
 
 class FailedLeftRecursion(FailedParse):
-    @property
-    def message(self):
-        return 'infinite left recursion'
+    pass
