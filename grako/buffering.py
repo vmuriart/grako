@@ -8,9 +8,28 @@ about source lines and content.
 """
 from __future__ import absolute_import, unicode_literals
 
-from grako.util import ustr, re as regexp, RE_FLAGS
+import sys
+import re as regexp
 
+RE_FLAGS = regexp.UNICODE | regexp.MULTILINE
 RETYPE = type(regexp.compile('.'))
+
+PY3 = sys.version_info[0] == 3
+if PY3:
+    unicode = None
+
+
+    def ustr(s):
+        return str(s)
+else:
+    unicode = unicode
+
+
+    def ustr(s):
+        if isinstance(s, unicode):
+            return s
+        elif isinstance(s, str):
+            return unicode(s, 'utf-8')
 
 
 class Buffer(object):

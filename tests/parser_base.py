@@ -13,8 +13,7 @@
 
 from __future__ import division, absolute_import, unicode_literals
 
-from grako import graken, Parser
-from grako.util import re, RE_FLAGS  # noqa
+from grako import graken, Parser, RE_FLAGS, regexp as re
 
 __version__ = (2016, 7, 5, 0, 7, 13, 1)
 

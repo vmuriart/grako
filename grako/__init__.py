@@ -17,6 +17,7 @@ Parser.parse() will take the text to parse directly, or an instance of the
 from __future__ import absolute_import, unicode_literals
 
 from grako.parsing import Parser, graken
+from grako.buffering import RE_FLAGS, regexp
 
 __version__ = '3.9.1'
-__all__ = ['Parser', 'graken']
+__all__ = ['Parser', 'graken', 'RE_FLAGS', 'regexp']
