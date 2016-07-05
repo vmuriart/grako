@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 
-import collections
 import functools
 import sys
 
@@ -16,10 +15,8 @@ PY3 = sys.version_info[0] == 3
 
 if PY3:
     strtype = str
-    Mapping = collections.Mapping
 else:
     strtype = basestring  # noqa
-    Mapping = collections.Mapping
 
 
 def is_list(o):
@@ -50,9 +47,8 @@ def prune_dict(d, predicate):
 def graken(func_rule):
     @functools.wraps(func_rule)
     def wrapper(self):
-        name = func_rule.__name__
         # remove the leading and trailing underscore the parser generator added
-        name = name[1:-1]
+        name = func_rule.__name__[1:-1]
         return self._call(func_rule, name)
 
     return wrapper
