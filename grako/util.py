@@ -6,20 +6,15 @@ import sys
 
 try:
     import regex as re
-
-    WHITESPACE_RE = re.compile(r'\p{IsPattern_White_Space}+', re.UNICODE)
 except ImportError:
     import re
 
-    WHITESPACE_RE = re.compile(r'\s+', re.UNICODE)
 RE_FLAGS = re.UNICODE | re.MULTILINE
 
-PY3 = sys.version_info[0] >= 3
+PY3 = sys.version_info[0] == 3
 
 if PY3:
     strtype = str
-    basestring = None
-    unicode = None
     Mapping = collections.Mapping
 else:
     strtype = basestring  # noqa
