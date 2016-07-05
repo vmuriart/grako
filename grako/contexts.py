@@ -81,45 +81,12 @@ class ParseContext(object):
         self.colorize = colorize
         self.keywords = set(keywords or [])
 
-    def _reset(self,
-               text=None,
-               filename=None,
-               semantics=None,
-               trace=None,
-               comments_re=None,
-               eol_comments_re=None,
-               whitespace=None,
-               ignorecase=None,
-               nameguard=None,
-               memoize_lookaheads=None,
-               left_recursion=None,
-               colorize=False,
-               namechars='',
-               **kwargs):
-        if ignorecase is None:
-            ignorecase = self.ignorecase
-        if nameguard is None:
-            nameguard = self.nameguard
+    def _reset(self, text=None):
 
-        if trace is not None:
-            self.trace = trace
-
-        if colorize is not None:
-            self.colorize = colorize
-
-        if isinstance(text, buffering.Buffer):
-            buffer = text
-        else:
-            buffer = buffering.Buffer(
-                text,
-                filename=filename,
-                comments_re=comments_re or self.comments_re,
-                eol_comments_re=eol_comments_re or self.eol_comments_re,
-                whitespace=self.whitespace if whitespace is None else whitespace,
-                ignorecase=ignorecase,
-                nameguard=nameguard,
-                namechars=namechars or self.namechars,
-                **kwargs)
+        buffer = buffering.Buffer(text,
+                                  eol_comments_re=self.eol_comments_re,
+                                  whitespace=self.whitespace,
+                                  ignorecase=self.ignorecase)
         self._buffer = buffer
         self._ast_stack = [AST()]
         self._concrete_stack = [None]
@@ -135,23 +102,9 @@ class ParseContext(object):
         self._recursive_eval = []
         self._recursive_head = []
 
-    def parse(self,
-              text,
-              rule_name='start',
-              filename=None,
-              semantics=None,
-              trace=False,
-              whitespace=None,
-              **kwargs):
+    def parse(self, text, rule_name='start'):
         try:
-            self.parseinfo = kwargs.pop('parseinfo', self.parseinfo)
-            self._reset(
-                text=text,
-                filename=filename,
-                semantics=semantics,
-                trace=trace or self.trace,
-                whitespace=whitespace if whitespace is not None else self.whitespace,
-                **kwargs)
+            self._reset(text=text)
             rule = self._find_rule(rule_name)
             result = rule()
             self.ast[rule_name] = result
