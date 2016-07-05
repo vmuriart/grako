@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import collections
+import functools
 import sys
 
 try:
@@ -43,3 +44,15 @@ def prune_dict(d, predicate):
     keys = [k for k, v in d.items() if predicate(k, v)]
     for k in keys:
         del d[k]
+
+
+# decorator for rule implementation methods
+def graken(func_rule):
+    @functools.wraps(func_rule)
+    def wrapper(self):
+        name = func_rule.__name__
+        # remove the leading and trailing underscore the parser generator added
+        name = name[1:-1]
+        return self._call(func_rule, name)
+
+    return wrapper

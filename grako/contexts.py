@@ -11,7 +11,7 @@ from grako.exceptions import (
     FailedSemantics, FailedKeywordSemantics, OptionSucceeded)
 from grako.util import prune_dict, is_list
 
-__all__ = ['ParseInfo', 'ParseContext']
+__all__ = ['ParseInfo', 'Parser']
 
 ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
@@ -20,7 +20,7 @@ class Closure(list):
     pass
 
 
-class ParseContext(object):
+class Parser(object):
     def __init__(self, eol_comments_re=None, whitespace=None, ignorecase=False,
                  keywords=None):
 
