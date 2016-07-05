@@ -102,12 +102,9 @@ class Parser(object):
             return node
 
     def _invoke_rule(self, rule, name):
-        cache = self._memoization_cache
-        pos = self._buffer.pos
-
-        key = pos, rule
-        if key in cache:
-            memo = cache[key]
+        key = self._buffer.pos, rule
+        if key in self._memoization_cache:
+            memo = self._memoization_cache[key]
             if isinstance(memo, Exception):
                 raise memo
             return memo
@@ -119,12 +116,12 @@ class Parser(object):
                 self._buffer.next_token()
             rule(self)
         except FailedParse as e:
-            cache[key] = e
+            self._memoization_cache[key] = e
             raise
         else:
             node = self._concrete_stack[-1]
             result = node, self._buffer.pos
-            cache[key] = result
+            self._memoization_cache[key] = result
             return result
         finally:
             self._concrete_stack.pop()
