@@ -13,8 +13,7 @@ the .buffering module.
 Parser.parse() will take the text to parse directly, or an instance of the
 .buffering.Buffer class.
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, unicode_literals
 
 from grako.contexts import ParseContext, graken
 from grako.exceptions import FailedRef
@@ -31,18 +30,3 @@ class Parser(ParseContext):
         if isinstance(rule, type(self._find_rule)):
             return rule
         self._error(name, etype=FailedRef)
-
-    @classmethod
-    def rule_list(cls):
-        import inspect
-        methods = inspect.getmembers(cls, predicate=inspect.isroutine)
-        result = []
-        for m in methods:
-            name = m[0]
-            if len(name) < 3:
-                continue
-            if name.startswith('__') or name.endswith('__'):
-                continue
-            if name.startswith('_') and name.endswith('_'):
-                result.append(name[1:-1])
-        return result
