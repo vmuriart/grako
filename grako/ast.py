@@ -47,7 +47,7 @@ class AST(dict):
         return self
 
     def copy(self):
-        return AST((k, v[:] if is_list(v) else v) for k, v in self.items())
+        return AST((k, list(v) if is_list(v) else v) for k, v in self.items())
 
     def __iter__(self):
         return iter(self._order)

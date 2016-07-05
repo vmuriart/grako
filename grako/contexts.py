@@ -168,16 +168,13 @@ class Parser(object):
     def _pop_cut(self):
         return self._cut_stack.pop()
 
-    def _memoization(self):
-        return True  # self._lookahead == 0  # value never changed.
-
     def _find_rule(self, name):
         rule = getattr(self, '_' + name + '_', None)
         if isinstance(rule, type(self._find_rule)):
             return rule
 
     def _error(self, item, etype=FailedParse):
-        raise etype(self._buffer, list(reversed(self._rule_stack[:])), item)
+        raise etype(self._buffer, list(reversed(self._rule_stack)), item)
 
     def _call(self, rule, name):
         self._rule_stack.append(name)
@@ -225,21 +222,20 @@ class Parser(object):
 
                 result = self._left_recurse(key, result)
 
-                if self._memoization() and not self._in_recursive_loop():
+                if not self._in_recursive_loop():
                     cache[key] = result
                 return result
             except FailedSemantics as e:
                 self._error(str(e), FailedParse)
         except FailedParse as e:
-            if self._memoization():
-                cache[key] = e
+            cache[key] = e
             raise
         finally:
             self._pop_ast()
 
     def _set_left_recursion_guard(self, name, key):
-        exception = FailedLeftRecursion(
-            self._buffer, list(reversed(self._rule_stack[:])), name)
+        exception = FailedLeftRecursion(self._buffer,
+                                        list(reversed(self._rule_stack)), name)
 
         # Alessandro Warth et al say that we can deal with
         # direct and indirect left-recursion by seeding the
@@ -247,16 +243,14 @@ class Parser(object):
         #
         #   http://www.vpri.org/pdf/tr2007002_packrat.pdf
         #
-        if self._memoization():
-            self._memoization_cache[key] = exception
+        self._memoization_cache[key] = exception
 
     def _in_recursive_loop(self):
         head = self._recursive_head
         return head and head[-1] in self._rule_stack
 
     def _left_recurse(self, key, result):
-        if self._memoization():
-            self._recursive_results[key] = result
+        self._recursive_results[key] = result
         return result
 
     def _token(self, token):
