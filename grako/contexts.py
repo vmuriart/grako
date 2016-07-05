@@ -25,13 +25,10 @@ class Parser(object):
         self._rule_stack = []
         self._cut_stack = [False]
         self._memoization_cache = dict()
+        self._recursive_results = dict()
 
         self.last_node = None
         self._state = None
-        self._lookahead = 0
-
-        self._recursive_results = dict()
-        self._recursive_head = []
 
     def _reset(self, text=None):
         self._buffer = Buffer(text, whitespace=self.whitespace,
@@ -41,13 +38,10 @@ class Parser(object):
         self._rule_stack = []
         self._cut_stack = [False]
         self._memoization_cache = dict()
+        self._recursive_results = dict()
 
         self.last_node = None
         self._state = None
-        self._lookahead = 0
-
-        self._recursive_results = dict()
-        self._recursive_head = []
 
     def parse(self, text, rule_name='start'):
         self._reset(text=text)
@@ -118,7 +112,8 @@ class Parser(object):
         else:
             self.cst = [previous, node]
 
-    def _copy_node(self, node):
+    @staticmethod
+    def _copy_node(node):
         if is_list(node):
             return list(node)
         else:
