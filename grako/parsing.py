@@ -189,7 +189,6 @@ class Parser(object):
     def _ignore(self):
         self._concrete_stack.append(None)
         try:
-            self._concrete_stack[-1] = None
             yield
         finally:
             self._concrete_stack.pop()

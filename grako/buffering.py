@@ -46,10 +46,6 @@ class Buffer(object):
     def pos(self):
         return self._pos
 
-    @pos.setter
-    def pos(self, p):
-        self.goto(p)
-
     def at_end(self):
         return self._pos >= self._len
 
@@ -83,9 +79,6 @@ class Buffer(object):
         return c is not None and c.isalnum()
 
     def match(self, token):
-        if token is None:
-            return self.at_end()
-
         p = self.pos
         # ignorecase == True
         result = self.text[p:p + len(token)].lower() == token.lower()

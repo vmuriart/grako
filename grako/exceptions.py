@@ -8,7 +8,7 @@ of the .buffering.Buffer class, and with as little overhead as possible for
 exceptions that will not be parsing errors (remember that Grako uses the
 exception system to backtrack).
 """
-from __future__ import absolute_import, division, unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 
 class GrakoException(Exception):
@@ -19,31 +19,7 @@ class OptionSucceeded(GrakoException):
     pass
 
 
-class GrammarError(GrakoException):
-    pass
-
-
-class SemanticError(GrakoException):
-    pass
-
-
-class CodegenError(GrakoException):
-    pass
-
-
-class MissingSemanticFor(SemanticError):
-    pass
-
-
 class ParseError(GrakoException):
-    pass
-
-
-class FailedSemantics(ParseError):
-    pass
-
-
-class FailedKeywordSemantics(FailedSemantics):
     pass
 
 
@@ -66,26 +42,6 @@ class FailedPattern(FailedParse):
     def __init__(self, pattern):
         super(FailedPattern, self).__init__(pattern)
         self.pattern = pattern
-
-
-class FailedMatch(FailedParse):
-    pass
-
-
-class FailedRef(FailedParseBase):
-    pass
-
-
-class FailedCut(FailedParse):
-    pass
-
-
-class FailedChoice(FailedParse):
-    pass
-
-
-class FailedLookahead(FailedParse):
-    pass
 
 
 class FailedLeftRecursion(FailedParse):
