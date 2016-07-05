@@ -63,16 +63,8 @@ class Buffer(object):
             return None
 
     def _preprocess(self):
-        lines, index = self._preprocess_block(self.text)
-        self.text = ''.join(lines)
-        self._line_index = index
-
-    def _preprocess_block(self, text):
-        lines = text.splitlines(True)
-        n = len(lines)
-        # index = [(u'', 0), (u'', 1)]
-        index = list(zip('', range(n)))
-        return lines, index
+        n = len(self.text.splitlines())
+        self._line_index = zip(n * [''], range(n))  # = [(u'', 0), (u'', 1)...]
 
     @property
     def pos(self):
