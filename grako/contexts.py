@@ -20,9 +20,6 @@ class Parser(object):
 
         self._buffer = None
 
-        self.memoize_lookaheads = False
-        self.left_recursion = False
-
         self._ast_stack = [AST()]
         self._concrete_stack = [None]
         self._rule_stack = []
@@ -142,15 +139,10 @@ class Parser(object):
             self.cst = [previous, node]
 
     def _copy_node(self, node):
-        if node is None:
-            return None
-        elif is_list(node):
-            return node[:]
+        if is_list(node):
+            return list(node)
         else:
             return node
-
-    def _is_cut_set(self):
-        return self._cut_stack[-1]
 
     def _cut(self):
         self._cut_stack[-1] = True
@@ -180,7 +172,7 @@ class Parser(object):
         return self._cut_stack.pop()
 
     def _memoization(self):
-        return self.memoize_lookaheads or self._lookahead == 0
+        return True  # self._lookahead == 0  # value never changed.
 
     def _find_rule(self, name):
         rule = getattr(self, '_' + name + '_', None)
@@ -216,7 +208,6 @@ class Parser(object):
         key = (pos, rule, self._state)
         if key in cache:
             memo = cache[key]
-            memo = self._left_recursion_check(name, key, memo)
             if isinstance(memo, Exception):
                 raise memo
             return memo
@@ -261,20 +252,6 @@ class Parser(object):
         #
         if self._memoization():
             self._memoization_cache[key] = exception
-
-    def _left_recursion_check(self, name, key, memo):
-        if isinstance(memo, FailedLeftRecursion) and self.left_recursion:
-            # At this point we know we've already seen this rule
-            # at this position. Either we've got a potential
-            # result from a previous pass that we can return, or
-            # we make a note of the rule so that we can take
-            # action as we unwind the rule stack.
-
-            if key in self._recursive_results:
-                memo = self._recursive_results[key]
-            else:
-                self._recursive_head.append(name)
-        return memo
 
     def _in_recursive_loop(self):
         head = self._recursive_head
