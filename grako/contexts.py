@@ -224,13 +224,12 @@ class ParseContext(object):
     def _get_parseinfo(self, node, name, start):
         return ParseInfo(self._buffer, name, start, self._pos)
 
-    def _call(self, rule, name, params, kwparams):
+    def _call(self, rule, name):
         self._rule_stack.append(name)
         pos = self._pos
         try:
             self._last_node = None
-            node, newpos, newstate = self._invoke_rule(rule, name, params,
-                                                       kwparams)
+            node, newpos, newstate = self._invoke_rule(rule, name)
             self.goto(newpos)
             self._state = newstate
             self._add_cst_node(node)
@@ -244,7 +243,7 @@ class ParseContext(object):
         finally:
             self._rule_stack.pop()
 
-    def _invoke_rule(self, rule, name, params, kwparams):
+    def _invoke_rule(self, rule, name):
         cache = self._memoization_cache
         pos = self._pos
 
@@ -272,8 +271,7 @@ class ParseContext(object):
 
                 result = (node, self._pos, self._state)
 
-                result = self._left_recurse(rule, name, pos, key, result,
-                                            params, kwparams)
+                result = self._left_recurse(rule, name, pos, key, result)
 
                 if self._memoization() and not self._in_recursive_loop():
                     cache[key] = result
@@ -318,7 +316,7 @@ class ParseContext(object):
         head = self._recursive_head
         return head and head[-1] in self._rule_stack
 
-    def _left_recurse(self, rule, name, pos, key, result, params, kwparams):
+    def _left_recurse(self, rule, name, pos, key, result):
         if self._memoization():
             self._recursive_results[key] = result
         return result

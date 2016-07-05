@@ -21,7 +21,7 @@ from grako.contexts import ParseContext
 
 
 # decorator for rule implementation methods
-def graken(*params, **kwparams):
+def graken():
     def decorator(rule):
         @functools.wraps(rule)
         def wrapper(self):
@@ -29,7 +29,7 @@ def graken(*params, **kwparams):
             # remove the single leading and trailing underscore
             # that the parser generator added
             name = name[1:-1]
-            return self._call(rule, name, params, kwparams)
+            return self._call(rule, name)
 
         return wrapper
 
