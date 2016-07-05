@@ -9,18 +9,15 @@ RE_FLAGS = re.UNICODE | re.MULTILINE
 
 PY3 = sys.version_info[0] == 3
 if PY3:
-    unicode = None
-else:
-    unicode = unicode
-
-
-def ustr(s):
-    if PY3:
+    def ustr(s):
         return str(s)
-    elif isinstance(s, unicode):
-        return s
-    elif isinstance(s, str):
-        return unicode(s, 'utf-8')
+
+else:
+    def ustr(s):
+        if isinstance(s, unicode):
+            return s
+        elif isinstance(s, str):
+            return unicode(s, 'utf-8')
 
 
 # decorator for rule implementation methods
