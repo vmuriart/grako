@@ -1,39 +1,25 @@
 # -*- coding: utf-8 -*-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, unicode_literals
 
 import functools
-import sys
 from collections import namedtuple
 from contextlib import contextmanager
 
 from grako import buffering
-from grako import color
 from grako.ast import AST
-from grako.exceptions import (
-    FailedCut,
-    FailedLeftRecursion,
-    FailedLookahead,
-    FailedParse,
-    FailedPattern,
-    FailedSemantics,
-    FailedKeywordSemantics,
-    FailedToken,
-    OptionSucceeded
-)
-from grako.util import notnone, ustr, prune_dict, is_list, info, safe_name
+from grako.exceptions import (FailedCut,
+                              FailedLeftRecursion,
+                              FailedParse,
+                              FailedPattern,
+                              FailedSemantics,
+                              FailedKeywordSemantics,
+                              FailedToken,
+                              OptionSucceeded)
+from grako.util import notnone, prune_dict, is_list
 
 __all__ = ['ParseInfo', 'ParseContext']
 
-ParseInfo = namedtuple(
-    'ParseInfo',
-    [
-        'buffer',
-        'rule',
-        'pos',
-        'endpos'
-    ]
-)
+ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
 
 
 # decorator for rule implementation methods
@@ -145,9 +131,6 @@ class ParseContext(object):
         if colorize is not None:
             self.colorize = colorize
 
-        if self.colorize:
-            color.init()
-
         if isinstance(text, buffering.Buffer):
             buffer = text
         else:
@@ -221,9 +204,6 @@ class ParseContext(object):
     def _clear_cache(self):
         self._memoization_cache = dict()
         self._recursive_results = dict()
-
-    def _goto(self, pos):
-        self._buffer.goto(pos)
 
     def _next_token(self):
         self._buffer.next_token()
@@ -329,74 +309,11 @@ class ParseContext(object):
     def _pop_cut(self):
         return self._cut_stack.pop()
 
-    def _enter_lookahead(self):
-        self._lookahead += 1
-
-    def _leave_lookahead(self):
-        self._lookahead -= 1
-
     def _memoization(self):
         return self.memoize_lookaheads or self._lookahead == 0
 
-    def _rulestack(self):
-        stack = self.trace_separator.join(self._rule_stack)
-        if len(stack) > self.trace_length:
-            stack = '...' + stack[-self.trace_length:].lstrip(
-                self.trace_separator)
-        return stack
-
     def _find_rule(self, name):
         return None
-
-    def _find_semantic_rule(self, name):
-        if self.semantics is None:
-            return None, None
-
-        postproc = getattr(self.semantics, '_postproc', None)
-        if not callable(postproc):
-            postproc = None
-
-        rule = getattr(self.semantics, safe_name(name), None)
-        if callable(rule):
-            return rule, postproc
-
-        rule = getattr(self.semantics, '_default', None)
-        if callable(rule):
-            return rule, postproc
-
-        return None, postproc
-
-    def _trace(self, msg, *params):
-        if self.trace:
-            msg = msg % params
-            info(ustr(msg), file=sys.stderr)
-
-    def _trace_event(self, event):
-        if self.trace:
-            fname = ''
-            if self.trace_filename:
-                fname = self._buffer.line_info().filename + '\n'
-            self._trace('%s   \n%s%s \n',
-                        event + ' ' + self._rulestack(),
-                        color.Style.DIM + fname,
-                        color.Style.NORMAL + self._buffer.lookahead().rstrip(
-                            '\r\n')
-                        )
-
-    def _trace_match(self, token, name=None, failed=False):
-        if self.trace:
-            fname = ''
-            if self.trace_filename:
-                fname = self._buffer.line_info().filename + '\n'
-            name = '/%s/' % name if name else ''
-            fgcolor = color.Fore.GREEN + '< ' if not failed else color.Fore.RED + '! '
-            self._trace(
-                color.Style.BRIGHT + fgcolor + '"%s" %s\n%s%s\n',
-                token,
-                name,
-                color.Style.DIM + fname,
-                color.Style.NORMAL + self._buffer.lookahead().rstrip('\r\n')
-            )
 
     def _error(self, item, etype=FailedParse):
         raise etype(
@@ -420,21 +337,18 @@ class ParseContext(object):
         self._rule_stack.append(name)
         pos = self._pos
         try:
-            self._trace_event(color.Fore.YELLOW + color.Style.BRIGHT + '>')
             self._last_node = None
             node, newpos, newstate = self._invoke_rule(rule, name, params,
                                                        kwparams)
-            self._goto(newpos)
+            self.goto(newpos)
             self._state = newstate
-            self._trace_event(color.Fore.GREEN + color.Style.BRIGHT + '<')
             self._add_cst_node(node)
             self._last_node = node
             return node
         except FailedPattern:
             self._error('Expecting <%s>' % name)
         except FailedParse:
-            self._trace_event(color.Fore.RED + color.Style.BRIGHT + '!')
-            self._goto(pos)
+            self.goto(pos)
             raise
         finally:
             self._rule_stack.pop()
@@ -471,7 +385,6 @@ class ParseContext(object):
                         pos
                     )
 
-                node = self._invoke_semantic_rule(name, node, params, kwparams)
                 result = (node, self._pos, self._state)
 
                 result = self._left_recurse(rule, name, pos, key, result,
@@ -493,8 +406,7 @@ class ParseContext(object):
         exception = FailedLeftRecursion(
             self._buffer,
             list(reversed(self._rule_stack[:])),
-            name
-        )
+            name)
 
         # Alessandro Warth et al say that we can deal with
         # direct and indirect left-recursion by seeding the
@@ -526,77 +438,23 @@ class ParseContext(object):
     def _left_recurse(self, rule, name, pos, key, result, params, kwparams):
         if self._memoization():
             self._recursive_results[key] = result
-
-        # If the current name is in the head, then we've just
-        # unwound to the highest rule in the recursion
-        cache = self._memoization_cache
-        last_pos = pos
-        if (
-                        [name] == self._recursive_head[-1:] and
-                        self._recursive_head[-1:] != self._recursive_eval[-1:]
-        ):
-            # Repeatedly apply the rule until it can't consume any
-            # more. We store the last good result each time. Prior
-            # to doing so we reset the position and remove any
-            # failures from the cache.
-            last_result = result
-            self._recursive_eval.append(name)
-            while self._pos > last_pos:
-                last_result = result
-                last_pos = self._pos
-                self._goto(pos)
-                prune_dict(cache, lambda _, v: isinstance(v, FailedParse))
-                try:
-                    result = self._invoke_rule(rule, name, params, kwparams)
-                except FailedParse:
-                    pass
-
-            result = last_result
-            self._recursive_results = dict()
-            self._recursive_head.pop()
-            self._recursive_eval.pop()
         return result
-
-    def _invoke_semantic_rule(self, name, node, params, kwparams):
-        semantic_rule, postproc = self._find_semantic_rule(name)
-        if semantic_rule:
-            node = semantic_rule(node, *(params or ()), **(kwparams or {}))
-        if postproc is not None:
-            postproc(self, node)
-        return node
 
     def _token(self, token):
         self._next_token()
         if self._buffer.match(token) is None:
-            self._trace_match(token, failed=True)
             self._error(token, etype=FailedToken)
-        self._trace_match(token)
         self._add_cst_node(token)
         self._last_node = token
         return token
-
-    def _constant(self, literal):
-        self._next_token()
-        self._trace_match(literal)
-        self._add_cst_node(literal)
-        self._last_node = literal
-        return literal
 
     def _pattern(self, pattern):
         token = self._buffer.matchre(pattern)
         if token is None:
-            self._trace_match('', pattern, failed=True)
             self._error(pattern, etype=FailedPattern)
-        self._trace_match(token, pattern)
         self._add_cst_node(token)
         self._last_node = token
         return token
-
-    def _eof(self):
-        return self._buffer.at_end()
-
-    def _eol(self):
-        return self._buffer.at_eol()
 
     def _check_eof(self):
         self._next_token()
@@ -616,7 +474,7 @@ class ParseContext(object):
             ast = self.ast
             cst = self.cst
         except:
-            self._goto(p)
+            self.goto(p)
             self._state = s
             raise
         finally:
@@ -667,30 +525,6 @@ class ParseContext(object):
             self._pop_cst()
         self._extend_cst(cst)
         self.last_node = cst
-
-    @contextmanager
-    def _if(self):
-        p = self._pos
-        s = self._state
-        self._push_ast()
-        self._enter_lookahead()
-        try:
-            yield
-        finally:
-            self._leave_lookahead()
-            self._goto(p)
-            self._state = s
-            self._pop_ast()  # simply discard
-
-    @contextmanager
-    def _ifnot(self):
-        try:
-            with self._if():
-                yield
-        except FailedParse:
-            pass
-        else:
-            self._error('', etype=FailedLookahead)
 
     @contextmanager
     def _ignore(self):
@@ -752,12 +586,6 @@ class ParseContext(object):
             cst = Closure(self.cst)
         finally:
             self._pop_cst()
-        self._add_cst_node(cst)
-        self.last_node = cst
-        return cst
-
-    def _empty_closure(self):
-        cst = Closure([])
         self._add_cst_node(cst)
         self.last_node = cst
         return cst
