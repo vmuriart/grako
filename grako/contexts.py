@@ -16,23 +16,17 @@ class Parser(object):
         self.whitespace = whitespace
         self.keywords = set(keywords)
 
+        self._concrete_stack = [None]
+        self._memoization_cache = dict()
+        self.last_node = None
         self._buffer = None
 
+    def _reset(self, text=None):
         self._concrete_stack = [None]
         self._memoization_cache = dict()
-
         self.last_node = None
-        self._state = None
-
-    def _reset(self, text=None):
         self._buffer = Buffer(text, whitespace=self.whitespace,
                               eol_comments_re=self.eol_comments_re)
-
-        self._concrete_stack = [None]
-        self._memoization_cache = dict()
-
-        self.last_node = None
-        self._state = None
 
     def parse(self, text, rule_name='start'):
         self._reset(text=text)
@@ -102,9 +96,8 @@ class Parser(object):
         pos = self._pos
         try:
             self.last_node = None
-            node, newpos, newstate = self._invoke_rule(rule, name)
+            node, newpos = self._invoke_rule(rule, name)
             self.goto(newpos)
-            self._state = newstate
             self._add_cst_node(node)
             self.last_node = node
             return node
@@ -118,7 +111,7 @@ class Parser(object):
         cache = self._memoization_cache
         pos = self._pos
 
-        key = (pos, rule, self._state)
+        key = pos, rule
         if key in cache:
             memo = cache[key]
             if isinstance(memo, Exception):
@@ -133,7 +126,7 @@ class Parser(object):
             try:
                 rule(self)
                 node = self.cst
-                result = (node, self._pos, self._state)
+                result = node, self._pos
                 cache[key] = result
                 return result
             except FailedSemantics as e:
@@ -168,7 +161,6 @@ class Parser(object):
     @contextmanager
     def _try(self):
         p = self._pos
-        s = self._state
         self._push_cst()
         self.last_node = None
         try:
@@ -176,7 +168,6 @@ class Parser(object):
             cst = self.cst
         except:
             self.goto(p)
-            self._state = s
             raise
         finally:
             self._pop_cst()
