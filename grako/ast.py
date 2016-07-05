@@ -5,7 +5,7 @@ to store the values of named elements of grammar rules.
 """
 from __future__ import absolute_import, division, unicode_literals
 
-from grako.util import is_list, PY3
+from grako.util import PY3
 
 
 class AST(dict):
@@ -36,7 +36,8 @@ class AST(dict):
         upairs(kwargs.items())
 
     def copy(self):
-        return AST((k, list(v) if is_list(v) else v) for k, v in self.items())
+        return AST((k, list(v) if isinstance(v, list) else v) for k, v in
+                   self.items())
 
     def __iter__(self):
         return iter(self._order)

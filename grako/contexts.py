@@ -8,7 +8,6 @@ from grako.ast import AST
 from grako.exceptions import (
     FailedLeftRecursion, FailedParse, FailedPattern, FailedToken,
     FailedSemantics, FailedKeywordSemantics, OptionSucceeded)
-from grako.util import is_list
 
 
 class Parser(object):
@@ -93,7 +92,7 @@ class Parser(object):
         previous = self.cst
         if previous is None:
             self.cst = self._copy_node(node)
-        elif is_list(previous):
+        elif isinstance(previous, list):
             previous.append(node)
         else:
             self.cst = [previous, node]
@@ -104,23 +103,21 @@ class Parser(object):
         previous = self.cst
         if previous is None:
             self.cst = self._copy_node(node)
-        elif is_list(node):
-            if is_list(previous):
+        elif isinstance(node, list):
+            if isinstance(previous, list):
                 previous.extend(node)
         else:
             self.cst = [previous, node]
 
     @staticmethod
     def _copy_node(node):
-        if is_list(node):
+        if isinstance(node, list):
             return list(node)
         else:
             return node
 
     def _find_rule(self, name):
-        rule = getattr(self, '_' + name + '_', None)
-        if isinstance(rule, type(self._find_rule)):
-            return rule
+        return getattr(self, '_' + name + '_', None)
 
     def _error(self, item, etype=FailedParse):
         raise etype(self._buffer, list(reversed(self._rule_stack)), item)
