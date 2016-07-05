@@ -1495,19 +1495,12 @@ class SqlParser(Parser):
 
     @graken()
     def _query_specification_(self):
-        with self._group():
-            self._token('SELECT')
-            self._cut()
-            with self._optional():
-                self._set_quantifier_()
-            self._select_list_()
-            self._table_expression_()
-        self.name_last_node('select')
-
-        self.ast._define(
-            ['select'],
-            []
-        )
+        self._token('SELECT')
+        self._cut()
+        with self._optional():
+            self._set_quantifier_()
+        self._select_list_()
+        self._table_expression_()
 
     @graken()
     def _select_list_(self):
@@ -1559,23 +1552,16 @@ class SqlParser(Parser):
 
     @graken()
     def _from_clause_(self):
-        with self._group():
-            self._token('FROM')
+        self._token('FROM')
 
-            def sep1():
-                self._token(',')
+        def sep0():
+            self._token(',')
 
-            def block1():
-                self._table_reference_()
-            self._positive_closure(block1, prefix=sep1)
-        self.name_last_node('from_')
+        def block0():
+            self._table_reference_()
+        self._positive_closure(block0, prefix=sep0)
 
-        self.ast._define(
-            ['from_'],
-            []
-        )
-
-    @graken('TABLES')
+    @graken()
     def _table_reference_(self):
         with self._choice():
             with self._option():
