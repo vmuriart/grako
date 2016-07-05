@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import collections
-import itertools
 import sys
 
 try:
@@ -22,14 +21,9 @@ if PY3:
     basestring = None
     unicode = None
     Mapping = collections.Mapping
-    zip_longest = itertools.zip_longest
-    import builtins
 else:
     strtype = basestring  # noqa
     Mapping = collections.Mapping
-    zip_longest = itertools.izip_longest
-    import __builtin__ as builtins
-assert builtins
 
 
 def is_list(o):
