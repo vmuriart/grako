@@ -7,7 +7,6 @@ env:
     - TOXENV=py34
     - TOXENV=py35
     - TOXENV=cython
-    - TOXENV=regex
 
 matrix:
     fast_finish: true
