@@ -4,15 +4,10 @@ from __future__ import absolute_import, unicode_literals
 import functools
 import sys
 
-try:
-    import regex as re
-except ImportError:
-    import re
-
+import re
 RE_FLAGS = re.UNICODE | re.MULTILINE
 
 PY3 = sys.version_info[0] == 3
-
 if PY3:
     unicode = None
 else:
