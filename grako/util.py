@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, unicode_literals
 
 import codecs
 import collections
-import datetime
 import itertools
-import json
-import keyword
 import sys
 
 try:
@@ -43,45 +39,8 @@ else:
 assert builtins
 
 
-def info(*args, **kwargs):
-    kwargs['file'] = sys.stderr
-    if PY3:
-        print(*args, **kwargs)
-    else:
-        print(*(a.encode('utf-8') for a in args), **kwargs)
-
-
-def debug(*args, **kwargs):
-    kwargs['file'] = sys.stderr
-    print(*args, **kwargs)
-
-
-def warning(*args, **kwargs):
-    kwargs['file'] = sys.stderr
-    print('WARNING:', *args, **kwargs)
-
-
 def is_list(o):
     return type(o) == list
-
-
-def to_list(o):
-    if o is None:
-        return []
-    elif isinstance(o, list):
-        return o
-    else:
-        return [o]
-
-
-def compress_seq(seq):
-    seen = set()
-    result = []
-    for x in seq:
-        if x not in seen:
-            result.append(x)
-            seen.add(x)
-    return result
 
 
 def ustr(s):
@@ -94,10 +53,6 @@ def ustr(s):
     else:
         # FIXME: last case resource!  We don't know unicode, period.
         return ustr(s.__str__())
-
-
-def urepr(obj):
-    return ustr(repr(obj)).lstrip('u')
 
 
 ESCAPE_SEQUENCE_RE = re.compile(
@@ -143,40 +98,6 @@ def isiter(value):
             not isinstance(value, strtype))
 
 
-def trim(text, tabwidth=4):
-    """Trim text of common, leading whitespace.
-
-    Based on the trim algorithm of PEP 257:
-        http://www.python.org/dev/peps/pep-0257/
-    """
-    if not text:
-        return ''
-    lines = text.expandtabs(tabwidth).splitlines()
-    maxindent = len(text)
-    indent = maxindent
-    for line in lines[1:]:
-        stripped = line.lstrip()
-        if stripped:
-            indent = min(indent, len(line) - len(stripped))
-    trimmed = [lines[0].strip()] + [line[indent:].rstrip() for line in
-                                    lines[1:]]
-    i = 0
-    while i < len(trimmed) and not trimmed[i]:
-        i += 1
-    return '\n'.join(trimmed[i:])
-
-
-def indent(text, indent=1, multiplier=4):
-    """Indent the given block of text by indent*4 spaces"""
-    if text is None:
-        return ''
-    text = ustr(text)
-    if indent >= 0:
-        sindent = ' ' * multiplier * indent
-        text = '\n'.join((sindent + t).rstrip() for t in text.splitlines())
-    return text
-
-
 def format_if(fmt, values):
     return fmt % values if values else ''
 
@@ -185,54 +106,9 @@ def notnone(value, default=None):
     return value if value is not None else default
 
 
-def timestamp():
-    return '.'.join(
-        '%2.2d' % t for t in datetime.datetime.utcnow().utctimetuple()[:-2])
-
-
-def asjson(obj, seen=None):
-    if isinstance(obj, collections.Mapping) or isiter(obj):
-        # prevent traversal of recursive structures
-        if seen is None:
-            seen = set()
-        elif id(obj) in seen:
-            return '__RECURSIVE__'
-        seen.add(id(obj))
-
-    if hasattr(obj, '__json__') and type(obj) is not type:
-        return obj.__json__()
-    elif isinstance(obj, collections.Mapping):
-        result = collections.OrderedDict()
-        for k, v in obj.items():
-            try:
-                result[asjson(k, seen)] = asjson(v, seen)
-            except TypeError:
-                debug('Unhashable key?', type(k), str(k))
-                raise
-        return result
-    elif isiter(obj):
-        return [asjson(e, seen) for e in obj]
-    else:
-        return obj
-
-
-def asjsons(obj):
-    return json.dumps(asjson(obj), indent=2)
-
-
 def prune_dict(d, predicate):
     """Remove all items x where predicate(x, d[x])"""
 
     keys = [k for k, v in d.items() if predicate(k, v)]
     for k in keys:
         del d[k]
-
-
-def safe_name(name):
-    if keyword.iskeyword(name):
-        return name + '_'
-    return name
-
-
-def chunks(iterable, size, fillvalue=None):
-    return zip_longest(*[iter(iterable)] * size, fillvalue=fillvalue)
