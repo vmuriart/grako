@@ -72,23 +72,13 @@ class FailedPattern(FailedParse):
 
 
 class FailedMatch(FailedParse):
-    def __init__(self, buf, name, item):
-        super(FailedMatch, self).__init__(buf, item)
-        self.name = name
-
+    pass
 
 class FailedRef(FailedParseBase):
-    def __init__(self, buf, stack, name):
-        super(FailedRef, self).__init__(buf, stack, name)
-        self.name = name
-
+    pass
 
 class FailedCut(FailedParse):
-    def __init__(self, nested):
-        super(FailedCut, self).__init__(nested.buf, nested.stack, nested.item)
-        self.pos = nested.pos
-        self.nested = nested
-
+    pass
 
 class FailedChoice(FailedParse):
     pass
