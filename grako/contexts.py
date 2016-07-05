@@ -16,7 +16,7 @@ class Parser(object):
 
         self.eol_comments_re = eol_comments_re
         self.whitespace = whitespace
-        self.keywords = set(keywords or [])
+        self.keywords = set(keywords)
 
         self._buffer = None
 
@@ -59,8 +59,6 @@ class Parser(object):
             result = rule()
             self.ast[rule_name] = result
             return result
-        except FailedCut as e:
-            raise e.nested
         finally:
             self._clear_cache()
 
@@ -237,7 +235,7 @@ class Parser(object):
 
                 result = (node, self._pos, self._state)
 
-                result = self._left_recurse(rule, name, pos, key, result)
+                result = self._left_recurse(key, result)
 
                 if self._memoization() and not self._in_recursive_loop():
                     cache[key] = result
@@ -282,7 +280,7 @@ class Parser(object):
         head = self._recursive_head
         return head and head[-1] in self._rule_stack
 
-    def _left_recurse(self, rule, name, pos, key, result):
+    def _left_recurse(self, key, result):
         if self._memoization():
             self._recursive_results[key] = result
         return result
@@ -340,9 +338,8 @@ class Parser(object):
             raise OptionSucceeded()
         except FailedCut:
             raise
-        except FailedParse as e:
-            if self._is_cut_set():
-                raise FailedCut(e)
+        except FailedParse:
+            pass
         finally:
             self._pop_cut()
 
@@ -390,9 +387,7 @@ class Parser(object):
                         self._error('empty closure')
             except FailedCut:
                 raise
-            except FailedParse as e:
-                if self._is_cut_set():
-                    raise FailedCut(e)
+            except FailedParse:
                 break
             finally:
                 self._pop_cst()
