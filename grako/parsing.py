@@ -21,23 +21,15 @@ from grako.contexts import ParseContext
 
 
 # decorator for rule implementation methods
-def graken():
-    def decorator(rule):
-        @functools.wraps(rule)
-        def wrapper(self):
-            name = rule.__name__
-            # remove the single leading and trailing underscore
-            # that the parser generator added
-            name = name[1:-1]
-            return self._call(rule, name)
+def graken(func_rule):
+    @functools.wraps(func_rule)
+    def wrapper(self):
+        name = func_rule.__name__
+        # remove the leading and trailing underscore the parser generator added
+        name = name[1:-1]
+        return self._call(func_rule, name)
 
-        return wrapper
-
-    return decorator
+    return wrapper
 
 
-class Parser(ParseContext):
-    def _find_rule(self, name):
-        rule = getattr(self, '_' + name + '_', None)
-        if isinstance(rule, type(self._find_rule)):
-            return rule
+Parser = ParseContext

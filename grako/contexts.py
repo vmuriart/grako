@@ -213,7 +213,9 @@ class ParseContext(object):
         return self.memoize_lookaheads or self._lookahead == 0
 
     def _find_rule(self, name):
-        return None
+        rule = getattr(self, '_' + name + '_', None)
+        if isinstance(rule, type(self._find_rule)):
+            return rule
 
     def _error(self, item, etype=FailedParse):
         raise etype(self._buffer, list(reversed(self._rule_stack[:])), item)
