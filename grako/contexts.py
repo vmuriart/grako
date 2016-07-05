@@ -20,7 +20,6 @@ class Parser(object):
 
         self._concrete_stack = [None]
         self._memoization_cache = dict()
-        self._recursive_results = dict()
 
         self.last_node = None
         self._state = None
@@ -31,7 +30,6 @@ class Parser(object):
 
         self._concrete_stack = [None]
         self._memoization_cache = dict()
-        self._recursive_results = dict()
 
         self.last_node = None
         self._state = None
@@ -91,10 +89,8 @@ class Parser(object):
 
     @staticmethod
     def _copy_node(node):
-        if isinstance(node, list):
-            return list(node)
-        else:
-            return node
+        # unicode or list
+        return list(node) if isinstance(node, list) else node
 
     def _find_rule(self, name):
         return getattr(self, '_' + name + '_', None)
@@ -136,14 +132,8 @@ class Parser(object):
                 self._next_token()
             try:
                 rule(self)
-
-                node = {}  # used to be ast get
-                if not node:
-                    node = self.cst
-
+                node = self.cst
                 result = (node, self._pos, self._state)
-                self._recursive_results[key] = result
-
                 cache[key] = result
                 return result
             except FailedSemantics as e:
