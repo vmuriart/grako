@@ -12,12 +12,18 @@ if PY3:
     def ustr(s):
         return str(s)
 
+
+    unicode = None
+
 else:
     def ustr(s):
         if isinstance(s, unicode):
             return s
         elif isinstance(s, str):
             return unicode(s, 'utf-8')
+
+
+    unicode = unicode
 
 
 # decorator for rule implementation methods
