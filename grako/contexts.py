@@ -129,7 +129,7 @@ class Parser(object):
                 raise memo
             return memo
 
-        self._set_left_recursion_guard(name, key)
+        self._memoization_cache[key] = FailedLeftRecursion(name)  #left rec grd
         self._push_cst()
         try:
             if name[0].islower():
@@ -153,17 +153,6 @@ class Parser(object):
             raise
         finally:
             self._pop_cst()
-
-    def _set_left_recursion_guard(self, name, key):
-        exception = FailedLeftRecursion(name)
-
-        # Alessandro Warth et al say that we can deal with
-        # direct and indirect left-recursion by seeding the
-        # memoization cache with a parse failure.
-        #
-        #   http://www.vpri.org/pdf/tr2007002_packrat.pdf
-        #
-        self._memoization_cache[key] = exception
 
     def _token(self, token):
         self._next_token()
