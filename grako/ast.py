@@ -3,8 +3,7 @@
 Define the AST class, a direct descendant of dict that's used during parsing
 to store the values of named elements of grammar rules.
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, unicode_literals
 
 from grako.util import strtype, asjson, is_list, PY3, Mapping
 
@@ -31,23 +30,6 @@ class AST(dict):
     @parseinfo.setter
     def parseinfo(self, value):
         self._parseinfo = value
-
-    def asjson(self):
-        return asjson(self)
-
-    def iterkeys(self):
-        return iter(self)
-
-    def keys(self):
-        keys = self.iterkeys()
-        return keys if PY3 else list(keys)
-
-    def itervalues(self):
-        return (self[k] for k in self)
-
-    def values(self):
-        values = self.itervalues()
-        return values if PY3 else list(values)
 
     def iteritems(self):
         return ((k, self[k]) for k in self)
@@ -103,11 +85,6 @@ class AST(dict):
     def __setitem__(self, key, value):
         self.set(key, value)
 
-    def __delitem__(self, key):
-        key = self._safekey(key)
-        super(AST, self).__delitem__(key)
-        self._order.remove(key)
-
     def __setattr__(self, name, value):
         if self._closed and name not in vars(self):
             raise AttributeError(
@@ -126,9 +103,6 @@ class AST(dict):
             return True
         except AttributeError:
             return False
-
-    def __reduce__(self):
-        return AST, (), None, None, iter(self.items())
 
     def _safekey(self, key):
         while self.__hasattribute__(key):
@@ -152,7 +126,3 @@ class AST(dict):
         # preserve order
         return {asjson(k): asjson(v)
                 for k, v in self.items() if not k.startswith('_')}
-
-    def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__,
-                           super(AST, self).__repr__())
