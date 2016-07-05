@@ -191,17 +191,12 @@ class Parser(object):
         while True:
             self._concrete_stack.append(None)
             try:
-                p = self._buffer.pos
                 with self._try():
                     if prefix:
                         with self._ignore():
                             prefix()
-
                     block()
                     cst = self._concrete_stack[-1]
-
-                    if self._buffer.pos == p:
-                        self._error('empty closure')
             except FailedParse:
                 break
             finally:
