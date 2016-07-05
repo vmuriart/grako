@@ -26,7 +26,7 @@ class Parser(object):
         self._cut_stack = [False]
         self._memoization_cache = dict()
 
-        self._last_node = None
+        self.last_node = None
         self._state = None
         self._lookahead = 0
 
@@ -42,7 +42,7 @@ class Parser(object):
         self._cut_stack = [False]
         self._memoization_cache = dict()
 
-        self._last_node = None
+        self.last_node = None
         self._state = None
         self._lookahead = 0
 
@@ -57,14 +57,6 @@ class Parser(object):
 
     def goto(self, pos):
         self._buffer.goto(pos)
-
-    @property
-    def last_node(self):
-        return self._last_node
-
-    @last_node.setter
-    def last_node(self, value):
-        self._last_node = value
 
     @property
     def _pos(self):
@@ -171,12 +163,12 @@ class Parser(object):
         self._rule_stack.append(name)
         pos = self._pos
         try:
-            self._last_node = None
+            self.last_node = None
             node, newpos, newstate = self._invoke_rule(rule, name)
             self.goto(newpos)
             self._state = newstate
             self._add_cst_node(node)
-            self._last_node = node
+            self.last_node = node
             return node
         except FailedPattern:
             self._error('Expecting <%s>' % name)
@@ -239,7 +231,7 @@ class Parser(object):
         if self._buffer.match(token) is None:
             self._error(token, etype=FailedToken)
         self._add_cst_node(token)
-        self._last_node = token
+        self.last_node = token
         return token
 
     def _pattern(self, pattern):
@@ -247,7 +239,7 @@ class Parser(object):
         if token is None:
             self._error(pattern, etype=FailedPattern)
         self._add_cst_node(token)
-        self._last_node = token
+        self.last_node = token
         return token
 
     def _check_eof(self):
