@@ -18,11 +18,7 @@ from grako.util import re, RE_FLAGS  # noqa
 
 __version__ = (2016, 7, 5, 0, 7, 13, 1)
 
-__all__ = [
-    'SqlParser',
-    'SqlSemantics',
-    'main'
-]
+__all__ = ['SqlParser']
 
 KEYWORDS = set([
     'FROM',
@@ -34,18 +30,12 @@ KEYWORDS = set([
 class SqlParser(Parser):
     def __init__(self,
                  whitespace=re.compile('[\\s]+', RE_FLAGS | re.DOTALL),
-                 comments_re=None,
                  eol_comments_re='--.*?$',
-                 ignorecase=True,
-                 left_recursion=True,
-                 keywords=KEYWORDS):
+                 ignorecase=True, keywords=KEYWORDS):
         super(SqlParser, self).__init__(
             whitespace=whitespace,
-            comments_re=comments_re,
             eol_comments_re=eol_comments_re,
-            ignorecase=ignorecase,
-            left_recursion=left_recursion,
-            keywords=keywords)
+            ignorecase=ignorecase, keywords=keywords)
 
     @graken()
     def _start_(self):
@@ -874,7 +864,8 @@ class SqlParser(Parser):
                 self._token('SYSTEM_USER')
             with self._option():
                 self._token('NULL')
-            self._error('expecting one of: CURRENT_USER NULL SESSION_USER SYSTEM_USER USER')
+            self._error(
+                'expecting one of: CURRENT_USER NULL SESSION_USER SYSTEM_USER USER')
 
     @graken()
     def _literal_(self):
@@ -1327,7 +1318,8 @@ class SqlParser(Parser):
                 self._token('SYSTEM_USER')
             with self._option():
                 self._token('VALUE')
-            self._error('expecting one of: ? CURRENT_USER SESSION_USER SYSTEM_USER USER VALUE')
+            self._error(
+                'expecting one of: ? CURRENT_USER SESSION_USER SYSTEM_USER USER VALUE')
 
     @graken()
     def _parameter_specification_(self):
@@ -1493,7 +1485,7 @@ class SqlParser(Parser):
     @graken()
     def _query_specification_(self):
         self._token('SELECT')
-        # self._cut()
+        self._cut()
         with self._optional():
             self._set_quantifier_()
         self._select_list_()
@@ -2856,7 +2848,8 @@ class SqlParser(Parser):
                     self._token(')')
             with self._option():
                 self._token('USAGE')
-            self._error('expecting one of: DELETE INSERT REFERENCES SELECT UPDATE USAGE')
+            self._error(
+                'expecting one of: DELETE INSERT REFERENCES SELECT UPDATE USAGE')
 
     @graken()
     def _privilege_column_list_(self):
