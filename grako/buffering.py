@@ -24,19 +24,12 @@ LineInfo = namedtuple(
 class Buffer(object):
     def __init__(self, text, whitespace=None, eol_comments_re=None,
                  ignorecase=False):
-        self.original_text = text
         self.text = ustr(text)
         self.whitespace = whitespace
         self.eol_comments_re = eol_comments_re
         self.ignorecase = ignorecase
 
-        self.filename = ''
-        self.tabwidth = None
-        self.comments_re = None
-        self.trace = False
         self.nameguard = bool(self.whitespace_re)
-        self.comment_recovery = False
-        self.namechars = ''
         self._namechar_set = set('')
 
         self._pos = 0
@@ -69,16 +62,16 @@ class Buffer(object):
         else:
             return None
 
-    def _preprocess(self, *args, **kwargs):
-        lines, index = self._preprocess_block(self.filename, self.text)
+    def _preprocess(self):
+        lines, index = self._preprocess_block(self.text)
         self.text = ''.join(lines)
         self._line_index = index
 
-    def _preprocess_block(self, filename, block):
-        lines = block.splitlines(True)
+    def _preprocess_block(self, text):
+        lines = text.splitlines(True)
         n = len(lines)
         # index = [(u'', 0), (u'', 1)]
-        index = list(zip(n * [filename], range(n)))
+        index = list(zip('', range(n)))
         return lines, index
 
     @property
@@ -142,11 +135,8 @@ class Buffer(object):
             if not self.nameguard:
                 return token
             else:
-                partial_match = (
-                    token.isalnum() and
-                    token[0].isalpha() and
-                    self.is_name_char(self.current())
-                )
+                partial_match = (self.is_name_char(self.current()) and
+                                 token.isalnum() and token[0].isalpha())
                 if not partial_match:
                     return token
         self.goto(p)
@@ -167,10 +157,7 @@ class Buffer(object):
             re = self._re_cache[pattern]
         else:
             flags = RE_FLAGS | (regexp.IGNORECASE if ignorecase else 0)
-            re = regexp.compile(
-                pattern,
-                flags
-            )
+            re = regexp.compile(pattern, flags)
             self._re_cache[pattern] = re
         return re.match(self.text, self.pos + offset)
 

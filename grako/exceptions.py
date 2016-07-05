@@ -74,11 +74,14 @@ class FailedPattern(FailedParse):
 class FailedMatch(FailedParse):
     pass
 
+
 class FailedRef(FailedParseBase):
     pass
 
+
 class FailedCut(FailedParse):
     pass
+
 
 class FailedChoice(FailedParse):
     pass
