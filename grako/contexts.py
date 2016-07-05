@@ -1,23 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, unicode_literals
 
-from collections import namedtuple
 from contextlib import contextmanager
 
-from grako import buffering
+from grako.buffering import Buffer
 from grako.ast import AST
 from grako.exceptions import (
     FailedCut, FailedLeftRecursion, FailedParse, FailedPattern, FailedToken,
     FailedSemantics, FailedKeywordSemantics, OptionSucceeded)
 from grako.util import prune_dict, is_list
-
-__all__ = ['ParseInfo', 'Parser']
-
-ParseInfo = namedtuple('ParseInfo', ['buffer', 'rule', 'pos', 'endpos'])
-
-
-class Closure(list):
-    pass
 
 
 class Parser(object):
@@ -28,9 +19,7 @@ class Parser(object):
         self.keywords = set(keywords or [])
 
         self._buffer = None
-        self.parseinfo = False
 
-        self.comments_re = None
         self.memoize_lookaheads = True
         self.left_recursion = True
 
@@ -45,13 +34,11 @@ class Parser(object):
         self._lookahead = 0
 
         self._recursive_results = dict()
-        self._recursive_eval = []
         self._recursive_head = []
 
     def _reset(self, text=None):
-
-        self._buffer = buffering.Buffer(text, whitespace=self.whitespace,
-                                        eol_comments_re=self.eol_comments_re)
+        self._buffer = Buffer(text, whitespace=self.whitespace,
+                              eol_comments_re=self.eol_comments_re)
         self._ast_stack = [AST()]
         self._concrete_stack = [None]
         self._rule_stack = []
@@ -63,7 +50,6 @@ class Parser(object):
         self._lookahead = 0
 
         self._recursive_results = dict()
-        self._recursive_eval = []
         self._recursive_head = []
 
     def parse(self, text, rule_name='start'):
@@ -206,12 +192,6 @@ class Parser(object):
     def _error(self, item, etype=FailedParse):
         raise etype(self._buffer, list(reversed(self._rule_stack[:])), item)
 
-    def _fail(self):
-        self._error('fail')
-
-    def _get_parseinfo(self, node, name, start):
-        return ParseInfo(self._buffer, name, start, self._pos)
-
     def _call(self, rule, name):
         self._rule_stack.append(name)
         pos = self._pos
@@ -254,8 +234,6 @@ class Parser(object):
                 node = self.ast
                 if not node:
                     node = self.cst
-                elif self.parseinfo:
-                    node._parseinfo = self._get_parseinfo(node, name, pos)
 
                 result = (node, self._pos, self._state)
 
@@ -426,7 +404,7 @@ class Parser(object):
         try:
             self.cst = []
             self._repeater(block)
-            cst = Closure(self.cst)
+            cst = list(self.cst)
         finally:
             self._pop_cst()
         self._add_cst_node(cst)
@@ -441,7 +419,7 @@ class Parser(object):
                 block()
             self.cst = [self.cst]
             self._repeater(block, prefix=prefix)
-            cst = Closure(self.cst)
+            cst = list(self.cst)
         finally:
             self._pop_cst()
         self._add_cst_node(cst)
