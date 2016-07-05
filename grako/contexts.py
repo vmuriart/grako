@@ -34,16 +34,6 @@ class Parser(object):
         result = rule()
         return result
 
-    def goto(self, pos):
-        self._buffer.goto(pos)
-
-    @property
-    def _pos(self):
-        return self._buffer.pos
-
-    def _next_token(self):
-        self._buffer.next_token()
-
     @property
     def cst(self):
         return self._concrete_stack[-1]
@@ -93,23 +83,23 @@ class Parser(object):
         raise etype(item)
 
     def _call(self, rule, name):
-        pos = self._pos
+        pos = self._buffer.pos
         try:
             self.last_node = None
             node, newpos = self._invoke_rule(rule, name)
-            self.goto(newpos)
+            self._buffer.goto(newpos)
             self._add_cst_node(node)
             self.last_node = node
             return node
         except FailedPattern:
             self._error('Expecting <%s>' % name)
         except FailedParse:
-            self.goto(pos)
+            self._buffer.goto(pos)
             raise
 
     def _invoke_rule(self, rule, name):
         cache = self._memoization_cache
-        pos = self._pos
+        pos = self._buffer.pos
 
         key = pos, rule
         if key in cache:
@@ -122,11 +112,11 @@ class Parser(object):
         self._push_cst()
         try:
             if name[0].islower():
-                self._next_token()
+                self._buffer.next_token()
             try:
                 rule(self)
                 node = self.cst
-                result = node, self._pos
+                result = node, self._buffer.pos
                 cache[key] = result
                 return result
             except FailedSemantics as e:
@@ -138,7 +128,7 @@ class Parser(object):
             self._pop_cst()
 
     def _token(self, token):
-        self._next_token()
+        self._buffer.next_token()
         if self._buffer.match(token) is None:
             self._error(token, etype=FailedToken)
         self._add_cst_node(token)
@@ -154,20 +144,20 @@ class Parser(object):
         return token
 
     def _check_eof(self):
-        self._next_token()
+        self._buffer.next_token()
         if not self._buffer.at_end():
             self._error('Expecting end of text.')
 
     @contextmanager
     def _try(self):
-        p = self._pos
+        p = self._buffer.pos
         self._push_cst()
         self.last_node = None
         try:
             yield
             cst = self.cst
         except:
-            self.goto(p)
+            self._buffer.goto(p)
             raise
         finally:
             self._pop_cst()
@@ -213,7 +203,7 @@ class Parser(object):
         while True:
             self._push_cst()
             try:
-                p = self._pos
+                p = self._buffer.pos
                 with self._try():
                     if prefix:
                         with self._ignore():
@@ -222,7 +212,7 @@ class Parser(object):
                     block()
                     cst = self.cst
 
-                    if self._pos == p:
+                    if self._buffer.pos == p:
                         self._error('empty closure')
             except FailedParse:
                 break
