@@ -8,7 +8,7 @@ from grako.ast import AST
 from grako.exceptions import (
     FailedLeftRecursion, FailedParse, FailedPattern, FailedToken,
     FailedSemantics, FailedKeywordSemantics, OptionSucceeded)
-from grako.util import prune_dict, is_list
+from grako.util import is_list
 
 
 class Parser(object):
@@ -23,7 +23,6 @@ class Parser(object):
         self._ast_stack = [AST()]
         self._concrete_stack = [None]
         self._rule_stack = []
-        self._cut_stack = [False]
         self._memoization_cache = dict()
         self._recursive_results = dict()
 
@@ -36,7 +35,6 @@ class Parser(object):
         self._ast_stack = [AST()]
         self._concrete_stack = [None]
         self._rule_stack = []
-        self._cut_stack = [False]
         self._memoization_cache = dict()
         self._recursive_results = dict()
 
@@ -118,33 +116,6 @@ class Parser(object):
             return list(node)
         else:
             return node
-
-    def _cut(self):
-        self._cut_stack[-1] = True
-
-        # Kota Mizushima et al say that we can throw away
-        # memos for previous positions in the buffer under
-        # certain circumstances, without affecting the linearity
-        # of PEG parsing.
-        #   http://goo.gl/VaGpj
-        #
-        # We adopt the heuristic of always dropping the cache for
-        # positions less than the current cut position. It remains to
-        # be proven if doing it this way affects linearity. Empirically,
-        # it hasn't.
-        cutpos = self._pos
-
-        def prune_cache(cache):
-            prune_dict(cache, lambda k, _: k[0] < cutpos)
-
-        prune_cache(self._memoization_cache)
-        prune_cache(self._recursive_results)
-
-    def _push_cut(self):
-        self._cut_stack.append(False)
-
-    def _pop_cut(self):
-        return self._cut_stack.pop()
 
     def _find_rule(self, name):
         rule = getattr(self, '_' + name + '_', None)
@@ -267,15 +238,12 @@ class Parser(object):
     @contextmanager
     def _option(self):
         self.last_node = None
-        self._push_cut()
         try:
             with self._try():
                 yield
             raise OptionSucceeded()
         except FailedParse:
             pass
-        finally:
-            self._pop_cut()
 
     @contextmanager
     def _choice(self):
@@ -304,7 +272,6 @@ class Parser(object):
 
     def _repeater(self, block, prefix=None):
         while True:
-            self._push_cut()
             self._push_cst()
             try:
                 p = self._pos
@@ -312,7 +279,6 @@ class Parser(object):
                     if prefix:
                         with self._ignore():
                             prefix()
-                            self._cut()
 
                     block()
                     cst = self.cst
@@ -323,7 +289,6 @@ class Parser(object):
                 break
             finally:
                 self._pop_cst()
-                self._pop_cut()
             self._add_cst_node(cst)
 
     def _closure(self, block):
