@@ -30,19 +30,11 @@ class ParseContext(object):
         self.keywords = set(keywords or [])
 
         self._buffer = None
-        self.semantics = None
-        self.encoding = 'utf-8'
         self.parseinfo = False
-        self.trace = False
-        self.trace_length = 72
-        self.trace_separator = ':'
-        self.trace_filename = False
 
         self.comments_re = None
-        self.nameguard = None
         self.memoize_lookaheads = True
         self.left_recursion = True
-        self.namechars = ''
 
         self._ast_stack = [AST()]
         self._concrete_stack = [None]
@@ -57,8 +49,6 @@ class ParseContext(object):
         self._recursive_results = dict()
         self._recursive_eval = []
         self._recursive_head = []
-
-        self.colorize = False
 
     def _reset(self, text=None):
 
