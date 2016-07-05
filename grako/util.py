@@ -14,9 +14,9 @@ RE_FLAGS = re.UNICODE | re.MULTILINE
 PY3 = sys.version_info[0] == 3
 
 if PY3:
-    strtype = str
+    unicode = None
 else:
-    strtype = basestring  # noqa
+    unicode = unicode
 
 
 def is_list(o):
@@ -30,9 +30,6 @@ def ustr(s):
         return s
     elif isinstance(s, str):
         return unicode(s, 'utf-8')
-    else:
-        # FIXME: last case resource!  We don't know unicode, period.
-        return ustr(s.__str__())
 
 
 def prune_dict(d, predicate):

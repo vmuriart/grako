@@ -77,17 +77,13 @@ class Buffer(object):
     def is_name_char(self, c):
         return c is not None and c.isalnum()
 
-    def match(self, token, ignorecase=None):
-        ignorecase = ignorecase if ignorecase is not None else self.ignorecase
-
+    def match(self, token):
         if token is None:
             return self.at_end()
 
         p = self.pos
-        if ignorecase:
-            result = self.text[p:p + len(token)].lower() == token.lower()
-        else:
-            result = self.text[p:p + len(token)] == token
+        # ignorecase == True
+        result = self.text[p:p + len(token)].lower() == token.lower()
 
         if result:
             self.move(len(token))
@@ -97,22 +93,20 @@ class Buffer(object):
                 return token
         self.goto(p)
 
-    def matchre(self, pattern, ignorecase=None):
-        matched = self._scanre(pattern, ignorecase=ignorecase)
+    def matchre(self, pattern):
+        matched = self._scanre(pattern)
         if matched:
             token = matched.group()
             self.move(len(token))
             return token
 
-    def _scanre(self, pattern, ignorecase=None, offset=0):
-        ignorecase = ignorecase if ignorecase is not None else self.ignorecase
-
+    def _scanre(self, pattern):
         if isinstance(pattern, RETYPE):
             re = pattern
         elif pattern in self._re_cache:
             re = self._re_cache[pattern]
         else:
-            flags = RE_FLAGS | (regexp.IGNORECASE if ignorecase else 0)
+            flags = RE_FLAGS | regexp.IGNORECASE
             re = regexp.compile(pattern, flags)
             self._re_cache[pattern] = re
-        return re.match(self.text, self.pos + offset)
+        return re.match(self.text, self.pos)

@@ -5,7 +5,7 @@ to store the values of named elements of grammar rules.
 """
 from __future__ import absolute_import, division, unicode_literals
 
-from grako.util import strtype, is_list, PY3
+from grako.util import is_list, PY3
 
 
 class AST(dict):
@@ -36,8 +36,6 @@ class AST(dict):
         upairs(kwargs.items())
 
     def set(self, key, value):
-        key = self._safekey(key)
-
         previous = self.get(key, None)
         if previous is None:
             super(AST, self).__setitem__(key, value)
@@ -59,17 +57,3 @@ class AST(dict):
 
     def __setattr__(self, name, value):
         super(AST, self).__setattr__(name, value)
-
-    def __hasattribute__(self, name):
-        if not isinstance(name, strtype):
-            return False
-        try:
-            super(AST, self).__getattribute__(name)
-            return True
-        except AttributeError:
-            return False
-
-    def _safekey(self, key):
-        while self.__hasattribute__(key):
-            key += '_'
-        return key
