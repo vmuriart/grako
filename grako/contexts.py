@@ -42,36 +42,28 @@ class Parser(object):
         result = rule()
         return result
 
-    @property
-    def cst(self):
-        return self._concrete_stack[-1]
-
-    @cst.setter
-    def cst(self, value):
-        self._concrete_stack[-1] = value
-
     def _add_cst_node(self, node):
         if node is None:
             return
-        previous = self.cst
+        previous = self._concrete_stack[-1]
         if previous is None:
-            self.cst = self._copy_node(node)
+            self._concrete_stack[-1] = self._copy_node(node)
         elif isinstance(previous, list):
             previous.append(node)
         else:
-            self.cst = [previous, node]
+            self._concrete_stack[-1] = [previous, node]
 
     def _extend_cst(self, node):
         if node is None:
             return
-        previous = self.cst
+        previous = self._concrete_stack[-1]
         if previous is None:
-            self.cst = self._copy_node(node)
+            self._concrete_stack[-1] = self._copy_node(node)
         elif isinstance(node, list):
             if isinstance(previous, list):
                 previous.extend(node)
         else:
-            self.cst = [previous, node]
+            self._concrete_stack[-1] = [previous, node]
 
     @staticmethod
     def _copy_node(node):
@@ -109,6 +101,7 @@ class Parser(object):
             if isinstance(memo, Exception):
                 raise memo
             return memo
+
         self._memoization_cache[key] = FailedLeftRecursion(name)  # left rc grd
         self._concrete_stack.append(None)
         try:
@@ -116,7 +109,7 @@ class Parser(object):
                 self._buffer.next_token()
             try:
                 rule(self)
-                node = self.cst
+                node = self._concrete_stack[-1]
                 result = node, self._buffer.pos
                 cache[key] = result
                 return result
@@ -156,7 +149,7 @@ class Parser(object):
         self.last_node = None
         try:
             yield
-            cst = self.cst
+            cst = self._concrete_stack[-1]
         except:
             self._buffer.goto(p)
             raise
@@ -191,7 +184,7 @@ class Parser(object):
     def _ignore(self):
         self._concrete_stack.append(None)
         try:
-            self.cst = None
+            self._concrete_stack[-1] = None
             yield
         finally:
             self._concrete_stack.pop()
@@ -207,7 +200,7 @@ class Parser(object):
                             prefix()
 
                     block()
-                    cst = self.cst
+                    cst = self._concrete_stack[-1]
 
                     if self._buffer.pos == p:
                         self._error('empty closure')
@@ -220,9 +213,9 @@ class Parser(object):
     def _closure(self, block):
         self._concrete_stack.append(None)
         try:
-            self.cst = []
+            self._concrete_stack[-1] = []
             self._repeater(block)
-            cst = list(self.cst)
+            cst = list(self._concrete_stack[-1])
         finally:
             self._concrete_stack.pop()
         self._add_cst_node(cst)
@@ -232,12 +225,12 @@ class Parser(object):
     def _positive_closure(self, block, prefix=None):
         self._concrete_stack.append(None)
         try:
-            self.cst = None
+            self._concrete_stack[-1] = None
             with self._try():
                 block()
-            self.cst = [self.cst]
+            self._concrete_stack[-1] = [self._concrete_stack[-1]]
             self._repeater(block, prefix=prefix)
-            cst = list(self.cst)
+            cst = list(self._concrete_stack[-1])
         finally:
             self._concrete_stack.pop()
         self._add_cst_node(cst)
