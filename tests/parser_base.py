@@ -28,14 +28,13 @@ KEYWORDS = set([
 
 
 class SqlParser(Parser):
-    def __init__(self,
-                 whitespace=re.compile('[\\s]+', RE_FLAGS | re.DOTALL),
-                 eol_comments_re='--.*?$',
-                 ignorecase=True, keywords=KEYWORDS):
+    def __init__(self):
         super(SqlParser, self).__init__(
-            whitespace=whitespace,
-            eol_comments_re=eol_comments_re,
-            ignorecase=ignorecase, keywords=keywords)
+            whitespace=re.compile('[\\s]+', RE_FLAGS | re.DOTALL),
+            eol_comments_re='--.*?$',
+            ignorecase=True,
+            keywords=KEYWORDS
+        )
 
     @graken()
     def _start_(self):
