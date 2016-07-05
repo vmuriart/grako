@@ -50,14 +50,11 @@ class Parser(object):
         self._recursive_head = []
 
     def parse(self, text, rule_name='start'):
-        try:
-            self._reset(text=text)
-            rule = self._find_rule(rule_name)
-            result = rule()
-            self.ast[rule_name] = result
-            return result
-        finally:
-            self._clear_cache()
+        self._reset(text=text)
+        rule = self._find_rule(rule_name)
+        result = rule()
+        self._clear_cache()
+        return result
 
     def goto(self, pos):
         self._buffer.goto(pos)
@@ -313,8 +310,6 @@ class Parser(object):
             with self._try():
                 yield
             raise OptionSucceeded()
-        except FailedCut:
-            raise
         except FailedParse:
             pass
         finally:
@@ -362,8 +357,6 @@ class Parser(object):
 
                     if self._pos == p:
                         self._error('empty closure')
-            except FailedCut:
-                raise
             except FailedParse:
                 break
             finally:
