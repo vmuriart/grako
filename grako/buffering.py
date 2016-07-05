@@ -29,14 +29,7 @@ class Buffer(object):
         self.eol_comments_re = eol_comments_re
         self.ignorecase = ignorecase
 
-        self.nameguard = bool(self.whitespace_re)
-        self._namechar_set = set('')
-
         self._pos = 0
-        self._len = 0
-        self._linecount = 0
-        self._linecache = []
-        self._build_line_cache()
         self._len = len(self.text)
         self._re_cache = {}
 
@@ -100,7 +93,7 @@ class Buffer(object):
             self.eat_whitespace()
 
     def is_name_char(self, c):
-        return c is not None and c.isalnum() or c in self._namechar_set
+        return c is not None and c.isalnum()
 
     def match(self, token, ignorecase=None):
         ignorecase = ignorecase if ignorecase is not None else self.ignorecase
@@ -116,13 +109,10 @@ class Buffer(object):
 
         if result:
             self.move(len(token))
-            if not self.nameguard:
+            partial_match = (self.is_name_char(self.current()) and
+                             token.isalnum() and token[0].isalpha())
+            if not partial_match:
                 return token
-            else:
-                partial_match = (self.is_name_char(self.current()) and
-                                 token.isalnum() and token[0].isalpha())
-                if not partial_match:
-                    return token
         self.goto(p)
 
     def matchre(self, pattern, ignorecase=None):
@@ -144,21 +134,3 @@ class Buffer(object):
             re = regexp.compile(pattern, flags)
             self._re_cache[pattern] = re
         return re.match(self.text, self.pos + offset)
-
-    def _build_line_cache(self):
-        # The line cache holds the position of the last character
-        # (counting from 0) in each line (counting from 1).  At the
-        # head, we have an imaginary line 0 that ends at -1.
-        lines = self.text.splitlines(True)
-        i = -1
-        n = 0
-        cache = []
-        for n, s in enumerate(lines):
-            cache.append(PosLine(i, n))
-            i += len(s)
-        n += 1
-        if lines and lines[-1][-1] in '\r\n':
-            n += 1
-        cache.append(PosLine(i, n))
-        self._linecache = cache
-        self._linecount = n
