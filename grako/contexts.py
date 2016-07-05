@@ -593,14 +593,14 @@ class ParseContext(object):
         return token
 
     def _eof(self):
-        return self._buffer.atend()
+        return self._buffer.at_end()
 
     def _eol(self):
-        return self._buffer.ateol()
+        return self._buffer.at_eol()
 
     def _check_eof(self):
         self._next_token()
-        if not self._buffer.atend():
+        if not self._buffer.at_end():
             self._error('Expecting end of text.')
 
     @contextmanager

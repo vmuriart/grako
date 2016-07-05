@@ -6,28 +6,20 @@ Line analysis and caching are done so the parser can freely move with goto(p)
 to any position in the parsed text, and still recover accurate information
 about source lines and content.
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, unicode_literals
 
-import os
 from bisect import bisect_left
 from collections import namedtuple
 
-from grako.exceptions import ParseError
 from grako.util import ustr, strtype, re as regexp, WHITESPACE_RE, RE_FLAGS
-
-# TODO: There could be a file buffer using random access
 
 __all__ = ['Buffer']
 
 RETYPE = type(regexp.compile('.'))
 
 PosLine = namedtuple('PosLine', ['pos', 'line'])
-
-LineInfo = namedtuple(
-    'LineInfo',
-    ['filename', 'line', 'col', 'start', 'end', 'text']
-)
+LineInfo = namedtuple('LineInfo',
+                      ['filename', 'line', 'col', 'start', 'end', 'text'])
 
 
 class Buffer(object):
@@ -122,28 +114,6 @@ class Buffer(object):
     def process_block(self, name, lines, index, **kwargs):
         return lines, index
 
-    def include(self, lines, index, i, j, name, block, **kwargs):
-        blines, bindex = self._preprocess_block(name, block, **kwargs)
-        assert len(blines) == len(bindex)
-        lines[i:j + 1] = blines
-        index[i:j + 1] = bindex
-        assert len(lines) == len(index)
-        return j + len(blines)
-
-    def include_file(self, source, name, lines, index, i, j):
-        text, filename = self.get_include(source, name)
-        return self.include(lines, index, i, i, filename, text)
-
-    def get_include(self, source, filename):
-        source = os.path.abspath(source)
-        base = os.path.dirname(source)
-        include = os.path.join(base, filename)
-        try:
-            with open(include) as f:
-                return f.read(), include
-        except IOError:
-            raise ParseError('include not found: %s' % include)
-
     @property
     def pos(self):
         return self._pos
@@ -163,11 +133,11 @@ class Buffer(object):
         start = self._linecache[n - 1][0]
         return self._pos - start - 1
 
-    def atend(self):
+    def at_end(self):
         return self._pos >= self._len
 
-    def ateol(self):
-        return self.atend() or self.current() in '\r\n'
+    def at_eol(self):
+        return self.at_end() or self.current() in '\r\n'
 
     def current(self):
         if self._pos >= self._len:
@@ -195,44 +165,10 @@ class Buffer(object):
     def move(self, n):
         self.goto(self.pos + n)
 
-    def comments(self, p, clear=True):
-        if not self.comment_recovery:
-            return [], []
-
-        n = self.line_info(p).line
-        if n >= len(self._comment_index):
-            n -= 1
-
-        eolcmm = self._comment_index[n]
-        if clear:
-            self._comment_index[n] = []
-        n -= 1
-
-        cmm = []
-        while n >= 0 and self._comment_index[n]:
-            cmm.insert(0, self._comment_index[n])
-            if clear:
-                self._comment_index[n] = []
-            n -= 1
-
-        return cmm, eolcmm
-
     def eat_whitespace(self):
         if self.whitespace_re is not None:
             while self.matchre(self.whitespace_re):
                 pass
-
-    def eat_comments(self):
-        if self.comments_re is not None:
-            while True:
-                comment = self.matchre(self.comments_re)
-                if not comment:
-                    break
-                if self.comment_recovery:
-                    n = self.line
-                    while n >= len(self._comment_index):
-                        self._comment_index.append([])
-                    self._comment_index[n].append(comment)
 
     def eat_eol_comments(self):
         if self.eol_comments_re is not None:
@@ -240,18 +176,12 @@ class Buffer(object):
                 comment = self.matchre(self.eol_comments_re)
                 if not comment:
                     break
-                if self.comment_recovery:
-                    n = self.line
-                    while n >= len(self._comment_index):
-                        self._comment_index.append([])
-                    self._comment_index[n].append(comment)
 
     def next_token(self):
         p = None
         while self._pos != p:
             p = self._pos
             self.eat_eol_comments()
-            self.eat_comments()
             self.eat_whitespace()
 
     def skip_to(self, c):
@@ -286,7 +216,7 @@ class Buffer(object):
         ignorecase = ignorecase if ignorecase is not None else self.ignorecase
 
         if token is None:
-            return self.atend()
+            return self.at_end()
 
         p = self.pos
         if ignorecase:
@@ -349,10 +279,6 @@ class Buffer(object):
         self._linecache = cache
         self._linecount = n
 
-    @property
-    def linecount(self):
-        return self._linecount
-
     def line_info(self, pos=None):
         if pos is None:
             pos = self._pos
@@ -363,7 +289,7 @@ class Buffer(object):
 
         n = bisect_left(self._linecache, PosLine(pos, 0))
         start, line = self._linecache[n - 1]
-        start = start + 1
+        start += 1
         end = self._linecache[n].pos + 1
         col = pos - start
 
@@ -374,7 +300,7 @@ class Buffer(object):
         return LineInfo(filename, line, col, start, end, text)
 
     def lookahead(self):
-        if self.atend():
+        if self.at_end():
             return ''
         info = self.line_info()
         text = info.text[info.col:info.col + 1 + 80]
