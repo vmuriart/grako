@@ -149,9 +149,9 @@ class Parser(object):
 
     @contextmanager
     def _try(self):
+        self.last_node = None
         p = self._buffer.pos
         self._concrete_stack.append(None)
-        self.last_node = None
         try:
             yield
             cst = self._concrete_stack[-1]
@@ -165,7 +165,6 @@ class Parser(object):
 
     @contextmanager
     def _option(self):
-        self.last_node = None
         with suppress(FailedParse):
             with self._try():
                 yield
@@ -173,14 +172,12 @@ class Parser(object):
 
     @contextmanager
     def _choice(self):
-        self.last_node = None
         with self._try():
             with suppress(OptionSucceeded):
                 yield
 
     @contextmanager
     def _optional(self):
-        self.last_node = None
         with self._choice():
             with self._option():
                 yield
