@@ -449,6 +449,11 @@ class ParseContext(object):
             with self._try():
                 yield
             raise OptionSucceeded()
+        except FailedCut:
+            raise
+        except FailedParse as e:
+            if self._is_cut_set():
+                raise FailedCut(e)
         finally:
             self._pop_cut()
 
