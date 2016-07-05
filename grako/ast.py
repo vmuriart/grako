@@ -5,7 +5,7 @@ to store the values of named elements of grammar rules.
 """
 from __future__ import absolute_import, division, unicode_literals
 
-from grako.util import strtype, asjson, is_list, PY3, Mapping
+from grako.util import strtype, is_list, PY3, Mapping
 
 
 class AST(dict):
@@ -121,8 +121,3 @@ class AST(dict):
             if key not in self:
                 super(AST, self).__setitem__(key, None)
                 self._order.append(key)
-
-    def __json__(self):
-        # preserve order
-        return {asjson(k): asjson(v)
-                for k, v in self.items() if not k.startswith('_')}
