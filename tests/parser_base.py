@@ -1493,7 +1493,7 @@ class SqlParser(Parser):
     @graken()
     def _query_specification_(self):
         self._token('SELECT')
-        self._cut()
+        # self._cut()
         with self._optional():
             self._set_quantifier_()
         self._select_list_()
