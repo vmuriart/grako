@@ -19,18 +19,6 @@ class AST(dict):
         self.update(*args, **kwargs)
         self._closed = True
 
-    @property
-    def parseinfo(self):
-        """ Make the special attribute `_parseinfo` be available
-            as a property without an underscore in the name.
-            This patch helps with backwards compatibility.
-        """
-        return self._parseinfo
-
-    @parseinfo.setter
-    def parseinfo(self, value):
-        self._parseinfo = value
-
     def iteritems(self):
         return ((k, self[k]) for k in self)
 
@@ -66,34 +54,17 @@ class AST(dict):
             super(AST, self).__setitem__(key, [previous, value])
         return self
 
-    def setlist(self, key, value):
-        return self.set(key, value, force_list=True)
-
     def copy(self):
         return AST((k, v[:] if is_list(v) else v) for k, v in self.items())
 
     def __iter__(self):
         return iter(self._order)
 
-    def __getitem__(self, key):
-        if key in self:
-            return super(AST, self).__getitem__(key)
-        key = self._safekey(key)
-        if key in self:
-            return super(AST, self).__getitem__(key)
-
     def __setitem__(self, key, value):
         self.set(key, value)
 
     def __setattr__(self, name, value):
-        if self._closed and name not in vars(self):
-            raise AttributeError(
-                '%s attributes are fixed. Cannot set attribute %s.' %
-                (self.__class__.__name__, name))
         super(AST, self).__setattr__(name, value)
-
-    def __getattr__(self, name):
-        return self[name]
 
     def __hasattribute__(self, name):
         if not isinstance(name, strtype):
@@ -108,16 +79,3 @@ class AST(dict):
         while self.__hasattribute__(key):
             key += '_'
         return key
-
-    def _define(self, keys, list_keys=None):
-        # WARNING: This is the *only* implementation that does what's intended
-        for key in list_keys or []:
-            key = self._safekey(key)
-            if key not in self:
-                self[key] = []
-
-        for key in keys:
-            key = self._safekey(key)
-            if key not in self:
-                super(AST, self).__setitem__(key, None)
-                self._order.append(key)
