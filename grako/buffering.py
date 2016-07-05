@@ -35,12 +35,8 @@ class Buffer(object):
         self._pos = 0
         self._len = 0
         self._linecount = 0
-        self._line_index = []
-        self._comment_index = []
-        self._preprocess()
         self._linecache = []
         self._build_line_cache()
-        self._comment_index = [[] for _ in self._line_index]
         self._len = len(self.text)
         self._re_cache = {}
 
@@ -61,10 +57,6 @@ class Buffer(object):
             return whitespace
         else:
             return None
-
-    def _preprocess(self):
-        n = len(self.text.splitlines())
-        self._line_index = zip(n * [''], range(n))  # = [(u'', 0), (u'', 1)...]
 
     @property
     def pos(self):
