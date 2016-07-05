@@ -10,7 +10,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 from collections import namedtuple
 
-from grako.util import ustr, re as regexp, WHITESPACE_RE, RE_FLAGS
+from grako.util import ustr, re as regexp, RE_FLAGS
 
 __all__ = ['Buffer']
 
@@ -25,31 +25,13 @@ class Buffer(object):
     def __init__(self, text, whitespace=None, eol_comments_re=None,
                  ignorecase=False):
         self.text = ustr(text)
-        self.whitespace = whitespace
+        self.whitespace_re = whitespace
         self.eol_comments_re = eol_comments_re
         self.ignorecase = ignorecase
 
         self._pos = 0
         self._len = len(self.text)
         self._re_cache = {}
-
-    @property
-    def whitespace(self):
-        return self._whitespace
-
-    @whitespace.setter
-    def whitespace(self, value):
-        self._whitespace = value
-        self.whitespace_re = self.build_whitespace_re(value)
-
-    @staticmethod
-    def build_whitespace_re(whitespace):
-        if whitespace is None:
-            return WHITESPACE_RE
-        elif isinstance(whitespace, RETYPE):
-            return whitespace
-        else:
-            return None
 
     @property
     def pos(self):
