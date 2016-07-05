@@ -22,12 +22,10 @@ LineInfo = namedtuple(
 
 
 class Buffer(object):
-    def __init__(self, text, whitespace=None, eol_comments_re=None,
-                 ignorecase=False):
+    def __init__(self, text, whitespace=None, eol_comments_re=None):
         self.text = ustr(text)
         self.whitespace_re = whitespace
         self.eol_comments_re = eol_comments_re
-        self.ignorecase = ignorecase
 
         self._pos = 0
         self._len = len(self.text)

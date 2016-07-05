@@ -21,12 +21,10 @@ class Closure(list):
 
 
 class Parser(object):
-    def __init__(self, eol_comments_re=None, whitespace=None, ignorecase=False,
-                 keywords=None):
+    def __init__(self, eol_comments_re=None, whitespace=None, keywords=None):
 
         self.eol_comments_re = eol_comments_re
         self.whitespace = whitespace
-        self.ignorecase = ignorecase
         self.keywords = set(keywords or [])
 
         self._buffer = None
@@ -52,10 +50,8 @@ class Parser(object):
 
     def _reset(self, text=None):
 
-        self._buffer = buffering.Buffer(text,
-                                        eol_comments_re=self.eol_comments_re,
-                                        whitespace=self.whitespace,
-                                        ignorecase=self.ignorecase)
+        self._buffer = buffering.Buffer(text, whitespace=self.whitespace,
+                                        eol_comments_re=self.eol_comments_re)
         self._ast_stack = [AST()]
         self._concrete_stack = [None]
         self._rule_stack = []
@@ -453,8 +449,6 @@ class Parser(object):
         return cst
 
     def _check_name(self):
-        name = self.last_node
-        if self.ignorecase or self._buffer.ignorecase:
-            name = name.upper()
+        name = self.last_node.upper()  # bcuz ignorecase == True
         if name in self.keywords:
             raise FailedKeywordSemantics('"%s" is a reserved word' % name)

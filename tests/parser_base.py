@@ -31,10 +31,7 @@ class SqlParser(Parser):
     def __init__(self):
         super(SqlParser, self).__init__(
             whitespace=re.compile('[\\s]+', RE_FLAGS | re.DOTALL),
-            eol_comments_re='--.*?$',
-            ignorecase=True,
-            keywords=KEYWORDS
-        )
+            eol_comments_re='--.*?$', keywords=KEYWORDS)
 
     @graken
     def _start_(self):
