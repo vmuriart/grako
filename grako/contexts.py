@@ -128,10 +128,6 @@ class Parser(object):
         elif is_list(node):
             if is_list(previous):
                 previous.extend(node)
-            else:
-                self.cst = [previous] + node
-        elif is_list(previous):
-            previous.append(node)
         else:
             self.cst = [previous, node]
 
@@ -219,11 +215,9 @@ class Parser(object):
                     node = self.cst
 
                 result = (node, self._pos, self._state)
+                self._recursive_results[key] = result
 
-                result = self._left_recurse(key, result)
-
-                if not self._in_recursive_loop():
-                    cache[key] = result
+                cache[key] = result
                 return result
             except FailedSemantics as e:
                 self._error(str(e), FailedParse)
@@ -244,14 +238,6 @@ class Parser(object):
         #   http://www.vpri.org/pdf/tr2007002_packrat.pdf
         #
         self._memoization_cache[key] = exception
-
-    def _in_recursive_loop(self):
-        head = self._recursive_head
-        return head and head[-1] in self._rule_stack
-
-    def _left_recurse(self, key, result):
-        self._recursive_results[key] = result
-        return result
 
     def _token(self, token):
         self._next_token()
