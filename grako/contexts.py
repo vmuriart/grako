@@ -45,7 +45,6 @@ class ParseContext(object):
                  keywords=None,
                  namechars='',
                  **kwargs):
-        super(ParseContext, self).__init__()
 
         self._buffer = None
         self.semantics = semantics

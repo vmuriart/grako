@@ -35,23 +35,19 @@ KEYWORDS = set([
 class SqlParser(Parser):
     def __init__(self,
                  whitespace=re.compile('[\\s]+', RE_FLAGS | re.DOTALL),
-                 nameguard=None,
                  comments_re=None,
                  eol_comments_re='--.*?$',
                  ignorecase=True,
                  left_recursion=True,
                  keywords=KEYWORDS,
-                 namechars='',
                  **kwargs):
         super(SqlParser, self).__init__(
             whitespace=whitespace,
-            nameguard=nameguard,
             comments_re=comments_re,
             eol_comments_re=eol_comments_re,
             ignorecase=ignorecase,
             left_recursion=left_recursion,
             keywords=keywords,
-            namechars=namechars,
             **kwargs
         )
 
