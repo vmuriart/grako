@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
 from contextlib import contextmanager
+import functools
 
 from grako.buffering import Buffer
 from grako.exceptions import (
@@ -15,6 +16,17 @@ def suppress(*exceptions):
         yield
     except exceptions:
         pass
+
+
+# decorator for rule implementation methods
+def graken(func_rule):
+    @functools.wraps(func_rule)
+    def wrapper(self):
+        # remove the leading and trailing underscore the parser generator added
+        name = func_rule.__name__[1:-1]
+        return self._call(func_rule, name)
+
+    return wrapper
 
 
 class Parser(object):
