@@ -35,25 +35,11 @@ class AST(dict):
             upairs(d)
         upairs(kwargs.items())
 
-    def set(self, key, value):
-        previous = self.get(key, None)
-        if previous is None:
-            super(AST, self).__setitem__(key, value)
-            self._order.append(key)
-        elif is_list(previous):
-            previous.append(value)
-        else:
-            super(AST, self).__setitem__(key, [previous, value])
-        return self
-
     def copy(self):
         return AST((k, list(v) if is_list(v) else v) for k, v in self.items())
 
     def __iter__(self):
         return iter(self._order)
-
-    def __setitem__(self, key, value):
-        self.set(key, value)
 
     def __setattr__(self, name, value):
         super(AST, self).__setattr__(name, value)

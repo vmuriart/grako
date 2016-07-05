@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from grako.buffering import Buffer
 from grako.ast import AST
 from grako.exceptions import (
-    FailedCut, FailedLeftRecursion, FailedParse, FailedPattern, FailedToken,
+    FailedLeftRecursion, FailedParse, FailedPattern, FailedToken,
     FailedSemantics, FailedKeywordSemantics, OptionSucceeded)
 from grako.util import prune_dict, is_list
 
