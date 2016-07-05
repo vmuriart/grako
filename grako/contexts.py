@@ -101,10 +101,6 @@ class ParseContext(object):
             ignorecase = self.ignorecase
         if nameguard is None:
             nameguard = self.nameguard
-        if memoize_lookaheads is not None:
-            self.memoize_lookaheads = memoize_lookaheads
-        if left_recursion is not None:
-            self.left_recursion = left_recursion
 
         if trace is not None:
             self.trace = trace
