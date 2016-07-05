@@ -17,18 +17,12 @@ except ImportError:
 RE_FLAGS = re.UNICODE | re.MULTILINE
 
 PY3 = sys.version_info[0] >= 3
-PY33 = PY3 and sys.version_info[1] >= 3
 
 if PY3:
     strtype = str
     basestring = None
     unicode = None
-    if PY33:
-        from collections import abc
-
-        Mapping = abc.Mapping
-    else:
-        Mapping = collections.Mapping
+    Mapping = collections.Mapping
     zip_longest = itertools.zip_longest
     import builtins
 else:
