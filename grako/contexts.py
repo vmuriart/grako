@@ -19,7 +19,6 @@ class Parser(object):
         self._buffer = None
 
         self._concrete_stack = [None]
-        self._rule_stack = []
         self._memoization_cache = dict()
         self._recursive_results = dict()
 
@@ -31,7 +30,6 @@ class Parser(object):
                               eol_comments_re=self.eol_comments_re)
 
         self._concrete_stack = [None]
-        self._rule_stack = []
         self._memoization_cache = dict()
         self._recursive_results = dict()
 
@@ -102,10 +100,9 @@ class Parser(object):
         return getattr(self, '_' + name + '_', None)
 
     def _error(self, item, etype=FailedParse):
-        raise etype(self._buffer, list(reversed(self._rule_stack)), item)
+        raise etype(item)
 
     def _call(self, rule, name):
-        self._rule_stack.append(name)
         pos = self._pos
         try:
             self.last_node = None
@@ -120,8 +117,6 @@ class Parser(object):
         except FailedParse:
             self.goto(pos)
             raise
-        finally:
-            self._rule_stack.pop()
 
     def _invoke_rule(self, rule, name):
         cache = self._memoization_cache
@@ -152,7 +147,7 @@ class Parser(object):
                 cache[key] = result
                 return result
             except FailedSemantics as e:
-                self._error(str(e), FailedParse)
+                self._error(str(e))
         except FailedParse as e:
             cache[key] = e
             raise
@@ -160,8 +155,7 @@ class Parser(object):
             self._pop_cst()
 
     def _set_left_recursion_guard(self, name, key):
-        exception = FailedLeftRecursion(self._buffer,
-                                        list(reversed(self._rule_stack)), name)
+        exception = FailedLeftRecursion(name)
 
         # Alessandro Warth et al say that we can deal with
         # direct and indirect left-recursion by seeding the

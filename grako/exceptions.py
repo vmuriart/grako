@@ -48,10 +48,7 @@ class FailedKeywordSemantics(FailedSemantics):
 
 
 class FailedParseBase(ParseError):
-    def __init__(self, buf, stack, item):
-        self.buf = buf
-        self.stack = stack
-        self.pos = buf.pos
+    def __init__(self, item):
         self.item = item
 
 
@@ -60,14 +57,14 @@ class FailedParse(FailedParseBase):
 
 
 class FailedToken(FailedParse):
-    def __init__(self, buf, stack, token):
-        super(FailedToken, self).__init__(buf, stack, token)
+    def __init__(self, token):
+        super(FailedToken, self).__init__(token)
         self.token = token
 
 
 class FailedPattern(FailedParse):
-    def __init__(self, buf, stack, pattern):
-        super(FailedPattern, self).__init__(buf, stack, pattern)
+    def __init__(self, pattern):
+        super(FailedPattern, self).__init__(pattern)
         self.pattern = pattern
 
 
