@@ -204,16 +204,16 @@ class Parser(object):
                 self._concrete_stack.pop()
             self._add_cst_node(cst)
 
-    def _closure(self, block):
-        self._concrete_stack.append([])  # different than others
+    @contextmanager
+    def _group(self):
+        self._concrete_stack.append(None)
         try:
-            self._repeater(block)
-            cst = list(self._concrete_stack[-1])
+            yield
+            cst = self._concrete_stack[-1]
         finally:
             self._concrete_stack.pop()
-        self._add_cst_node(cst)
+        self._extend_cst(cst)
         self.last_node = cst
-        return cst
 
     def _positive_closure(self, block, prefix=None):
         self._concrete_stack.append(None)
