@@ -27,8 +27,8 @@ class SqlParser(Parser):
 
     @graken
     def _regular_identifier_(self):
-        self._pattern(r'[a-z]\w*')
-        self._check_name()
+        token = self._pattern(r'[a-z]\w*')
+        self._check_name(token)
 
     @graken
     def _unsigned_numeric_literal_(self):

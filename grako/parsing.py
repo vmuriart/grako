@@ -35,13 +35,11 @@ class Parser(object):
 
         self._concrete_stack = [None]
         self._memoization_cache = dict()
-        self.last_node = None
         self._buffer = None
 
     def _reset(self, text=None):
         self._concrete_stack = [None]
         self._memoization_cache = dict()
-        self.last_node = None
         self._buffer = Buffer(text, eol_comments_re=self.eol_comments_re)
 
     def parse(self, text, rule_name='start'):
@@ -83,7 +81,6 @@ class Parser(object):
 
     def _call(self, rule, name):
         pos = self._buffer.pos
-        self.last_node = None
         try:
             node, newpos = self._invoke_rule(rule, name)
         except FailedParse:
@@ -92,7 +89,6 @@ class Parser(object):
         else:
             self._buffer.goto(newpos)
             self._add_cst_node(node)
-            self.last_node = node
             return node
 
     def _invoke_rule(self, rule, name):
@@ -124,7 +120,6 @@ class Parser(object):
         if self._buffer.match(token) is None:
             self._error(token)
         self._add_cst_node(token)
-        self.last_node = token
         return token
 
     def _pattern(self, pattern):
@@ -132,7 +127,6 @@ class Parser(object):
         if token is None:
             self._error(pattern)
         self._add_cst_node(token)
-        self.last_node = token
         return token
 
     def _check_eof(self):
@@ -142,7 +136,6 @@ class Parser(object):
 
     @contextmanager
     def _try(self):
-        self.last_node = None
         pos = self._buffer.pos
         self._concrete_stack.append(None)
         try:
@@ -153,7 +146,6 @@ class Parser(object):
         finally:
             node = self._concrete_stack.pop()
         self._extend_cst(node)
-        self.last_node = node
 
     @contextmanager
     def _option(self):
@@ -190,7 +182,6 @@ class Parser(object):
         finally:
             node = self._concrete_stack.pop()
         self._extend_cst(node)
-        self.last_node = node
 
     def _repeater(self, block, prefix=None):
         while True:
@@ -217,10 +208,9 @@ class Parser(object):
         finally:
             node = self._concrete_stack.pop()
         self._add_cst_node(node)
-        self.last_node = node
         return node
 
-    def _check_name(self):
-        name = self.last_node.upper()  # bcuz ignorecase == True
+    def _check_name(self, token):
+        name = token.upper()  # bcuz ignorecase == True
         if name in self.keywords:
             raise FailedParse('"%s" is a reserved word' % name)
