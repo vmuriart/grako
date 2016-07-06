@@ -147,18 +147,18 @@ class Parser(object):
     @contextmanager
     def _try(self):
         self.last_node = None
-        p = self._buffer.pos
+        pos = self._buffer.pos
         self._concrete_stack.append(None)
         try:
             yield
-            cst = self._concrete_stack[-1]
+            node = self._concrete_stack[-1]
         except Exception:
-            self._buffer.goto(p)
+            self._buffer.goto(pos)
             raise
         finally:
             self._concrete_stack.pop()
-        self._extend_cst(cst)
-        self.last_node = cst
+        self._extend_cst(node)
+        self.last_node = node
 
     @contextmanager
     def _option(self):
@@ -192,11 +192,11 @@ class Parser(object):
         self._concrete_stack.append(None)
         try:
             yield
-            cst = self._concrete_stack[-1]
+            node = self._concrete_stack[-1]
         finally:
             self._concrete_stack.pop()
-        self._extend_cst(cst)
-        self.last_node = cst
+        self._extend_cst(node)
+        self.last_node = node
 
     def _repeater(self, block, prefix=None):
         while True:
@@ -207,12 +207,12 @@ class Parser(object):
                         with self._ignore():
                             prefix()
                     block()
-                    cst = self._concrete_stack[-1]
+                    node = self._concrete_stack[-1]
             except FailedParse:
                 break
             finally:
                 self._concrete_stack.pop()
-            self._add_cst_node(cst)
+            self._add_cst_node(node)
 
     def _positive_closure(self, block, prefix=None):
         self._concrete_stack.append(None)
@@ -221,12 +221,12 @@ class Parser(object):
                 block()
             self._concrete_stack[-1] = [self._concrete_stack[-1]]
             self._repeater(block, prefix=prefix)
-            cst = list(self._concrete_stack[-1])
+            node = list(self._concrete_stack[-1])
         finally:
             self._concrete_stack.pop()
-        self._add_cst_node(cst)
-        self.last_node = cst
-        return cst
+        self._add_cst_node(node)
+        self.last_node = node
+        return node
 
     def _check_name(self):
         name = self.last_node.upper()  # bcuz ignorecase == True
