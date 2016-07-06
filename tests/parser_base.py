@@ -1740,12 +1740,12 @@ class SqlParser(Parser):
                 self._token('COALESCE')
                 self._token('(')
                 self._value_expression_()
+                with self._optional():
+                    def block0():
+                        self._token(',')
+                        self._value_expression_()
 
-                def block0():
-                    self._token(',')
-                    self._value_expression_()
-
-                self._positive_closure(block0)
+                    self._positive_closure(block0)
                 self._token(')')
             self._error('no available options')
 
@@ -2337,12 +2337,12 @@ class SqlParser(Parser):
     @graken
     def _in_value_list_(self):
         self._value_expression_()
+        with self._optional():
+            def block0():
+                self._token(',')
+                self._value_expression_()
 
-        def block0():
-            self._token(',')
-            self._value_expression_()
-
-        self._positive_closure(block0)
+            self._positive_closure(block0)
 
     @graken
     def _like_predicate_(self):
