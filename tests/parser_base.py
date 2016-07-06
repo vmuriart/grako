@@ -13,17 +13,17 @@
 
 from __future__ import division, absolute_import, unicode_literals
 
-from grako import graken, Parser, RE_FLAGS, regexp as re
+import re
 
-__version__ = (2016, 7, 5, 0, 7, 13, 1)
+from grako import graken, Parser
 
-__all__ = ['SqlParser']
 
-KEYWORDS = set([
-    'FROM',
-    'SELECT',
-    'WHERE',
-])
+KEYWORDS = set(['SELECT',
+                'FROM',
+                'WHERE',
+                ])
+
+RE_FLAGS = re.UNICODE | re.MULTILINE | re.IGNORECASE
 
 
 class SqlParser(Parser):

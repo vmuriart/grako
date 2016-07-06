@@ -9,10 +9,10 @@ about source lines and content.
 from __future__ import absolute_import, unicode_literals
 
 import sys
-import re as regexp
+import re
 
-RE_FLAGS = regexp.UNICODE | regexp.MULTILINE
-RETYPE = type(regexp.compile('.'))
+RE_FLAGS = re.UNICODE | re.MULTILINE | re.IGNORECASE
+RETYPE = type(re.compile('.'))
 
 PY3 = sys.version_info[0] == 3
 if PY3:
@@ -78,16 +78,16 @@ class Buffer(object):
 
     def match(self, token):
         p = self.pos
-        # ignorecase == True
         result = self.text[p:p + len(token)].lower() == token.lower()
 
         if result:
             self.move(len(token))
             partial_match = (self.is_name_char(self.current()) and
                              token.isalnum() and token[0].isalpha())
-            if not partial_match:
+            if partial_match:
+                self.goto(p)
+            else:
                 return token
-        self.goto(p)
 
     def matchre(self, pattern):
         matched = self._scanre(pattern)
@@ -98,11 +98,10 @@ class Buffer(object):
 
     def _scanre(self, pattern):
         if isinstance(pattern, RETYPE):
-            re = pattern
+            regexp = pattern
         elif pattern in self._re_cache:
-            re = self._re_cache[pattern]
+            regexp = self._re_cache[pattern]
         else:
-            flags = RE_FLAGS | regexp.IGNORECASE
-            re = regexp.compile(pattern, flags)
-            self._re_cache[pattern] = re
-        return re.match(self.text, self.pos)
+            regexp = re.compile(pattern, RE_FLAGS)
+            self._re_cache[pattern] = regexp
+        return regexp.match(self.text, self.pos)
