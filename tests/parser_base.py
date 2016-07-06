@@ -670,8 +670,8 @@ class SqlParser(Parser):
                 self._token('INT')
             with self._option():
                 self._token('SMALLINT')
-            self._error(
-                'expecting one of: DEC DECIMAL INT INTEGER NUMERIC SMALLINT')
+            self._error('expecting one of: DEC DECIMAL INT INTEGER NUMERIC '
+                        'SMALLINT')
 
     @graken
     def _approximate_numeric_type_(self):

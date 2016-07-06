@@ -1140,8 +1140,8 @@ class SqlParser(Parser):
                 self._token('INT')
             with self._option():
                 self._token('BIGINT')
-            self._error(
-                'expecting one of: BIGINT DEC DECIMAL INT INTEGER NUMERIC SMALLINT')
+            self._error('expecting one of: BIGINT DEC DECIMAL INT INTEGER '
+                        'NUMERIC SMALLINT')
 
     @graken
     def _approximate_numeric_type_(self):
@@ -1429,8 +1429,9 @@ class SqlParser(Parser):
                 self._token('USER')
             with self._option():
                 self._token('VALUE')
-            self._error(
-                'expecting one of: CURRENT_DEFAULT_TRANSFORM_GROUP CURRENT_PATH CURRENT_ROLE CURRENT_USER SESSION_USER SYSTEM_USER USER VALUE')
+            self._error('expecting one of: CURRENT_DEFAULT_TRANSFORM_GROUP '
+                        'CURRENT_PATH CURRENT_ROLE CURRENT_USER SESSION_USER '
+                        'SYSTEM_USER USER VALUE')
 
     @graken
     def _simple_value_specification_(self):
@@ -1624,8 +1625,8 @@ class SqlParser(Parser):
                 self._token('PERCENT_RANK')
             with self._option():
                 self._token('CUME_DIST')
-            self._error(
-                'expecting one of: CUME_DIST DENSE_RANK PERCENT_RANK RANK')
+            self._error('expecting one of: CUME_DIST DENSE_RANK PERCENT_RANK '
+                        'RANK')
 
     @graken
     def _window_name_or_specification_(self):
@@ -4765,8 +4766,8 @@ class SqlParser(Parser):
                 self._token('PLI')
             with self._option():
                 self._token('SQL')
-            self._error(
-                'expecting one of: ADA C COBOL FORTRAN MUMPS PASCAL PLI SQL')
+            self._error('expecting one of: ADA C COBOL FORTRAN MUMPS PASCAL '
+                        'PLI SQL')
 
     @graken
     def _path_specification_(self):
@@ -4881,11 +4882,11 @@ class SqlParser(Parser):
                             self._token('STATIC')
                         with self._option():
                             self._token('CONSTRUCTOR')
-                        self._error(
-                            'expecting one of: CONSTRUCTOR INSTANCE STATIC')
+                        self._error('expecting one of: CONSTRUCTOR INSTANCE '
+                                    'STATIC')
                 self._token('METHOD')
-            self._error(
-                'expecting one of: CONSTRUCTOR FUNCTION INSTANCE METHOD PROCEDURE ROUTINE STATIC')
+            self._error('expecting one of: CONSTRUCTOR FUNCTION INSTANCE '
+                        'METHOD PROCEDURE ROUTINE STATIC')
 
     @graken
     def _member_name_(self):
@@ -5023,8 +5024,9 @@ class SqlParser(Parser):
                 self._token('FUSION')
             with self._option():
                 self._token('INTERSECTION')
-            self._error(
-                'expecting one of: ANY AVG COLLECT COUNT EVERY FUSION INTERSECTION MAX MIN SOME STDDEV_POP STDDEV_SAMP SUM VAR_POP VAR_SAMP')
+            self._error('expecting one of: ANY AVG COLLECT COUNT EVERY FUSION '
+                        'INTERSECTION MAX MIN SOME STDDEV_POP STDDEV_SAMP SUM '
+                        'VAR_POP VAR_SAMP')
 
     @graken
     def _set_quantifier_(self):
@@ -5079,8 +5081,9 @@ class SqlParser(Parser):
                 self._token('REGR_SYY')
             with self._option():
                 self._token('REGR_SXY')
-            self._error(
-                'expecting one of: CORR COVAR_POP COVAR_SAMP REGR_AVGX REGR_AVGY REGR_COUNT REGR_INTERCEPT REGR_R2 REGR_SLOPE REGR_SXX REGR_SXY REGR_SYY')
+            self._error('expecting one of: CORR COVAR_POP COVAR_SAMP '
+                        'REGR_AVGX REGR_AVGY REGR_COUNT REGR_INTERCEPT '
+                        'REGR_R2 REGR_SLOPE REGR_SXX REGR_SXY REGR_SYY')
 
     @graken
     def _dependent_variable_expression_(self):
@@ -5624,8 +5627,8 @@ class SqlParser(Parser):
                 self._token('CURRENT_PATH')
             with self._option():
                 self._implicitly_typed_value_specification_()
-            self._error(
-                'expecting one of: CURRENT_PATH CURRENT_ROLE CURRENT_USER SESSION_USER SYSTEM_USER USER')
+            self._error('expecting one of: CURRENT_PATH CURRENT_ROLE '
+                        'CURRENT_USER SESSION_USER SYSTEM_USER USER')
 
     @graken
     def _table_constraint_definition_(self):
@@ -6812,8 +6815,8 @@ class SqlParser(Parser):
                             self._token('STATIC')
                         with self._option():
                             self._token('CONSTRUCTOR')
-                        self._error(
-                            'expecting one of: CONSTRUCTOR INSTANCE STATIC')
+                        self._error('expecting one of: CONSTRUCTOR INSTANCE '
+                                    'STATIC')
                 self._token('METHOD')
                 self._method_name_()
                 self._sql_parameter_declaration_list_()
@@ -7705,8 +7708,8 @@ class SqlParser(Parser):
                 self._token('UNDER')
             with self._option():
                 self._token('EXECUTE')
-            self._error(
-                'expecting one of: DELETE EXECUTE INSERT REFERENCES SELECT TRIGGER UNDER UPDATE USAGE')
+            self._error('expecting one of: DELETE EXECUTE INSERT REFERENCES '
+                        'SELECT TRIGGER UNDER UPDATE USAGE')
 
     @graken
     def _privilege_method_list_(self):
@@ -9081,8 +9084,8 @@ class SqlParser(Parser):
                 self._token('DYNAMIC_FUNCTION_CODE')
             with self._option():
                 self._token('TOP_LEVEL_COUNT')
-            self._error(
-                'expecting one of: COUNT DYNAMIC_FUNCTION DYNAMIC_FUNCTION_CODE KEY_TYPE TOP_LEVEL_COUNT')
+            self._error('expecting one of: COUNT DYNAMIC_FUNCTION '
+                        'DYNAMIC_FUNCTION_CODE KEY_TYPE TOP_LEVEL_COUNT')
 
     @graken
     def _get_item_information_(self):
@@ -9179,8 +9182,20 @@ class SqlParser(Parser):
                 self._token('USER_DEFINED_TYPE_SCHEMA')
             with self._option():
                 self._token('USER_DEFINED_TYPE_CODE')
-            self._error(
-                'expecting one of: CARDINALITY CHARACTER_SET_CATALOG CHARACTER_SET_NAME CHARACTER_SET_SCHEMA COLLATION_CATALOG COLLATION_NAME COLLATION_SCHEMA DATA DATETIME_INTERVAL_CODE DATETIME_INTERVAL_PRECISION DEGREE INDICATOR KEY_MEMBER LENGTH LEVEL NAME NULLABLE OCTET_LENGTH PARAMETER_MODE PARAMETER_ORDINAL_POSITION PARAMETER_SPECIFIC_CATALOG PARAMETER_SPECIFIC_NAME PARAMETER_SPECIFIC_SCHEMA PRECISION RETURNED_CARDINALITY RETURNED_LENGTH RETURNED_OCTET_LENGTH SCALE SCOPE_CATALOG SCOPE_NAME SCOPE_SCHEMA TYPE UNNAMED USER_DEFINED_TYPE_CATALOG USER_DEFINED_TYPE_CODE USER_DEFINED_TYPE_NAME USER_DEFINED_TYPE_SCHEMA')
+            self._error('expecting one of: CARDINALITY CHARACTER_SET_CATALOG '
+                        'CHARACTER_SET_NAME CHARACTER_SET_SCHEMA '
+                        'COLLATION_CATALOG COLLATION_NAME COLLATION_SCHEMA '
+                        'DATA DATETIME_INTERVAL_CODE '
+                        'DATETIME_INTERVAL_PRECISION DEGREE INDICATOR '
+                        'KEY_MEMBER LENGTH LEVEL NAME NULLABLE OCTET_LENGTH '
+                        'PARAMETER_MODE PARAMETER_ORDINAL_POSITION '
+                        'PARAMETER_SPECIFIC_CATALOG PARAMETER_SPECIFIC_NAME '
+                        'PARAMETER_SPECIFIC_SCHEMA PRECISION '
+                        'RETURNED_CARDINALITY RETURNED_LENGTH '
+                        'RETURNED_OCTET_LENGTH SCALE SCOPE_CATALOG SCOPE_NAME '
+                        'SCOPE_SCHEMA TYPE UNNAMED USER_DEFINED_TYPE_CATALOG '
+                        'USER_DEFINED_TYPE_CODE USER_DEFINED_TYPE_NAME '
+                        'USER_DEFINED_TYPE_SCHEMA')
 
     @graken
     def _set_descriptor_statement_(self):
@@ -9576,8 +9591,11 @@ class SqlParser(Parser):
                 self._token('TRANSACTIONS_ROLLED_BACK')
             with self._option():
                 self._token('TRANSACTION_ACTIVE')
-            self._error(
-                'expecting one of: COMMAND_FUNCTION COMMAND_FUNCTION_CODE DYNAMIC_FUNCTION DYNAMIC_FUNCTION_CODE MORE NUMBER ROW_COUNT TRANSACTIONS_COMMITTED TRANSACTIONS_ROLLED_BACK TRANSACTION_ACTIVE')
+            self._error('expecting one of: COMMAND_FUNCTION '
+                        'COMMAND_FUNCTION_CODE DYNAMIC_FUNCTION '
+                        'DYNAMIC_FUNCTION_CODE MORE NUMBER ROW_COUNT '
+                        'TRANSACTIONS_COMMITTED TRANSACTIONS_ROLLED_BACK '
+                        'TRANSACTION_ACTIVE')
 
     @graken
     def _condition_information_(self):
@@ -9660,8 +9678,16 @@ class SqlParser(Parser):
                 self._token('TRIGGER_NAME')
             with self._option():
                 self._token('TRIGGER_SCHEMA')
-            self._error(
-                'expecting one of: CATALOG_NAME CLASS_ORIGIN COLUMN_NAME CONDITION_NUMBER CONNECTION_NAME CONSTRAINT_CATALOG CONSTRAINT_NAME CONSTRAINT_SCHEMA CURSOR_NAME MESSAGE_LENGTH MESSAGE_OCTET_LENGTH MESSAGE_TEXT PARAMETER_MODE PARAMETER_NAME PARAMETER_ORDINAL_POSITION RETURNED_SQLSTATE ROUTINE_CATALOG ROUTINE_NAME ROUTINE_SCHEMA SCHEMA_NAME SERVER_NAME SPECIFIC_NAME SUBCLASS_ORIGIN TABLE_NAME TRIGGER_CATALOG TRIGGER_NAME TRIGGER_SCHEMA')
+            self._error('expecting one of: CATALOG_NAME CLASS_ORIGIN '
+                        'COLUMN_NAME CONDITION_NUMBER CONNECTION_NAME '
+                        'CONSTRAINT_CATALOG CONSTRAINT_NAME CONSTRAINT_SCHEMA '
+                        'CURSOR_NAME MESSAGE_LENGTH MESSAGE_OCTET_LENGTH '
+                        'MESSAGE_TEXT PARAMETER_MODE PARAMETER_NAME '
+                        'PARAMETER_ORDINAL_POSITION RETURNED_SQLSTATE '
+                        'ROUTINE_CATALOG ROUTINE_NAME ROUTINE_SCHEMA '
+                        'SCHEMA_NAME SERVER_NAME SPECIFIC_NAME '
+                        'SUBCLASS_ORIGIN TABLE_NAME TRIGGER_CATALOG '
+                        'TRIGGER_NAME TRIGGER_SCHEMA')
 
     @graken
     def _condition_number_(self):
