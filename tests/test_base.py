@@ -9,7 +9,8 @@ def test_basic():
     parser = parser_base.SqlParser()
     ast = parser.parse("""\
         -- comment
-        SELECT 1 a,dual.b, triple.c as r, 2 b, 3 c, d FROM dual t, triple WHERE 1 = 4""")
+        SELECT 1 a,dual.b, triple.c as r, 2 b, 3 c, d
+        FROM dual t, triple WHERE 1 = 4""")
     assert isinstance(ast, list)
 
 

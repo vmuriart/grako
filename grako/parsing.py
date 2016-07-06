@@ -30,10 +30,9 @@ def graken(func_rule):
 
 
 class Parser(object):
-    def __init__(self, eol_comments_re=None, whitespace=None, keywords=None):
+    def __init__(self, eol_comments_re=None, keywords=None):
 
         self.eol_comments_re = eol_comments_re
-        self.whitespace = whitespace
         self.keywords = set(keywords)
 
         self._concrete_stack = [None]
@@ -45,8 +44,7 @@ class Parser(object):
         self._concrete_stack = [None]
         self._memoization_cache = dict()
         self.last_node = None
-        self._buffer = Buffer(text, whitespace=self.whitespace,
-                              eol_comments_re=self.eol_comments_re)
+        self._buffer = Buffer(text, eol_comments_re=self.eol_comments_re)
 
     def parse(self, text, rule_name='start'):
         self._reset(text=text)

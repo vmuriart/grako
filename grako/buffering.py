@@ -31,10 +31,10 @@ else:
 
 
 class Buffer(object):
-    def __init__(self, text, whitespace=None, eol_comments_re=None):
+    def __init__(self, text, eol_comments_re=None):
         self.text = ustr(text)
-        self.whitespace_re = whitespace
         self.eol_comments_re = eol_comments_re
+        self.whitespace_re = re.compile('[\\s]+', RE_FLAGS | re.DOTALL)
 
         self._pos = 0
         self._len = len(self.text)
