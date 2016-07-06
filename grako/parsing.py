@@ -5,8 +5,7 @@ from contextlib import contextmanager
 import functools
 
 from grako.buffering import Buffer
-from grako.exceptions import (
-    FailedLeftRecursion, FailedParse, FailedPattern, OptionSucceeded)
+from grako.exceptions import FailedLeftRecursion, FailedParse, OptionSucceeded
 
 
 @contextmanager
@@ -87,8 +86,6 @@ class Parser(object):
         self.last_node = None
         try:
             node, newpos = self._invoke_rule(rule, name)
-        except FailedPattern:
-            self._error('Expecting <%s>' % name)
         except FailedParse:
             self._buffer.goto(pos)
             raise
@@ -134,7 +131,7 @@ class Parser(object):
     def _pattern(self, pattern):
         token = self._buffer.matchre(pattern)
         if token is None:
-            self._error(pattern, etype=FailedPattern)
+            self._error(pattern)
         self._add_cst_node(token)
         self.last_node = token
         return token

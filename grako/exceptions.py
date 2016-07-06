@@ -19,29 +19,9 @@ class OptionSucceeded(GrakoException):
     pass
 
 
-class ParseError(GrakoException):
-    pass
-
-
-class FailedParseBase(ParseError):
+class FailedParse(GrakoException):
     def __init__(self, item):
         self.item = item
-
-
-class FailedParse(FailedParseBase):
-    pass
-
-
-class FailedToken(FailedParse):
-    def __init__(self, token):
-        super(FailedToken, self).__init__(token)
-        self.token = token
-
-
-class FailedPattern(FailedParse):
-    def __init__(self, pattern):
-        super(FailedPattern, self).__init__(pattern)
-        self.pattern = pattern
 
 
 class FailedLeftRecursion(FailedParse):
