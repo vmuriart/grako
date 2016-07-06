@@ -6,8 +6,7 @@ import functools
 
 from grako.buffering import Buffer
 from grako.exceptions import (
-    FailedLeftRecursion, FailedParse, FailedPattern, FailedToken,
-    OptionSucceeded)
+    FailedLeftRecursion, FailedParse, FailedPattern, OptionSucceeded)
 
 
 @contextmanager
@@ -127,7 +126,7 @@ class Parser(object):
     def _token(self, token):
         self._buffer.next_token()
         if self._buffer.match(token) is None:
-            self._error(token, etype=FailedToken)
+            self._error(token)
         self._add_cst_node(token)
         self.last_node = token
         return token
@@ -188,6 +187,17 @@ class Parser(object):
         finally:
             self._concrete_stack.pop()
 
+    @contextmanager
+    def _group(self):
+        self._concrete_stack.append(None)
+        try:
+            yield
+            cst = self._concrete_stack[-1]
+        finally:
+            self._concrete_stack.pop()
+        self._extend_cst(cst)
+        self.last_node = cst
+
     def _repeater(self, block, prefix=None):
         while True:
             self._concrete_stack.append(None)
@@ -203,17 +213,6 @@ class Parser(object):
             finally:
                 self._concrete_stack.pop()
             self._add_cst_node(cst)
-
-    @contextmanager
-    def _group(self):
-        self._concrete_stack.append(None)
-        try:
-            yield
-            cst = self._concrete_stack[-1]
-        finally:
-            self._concrete_stack.pop()
-        self._extend_cst(cst)
-        self.last_node = cst
 
     def _positive_closure(self, block, prefix=None):
         self._concrete_stack.append(None)
