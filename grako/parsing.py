@@ -112,13 +112,12 @@ class Parser(object):
         except FailedParse as e:
             self._memoization_cache[key] = e
             raise
-        else:
-            node = self._concrete_stack[-1]
-            result = node, self._buffer.pos
-            self._memoization_cache[key] = result
-            return result
         finally:
-            self._concrete_stack.pop()
+            node = self._concrete_stack.pop()
+
+        result = node, self._buffer.pos
+        self._memoization_cache[key] = result
+        return result
 
     def _token(self, token):
         self._buffer.next_token()
@@ -148,12 +147,11 @@ class Parser(object):
         self._concrete_stack.append(None)
         try:
             yield
-            node = self._concrete_stack[-1]
         except Exception:
             self._buffer.goto(pos)
             raise
         finally:
-            self._concrete_stack.pop()
+            node = self._concrete_stack.pop()
         self._extend_cst(node)
         self.last_node = node
 
@@ -189,9 +187,8 @@ class Parser(object):
         self._concrete_stack.append(None)
         try:
             yield
-            node = self._concrete_stack[-1]
         finally:
-            self._concrete_stack.pop()
+            node = self._concrete_stack.pop()
         self._extend_cst(node)
         self.last_node = node
 
@@ -204,11 +201,10 @@ class Parser(object):
                         with self._ignore():
                             prefix()
                     block()
-                    node = self._concrete_stack[-1]
             except FailedParse:
                 break
             finally:
-                self._concrete_stack.pop()
+                node = self._concrete_stack.pop()
             self._add_cst_node(node)
 
     def _positive_closure(self, block, prefix=None):
@@ -218,9 +214,8 @@ class Parser(object):
                 block()
             self._concrete_stack[-1] = [self._concrete_stack[-1]]
             self._repeater(block, prefix=prefix)
-            node = list(self._concrete_stack[-1])
         finally:
-            self._concrete_stack.pop()
+            node = self._concrete_stack.pop()
         self._add_cst_node(node)
         self.last_node = node
         return node
