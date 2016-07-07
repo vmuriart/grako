@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from . import parser_base
+from . import parser_base as parser_base
 from grako.exceptions import FailedParse
 
 

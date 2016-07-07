@@ -92,6 +92,8 @@ class Parser(object):
             return node
 
     def _invoke_rule(self, rule, name):
+        if name[0].islower():
+            self._buffer.next_token()
         key = self._buffer.pos, rule
         if key in self._memoization_cache:
             memo = self._memoization_cache[key]
@@ -102,8 +104,6 @@ class Parser(object):
         self._memoization_cache[key] = FailedLeftRecursion(name)  # left rc grd
         self._concrete_stack.append(None)
         try:
-            if name[0].islower():
-                self._buffer.next_token()
             rule(self)
         except FailedParse as e:
             self._memoization_cache[key] = e
