@@ -167,14 +167,6 @@ class Parser(object):
                 yield
 
     @contextmanager
-    def _ignore(self):
-        self._concrete_stack.append(None)
-        try:
-            yield
-        finally:
-            self._concrete_stack.pop()
-
-    @contextmanager
     def _group(self):
         self._concrete_stack.append(None)
         try:
@@ -183,14 +175,11 @@ class Parser(object):
             node = self._concrete_stack.pop()
         self._extend_cst(node)
 
-    def _repeater(self, block, prefix=None):
+    def _repeater(self, block):
         while True:
             self._concrete_stack.append(None)
             try:
                 with self._try():
-                    if prefix:
-                        with self._ignore():
-                            prefix()
                     block()
             except FailedParse:
                 break
@@ -204,7 +193,7 @@ class Parser(object):
             with self._try():
                 block()
             self._concrete_stack[-1] = [self._concrete_stack[-1]]
-            self._repeater(block, prefix=prefix)
+            self._repeater(block)
         finally:
             node = self._concrete_stack.pop()
         self._add_cst_node(node)
