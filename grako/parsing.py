@@ -213,4 +213,4 @@ class Parser(object):
     def _check_name(self, token):
         name = token.upper()  # bcuz ignorecase == True
         if name in self.keywords:
-            raise FailedParse('"%s" is a reserved word' % name)
+            raise FailedParse('"{name}" is a reserved word'.format(name=name))

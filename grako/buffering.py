@@ -73,7 +73,8 @@ class Buffer(object):
             self.eat_eol_comments()
             self.eat_whitespace()
 
-    def is_name_char(self, c):
+    @staticmethod
+    def is_name_char(c):
         return c is not None and c.isalnum()
 
     def match(self, token):
