@@ -16,6 +16,7 @@ class SqlParser(Parser):
     @graken
     def _start_(self):
         self._direct_sql_statement_()
+        self._check_eof()
 
     @graken
     def _letter_(self):
@@ -49,7 +50,8 @@ class SqlParser(Parser):
 
     @graken
     def _regular_identifier_(self):
-        self._pattern(r'[a-z]\w*')
+        token = self._pattern(r'[a-z]\w*')
+        self._check_name(token)
 
     @graken
     def _large_object_length_token_(self):
@@ -9499,7 +9501,8 @@ class SqlParser(Parser):
     @graken
     def _direct_sql_statement_(self):
         self._directly_executable_statement_()
-        self._token(';')
+        with self._optional():
+            self._token(';')
 
     @graken
     def _directly_executable_statement_(self):
