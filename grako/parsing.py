@@ -197,7 +197,6 @@ class Parser(object):
         finally:
             node = self._concrete_stack.pop()
         self._add_cst_node(node)
-        return node
 
     def _check_name(self, token):
         name = token.upper()  # bcuz ignorecase == True
