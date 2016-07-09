@@ -55,10 +55,7 @@ class SqlParser(Parser):
 
     @graken
     def _large_object_length_token_(self):
-        def block0():
-            self._integer_()
-
-        self._positive_closure(block0)
+        self._integer_()
         self._multiplier_()
 
     @graken
@@ -244,25 +241,21 @@ class SqlParser(Parser):
         with self._optional():
             self._token('_')
             self._character_set_name_()
-        self._token("'")
-        with self._optional():
-            def block0():
-                self._character_representation_()
 
-            self._positive_closure(block0)
-        self._token("'")
-        with self._optional():
-            def block1():
+        def sep0():
+            with self._group():
                 self._separator_()
-                self._token("'")
-                with self._optional():
-                    def block2():
-                        self._character_representation_()
 
-                    self._positive_closure(block2)
-                self._token("'")
+        def block0():
+            self._token("'")
+            with self._optional():
+                def block1():
+                    self._character_representation_()
 
-            self._positive_closure(block1)
+                self._positive_closure(block1)
+            self._token("'")
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _character_representation_(self):
@@ -280,25 +273,21 @@ class SqlParser(Parser):
     @graken
     def _national_character_string_literal_(self):
         self._token('N')
-        self._token("'")
-        with self._optional():
-            def block0():
-                self._character_representation_()
 
-            self._positive_closure(block0)
-        self._token("'")
-        with self._optional():
-            def block1():
+        def sep0():
+            with self._group():
                 self._separator_()
-                self._token("'")
-                with self._optional():
-                    def block2():
-                        self._character_representation_()
 
-                    self._positive_closure(block2)
-                self._token("'")
+        def block0():
+            self._token("'")
+            with self._optional():
+                def block1():
+                    self._character_representation_()
 
-            self._positive_closure(block1)
+                self._positive_closure(block1)
+            self._token("'")
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _unicode_character_string_literal_(self):
@@ -307,25 +296,21 @@ class SqlParser(Parser):
             self._character_set_name_()
         self._token('U')
         self._token('&')
-        self._token("'")
-        with self._optional():
-            def block0():
-                self._unicode_representation_()
 
-            self._positive_closure(block0)
-        self._token("'")
-        with self._optional():
-            def block1():
+        def sep0():
+            with self._group():
                 self._separator_()
-                self._token("'")
-                with self._optional():
-                    def block2():
-                        self._unicode_representation_()
 
-                    self._positive_closure(block2)
-                self._token("'")
+        def block0():
+            self._token("'")
+            with self._optional():
+                def block1():
+                    self._unicode_representation_()
 
-            self._positive_closure(block1)
+                self._positive_closure(block1)
+            self._token("'")
+
+        self._positive_closure(block0, prefix=sep0)
         with self._optional():
             self._token('ESCAPE')
             self._escape_character_()
@@ -342,27 +327,22 @@ class SqlParser(Parser):
     @graken
     def _binary_string_literal_(self):
         self._token('X')
-        self._token("'")
-        with self._optional():
-            def block0():
-                self._hexit_()
-                self._hexit_()
 
-            self._positive_closure(block0)
-        self._token("'")
-        with self._optional():
-            def block1():
+        def sep0():
+            with self._group():
                 self._separator_()
-                self._token("'")
-                with self._optional():
-                    def block2():
-                        self._hexit_()
-                        self._hexit_()
 
-                    self._positive_closure(block2)
-                self._token("'")
+        def block0():
+            self._token("'")
+            with self._optional():
+                def block1():
+                    self._hexit_()
+                    self._hexit_()
 
-            self._positive_closure(block1)
+                self._positive_closure(block1)
+            self._token("'")
+
+        self._positive_closure(block0, prefix=sep0)
         with self._optional():
             self._token('ESCAPE')
             self._escape_character_()
@@ -1201,13 +1181,14 @@ class SqlParser(Parser):
     @graken
     def _row_type_body_(self):
         self._token('(')
-        self._field_definition_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._field_definition_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._field_definition_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -1478,13 +1459,13 @@ class SqlParser(Parser):
 
     @graken
     def _identifier_chain_(self):
-        self._identifier_()
-        with self._optional():
-            def block0():
-                self._token('.')
-                self._identifier_()
+        def sep0():
+            self._token('.')
 
-            self._positive_closure(block0)
+        def block0():
+            self._identifier_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _basic_identifier_chain_(self):
@@ -1520,13 +1501,14 @@ class SqlParser(Parser):
     def _grouping_operation_(self):
         self._token('GROUPING')
         self._token('(')
-        self._column_reference_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._column_reference_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._column_reference_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -2810,13 +2792,13 @@ class SqlParser(Parser):
 
     @graken
     def _array_element_list_(self):
-        self._array_element_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._array_element_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._array_element_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _array_element_(self):
@@ -2921,13 +2903,13 @@ class SqlParser(Parser):
 
     @graken
     def _multiset_element_list_(self):
-        self._multiset_element_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._multiset_element_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._multiset_element_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _multiset_element_(self):
@@ -2978,13 +2960,13 @@ class SqlParser(Parser):
 
     @graken
     def _row_value_constructor_element_list_(self):
-        self._row_value_constructor_element_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._row_value_constructor_element_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._row_value_constructor_element_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _row_value_constructor_element_(self):
@@ -3014,13 +2996,13 @@ class SqlParser(Parser):
 
     @graken
     def _contextually_typed_row_value_constructor_element_list_(self):
-        self._contextually_typed_row_value_constructor_element_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._contextually_typed_row_value_constructor_element_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._contextually_typed_row_value_constructor_element_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _contextually_typed_row_value_constructor_element_(self):
@@ -3089,13 +3071,13 @@ class SqlParser(Parser):
 
     @graken
     def _row_value_expression_list_(self):
-        self._table_row_value_expression_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._table_row_value_expression_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._table_row_value_expression_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _contextually_typed_table_value_constructor_(self):
@@ -3104,13 +3086,13 @@ class SqlParser(Parser):
 
     @graken
     def _contextually_typed_row_value_expression_list_(self):
-        self._contextually_typed_row_value_expression_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._contextually_typed_row_value_expression_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._contextually_typed_row_value_expression_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _table_expression_(self):
@@ -3131,13 +3113,13 @@ class SqlParser(Parser):
 
     @graken
     def _table_reference_list_(self):
-        self._table_reference_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._table_reference_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._table_reference_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _table_reference_(self):
@@ -3293,13 +3275,13 @@ class SqlParser(Parser):
 
     @graken
     def _column_name_list_(self):
-        self._column_name_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._column_name_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._column_name_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _joined_table_(self):
@@ -3404,13 +3386,13 @@ class SqlParser(Parser):
 
     @graken
     def _grouping_element_list_(self):
-        self._grouping_element_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._grouping_element_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._grouping_element_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _grouping_element_(self):
@@ -3446,13 +3428,13 @@ class SqlParser(Parser):
 
     @graken
     def _grouping_column_reference_list_(self):
-        self._grouping_column_reference_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._grouping_column_reference_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._grouping_column_reference_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _rollup_list_(self):
@@ -3463,13 +3445,13 @@ class SqlParser(Parser):
 
     @graken
     def _ordinary_grouping_set_list_(self):
-        self._ordinary_grouping_set_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._ordinary_grouping_set_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._ordinary_grouping_set_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _cube_list_(self):
@@ -3488,13 +3470,13 @@ class SqlParser(Parser):
 
     @graken
     def _grouping_set_list_(self):
-        self._grouping_set_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._grouping_set_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._grouping_set_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _grouping_set_(self):
@@ -3528,13 +3510,13 @@ class SqlParser(Parser):
 
     @graken
     def _window_definition_list_(self):
-        self._window_definition_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._window_definition_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._window_definition_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _window_definition_(self):
@@ -3575,13 +3557,13 @@ class SqlParser(Parser):
 
     @graken
     def _window_partition_column_reference_list_(self):
-        self._window_partition_column_reference_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._window_partition_column_reference_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._window_partition_column_reference_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _window_partition_column_reference_(self):
@@ -3695,13 +3677,13 @@ class SqlParser(Parser):
             with self._option():
                 self._token('*')
             with self._option():
-                self._select_sublist_()
-                with self._optional():
-                    def block0():
-                        self._token(',')
-                        self._select_sublist_()
+                def sep0():
+                    self._token(',')
 
-                    self._positive_closure(block0)
+                def block0():
+                    self._select_sublist_()
+
+                self._positive_closure(block0, prefix=sep0)
             self._error('expecting one of: *')
 
     @graken
@@ -3726,13 +3708,13 @@ class SqlParser(Parser):
 
     @graken
     def _asterisked_identifier_chain_(self):
-        self._asterisked_identifier_()
-        with self._optional():
-            def block0():
-                self._token('.')
-                self._asterisked_identifier_()
+        def sep0():
+            self._token('.')
 
-            self._positive_closure(block0)
+        def block0():
+            self._asterisked_identifier_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _asterisked_identifier_(self):
@@ -3776,13 +3758,13 @@ class SqlParser(Parser):
 
     @graken
     def _with_list_(self):
-        self._with_list_element_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._with_list_element_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._with_list_element_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _with_list_element_(self):
@@ -3963,13 +3945,13 @@ class SqlParser(Parser):
 
     @graken
     def _cycle_column_list_(self):
-        self._column_name_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._column_name_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._column_name_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _cycle_mark_value_(self):
@@ -4085,13 +4067,13 @@ class SqlParser(Parser):
 
     @graken
     def _in_value_list_(self):
-        self._row_value_expression_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._row_value_expression_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._row_value_expression_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _like_predicate_(self):
@@ -4158,24 +4140,16 @@ class SqlParser(Parser):
 
     @graken
     def _regular_expression_(self):
-        with self._choice():
-            with self._option():
-                self._regular_term_()
-            with self._option():
-                self._regular_expression_()
-                self._token('|')
-                self._regular_term_()
-            self._error('no available options')
+        with self._optional():
+            self._regular_expression_()
+            self._token('|')
+        self._regular_term_()
 
     @graken
     def _regular_term_(self):
-        with self._choice():
-            with self._option():
-                self._regular_factor_()
-            with self._option():
-                self._regular_term_()
-                self._regular_factor_()
-            self._error('no available options')
+        with self._optional():
+            self._regular_term_()
+        self._regular_factor_()
 
     @graken
     def _regular_factor_(self):
@@ -4418,13 +4392,13 @@ class SqlParser(Parser):
 
     @graken
     def _type_list_(self):
-        self._user_defined_type_specification_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._user_defined_type_specification_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._user_defined_type_specification_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _user_defined_type_specification_(self):
@@ -4558,13 +4532,13 @@ class SqlParser(Parser):
 
     @graken
     def _schema_name_list_(self):
-        self._schema_name_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._schema_name_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._schema_name_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _routine_invocation_(self):
@@ -4582,13 +4556,13 @@ class SqlParser(Parser):
     def _sql_argument_list_(self):
         self._token('(')
         with self._optional():
-            self._sql_argument_()
-            with self._optional():
-                def block0():
-                    self._token(',')
-                    self._sql_argument_()
+            def sep0():
+                self._token(',')
 
-                self._positive_closure(block0)
+            def block0():
+                self._sql_argument_()
+
+            self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -4666,13 +4640,13 @@ class SqlParser(Parser):
     def _data_type_list_(self):
         self._token('(')
         with self._optional():
-            self._data_type_()
-            with self._optional():
-                def block0():
-                    self._token(',')
-                    self._data_type_()
+            def sep0():
+                self._token(',')
 
-                self._positive_closure(block0)
+            def block0():
+                self._data_type_()
+
+            self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -4739,7 +4713,7 @@ class SqlParser(Parser):
 
     @graken
     def _general_set_function_(self):
-        self._set_function_type_()
+        self._set_computational_operation_()
         self._token('(')
         with self._optional():
             self._set_quantifier_()
@@ -4747,11 +4721,7 @@ class SqlParser(Parser):
         self._token(')')
 
     @graken
-    def _set_function_type_(self):
-        self._computational_operation_()
-
-    @graken
-    def _computational_operation_(self):
+    def _set_computational_operation_(self):
         with self._choice():
             with self._option():
                 self._token('AVG')
@@ -4881,13 +4851,13 @@ class SqlParser(Parser):
 
     @graken
     def _hypothetical_set_function_value_expression_list_(self):
-        self._value_expression_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._value_expression_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._value_expression_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _inverse_distribution_function_(self):
@@ -4908,13 +4878,13 @@ class SqlParser(Parser):
 
     @graken
     def _sort_specification_list_(self):
-        self._sort_specification_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._sort_specification_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._sort_specification_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _sort_specification_(self):
@@ -5114,13 +5084,14 @@ class SqlParser(Parser):
     @graken
     def _table_element_list_(self):
         self._token('(')
-        self._table_element_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._table_element_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._table_element_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -5662,13 +5633,14 @@ class SqlParser(Parser):
     @graken
     def _view_element_list_(self):
         self._token('(')
-        self._view_element_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._view_element_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._view_element_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -6022,12 +5994,10 @@ class SqlParser(Parser):
 
     @graken
     def _user_defined_type_option_list_(self):
-        self._user_defined_type_option_()
-        with self._optional():
-            def block0():
-                self._user_defined_type_option_()
+        def block0():
+            self._user_defined_type_option_()
 
-            self._positive_closure(block0)
+        self._positive_closure(block0)
 
     @graken
     def _user_defined_type_option_(self):
@@ -6061,13 +6031,14 @@ class SqlParser(Parser):
     @graken
     def _member_list_(self):
         self._token('(')
-        self._member_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._member_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._member_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -6148,13 +6119,14 @@ class SqlParser(Parser):
     @graken
     def _list_of_attributes_(self):
         self._token('(')
-        self._attribute_name_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._attribute_name_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._attribute_name_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -6188,13 +6160,13 @@ class SqlParser(Parser):
 
     @graken
     def _method_specification_list_(self):
-        self._method_specification_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._method_specification_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._method_specification_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _method_specification_(self):
@@ -6398,13 +6370,13 @@ class SqlParser(Parser):
     def _sql_parameter_declaration_list_(self):
         self._token('(')
         with self._optional():
-            self._sql_parameter_declaration_()
-            with self._optional():
-                def block0():
-                    self._token(',')
-                    self._sql_parameter_declaration_()
+            def sep0():
+                self._token(',')
 
-                self._positive_closure(block0)
+            def block0():
+                self._sql_parameter_declaration_()
+
+            self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -6549,13 +6521,14 @@ class SqlParser(Parser):
     @graken
     def _table_function_column_list_(self):
         self._token('(')
-        self._table_function_column_list_element_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._table_function_column_list_element_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._table_function_column_list_element_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -6706,13 +6679,13 @@ class SqlParser(Parser):
 
     @graken
     def _multiple_group_specification_(self):
-        self._group_specification_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._group_specification_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._group_specification_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _group_specification_(self):
@@ -6926,13 +6899,13 @@ class SqlParser(Parser):
 
     @graken
     def _alter_transform_action_list_(self):
-        self._alter_transform_action_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._alter_transform_action_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._alter_transform_action_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _alter_transform_action_(self):
@@ -7144,13 +7117,14 @@ class SqlParser(Parser):
         self._token('GRANT')
         self._privileges_()
         self._token('TO')
-        self._grantee_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._grantee_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._grantee_()
+
+        self._positive_closure(block0, prefix=sep0)
         with self._optional():
             self._token('WITH')
             self._token('HIERARCHY')
@@ -7207,13 +7181,13 @@ class SqlParser(Parser):
                 self._token('ALL')
                 self._token('PRIVILEGES')
             with self._option():
-                self._action_()
-                with self._optional():
-                    def block0():
-                        self._token(',')
-                        self._action_()
+                def sep0():
+                    self._token(',')
 
-                    self._positive_closure(block0)
+                def block0():
+                    self._action_()
+
+                self._positive_closure(block0, prefix=sep0)
             self._error('expecting one of: ALL')
 
     @graken
@@ -7264,13 +7238,13 @@ class SqlParser(Parser):
 
     @graken
     def _privilege_method_list_(self):
-        self._specific_routine_designator_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._specific_routine_designator_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._specific_routine_designator_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _grantee_(self):
@@ -7303,21 +7277,23 @@ class SqlParser(Parser):
     @graken
     def _grant_role_statement_(self):
         self._token('GRANT')
-        self._role_name_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._role_name_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._role_name_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token('TO')
-        self._grantee_()
-        with self._optional():
-            def block1():
-                self._token(',')
-                self._grantee_()
 
-            self._positive_closure(block1)
+        def sep1():
+            self._token(',')
+
+        def block1():
+            self._grantee_()
+
+        self._positive_closure(block1, prefix=sep1)
         with self._optional():
             self._token('WITH')
             self._token('ADMIN')
@@ -7349,13 +7325,14 @@ class SqlParser(Parser):
             self._revoke_option_extension_()
         self._privileges_()
         self._token('FROM')
-        self._grantee_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._grantee_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._grantee_()
+
+        self._positive_closure(block0, prefix=sep0)
         with self._optional():
             self._token('GRANTED')
             self._token('BY')
@@ -7382,21 +7359,23 @@ class SqlParser(Parser):
             self._token('ADMIN')
             self._token('OPTION')
             self._token('FOR')
-        self._role_name_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._role_name_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._role_name_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token('FROM')
-        self._grantee_()
-        with self._optional():
-            def block1():
-                self._token(',')
-                self._grantee_()
 
-            self._positive_closure(block1)
+        def sep1():
+            self._token(',')
+
+        def block1():
+            self._grantee_()
+
+        self._positive_closure(block1, prefix=sep1)
         with self._optional():
             self._token('GRANTED')
             self._token('BY')
@@ -7405,13 +7384,13 @@ class SqlParser(Parser):
 
     @graken
     def _character_set_specification_list_(self):
-        self._character_set_name_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._character_set_name_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._character_set_name_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _sql_procedure_statement_(self):
@@ -7786,13 +7765,13 @@ class SqlParser(Parser):
 
     @graken
     def _fetch_target_list_(self):
-        self._target_specification_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._target_specification_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._target_specification_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _close_statement_(self):
@@ -7811,13 +7790,13 @@ class SqlParser(Parser):
 
     @graken
     def _select_target_list_(self):
-        self._target_specification_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._target_specification_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._target_specification_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _delete_statement_positioned_(self):
@@ -7969,13 +7948,14 @@ class SqlParser(Parser):
     @graken
     def _merge_insert_value_list_(self):
         self._token('(')
-        self._merge_insert_value_element_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._merge_insert_value_element_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._merge_insert_value_element_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -8010,13 +7990,13 @@ class SqlParser(Parser):
 
     @graken
     def _set_clause_list_(self):
-        self._set_clause_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._set_clause_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._set_clause_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _set_clause_(self):
@@ -8047,13 +8027,14 @@ class SqlParser(Parser):
     @graken
     def _set_target_list_(self):
         self._token('(')
-        self._set_target_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._set_target_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._set_target_()
+
+        self._positive_closure(block0, prefix=sep0)
         self._token(')')
 
     @graken
@@ -8106,25 +8087,27 @@ class SqlParser(Parser):
     def _free_locator_statement_(self):
         self._token('FREE')
         self._token('LOCATOR')
-        self._host_parameter_name_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._host_parameter_name_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._host_parameter_name_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _hold_locator_statement_(self):
         self._token('HOLD')
         self._token('LOCATOR')
-        self._host_parameter_name_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._host_parameter_name_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._host_parameter_name_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _call_statement_(self):
@@ -8150,13 +8133,13 @@ class SqlParser(Parser):
         self._token('START')
         self._token('TRANSACTION')
         with self._optional():
-            self._transaction_mode_()
-            with self._optional():
-                def block0():
-                    self._token(',')
-                    self._transaction_mode_()
+            def sep0():
+                self._token(',')
 
-                self._positive_closure(block0)
+            def block0():
+                self._transaction_mode_()
+
+            self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _transaction_mode_(self):
@@ -8222,13 +8205,14 @@ class SqlParser(Parser):
     @graken
     def _transaction_characteristics_(self):
         self._token('TRANSACTION')
-        self._transaction_mode_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._transaction_mode_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._transaction_mode_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _set_constraints_mode_statement_(self):
@@ -8249,13 +8233,13 @@ class SqlParser(Parser):
             with self._option():
                 self._token('ALL')
             with self._option():
-                self._constraint_name_()
-                with self._optional():
-                    def block0():
-                        self._token(',')
-                        self._constraint_name_()
+                def sep0():
+                    self._token(',')
 
-                    self._positive_closure(block0)
+                def block0():
+                    self._constraint_name_()
+
+                self._positive_closure(block0, prefix=sep0)
             self._error('expecting one of: ALL')
 
     @graken
@@ -8361,13 +8345,13 @@ class SqlParser(Parser):
 
     @graken
     def _session_characteristic_list_(self):
-        self._transaction_characteristics_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._transaction_characteristics_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._transaction_characteristics_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _set_session_user_identifier_statement_(self):
@@ -8513,23 +8497,24 @@ class SqlParser(Parser):
     def _get_descriptor_information_(self):
         with self._choice():
             with self._option():
-                self._get_header_information_()
-                with self._optional():
-                    def block0():
-                        self._token(',')
-                        self._get_header_information_()
+                def sep0():
+                    self._token(',')
 
-                    self._positive_closure(block0)
+                def block0():
+                    self._get_header_information_()
+
+                self._positive_closure(block0, prefix=sep0)
             with self._option():
                 self._token('VALUE')
                 self._item_number_()
-                self._get_item_information_()
-                with self._optional():
-                    def block1():
-                        self._token(',')
-                        self._get_item_information_()
 
-                    self._positive_closure(block1)
+                def sep1():
+                    self._token(',')
+
+                def block1():
+                    self._get_item_information_()
+
+                self._positive_closure(block1, prefix=sep1)
             self._error('no available options')
 
     @graken
@@ -8669,23 +8654,24 @@ class SqlParser(Parser):
     def _set_descriptor_information_(self):
         with self._choice():
             with self._option():
-                self._set_header_information_()
-                with self._optional():
-                    def block0():
-                        self._token(',')
-                        self._set_header_information_()
+                def sep0():
+                    self._token(',')
 
-                    self._positive_closure(block0)
+                def block0():
+                    self._set_header_information_()
+
+                self._positive_closure(block0, prefix=sep0)
             with self._option():
                 self._token('VALUE')
                 self._item_number_()
-                self._set_item_information_()
-                with self._optional():
-                    def block1():
-                        self._token(',')
-                        self._set_item_information_()
 
-                    self._positive_closure(block1)
+                def sep1():
+                    self._token(',')
+
+                def block1():
+                    self._set_item_information_()
+
+                self._positive_closure(block1, prefix=sep1)
             self._error('no available options')
 
     @graken
@@ -8798,13 +8784,14 @@ class SqlParser(Parser):
     @graken
     def _using_arguments_(self):
         self._token('USING')
-        self._using_argument_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._using_argument_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._using_argument_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _using_argument_(self):
@@ -8822,13 +8809,14 @@ class SqlParser(Parser):
     @graken
     def _into_arguments_(self):
         self._token('INTO')
-        self._target_specification_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._target_specification_()
 
-            self._positive_closure(block0)
+        def sep0():
+            self._token(',')
+
+        def block0():
+            self._target_specification_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _into_descriptor_(self):
@@ -9002,13 +8990,13 @@ class SqlParser(Parser):
 
     @graken
     def _statement_information_(self):
-        self._statement_information_item_()
-        with self._optional():
-            def block0():
-                self._token(',')
-                self._statement_information_item_()
+        def sep0():
+            self._token(',')
 
-            self._positive_closure(block0)
+        def block0():
+            self._statement_information_item_()
+
+        self._positive_closure(block0, prefix=sep0)
 
     @graken
     def _statement_information_item_(self):
@@ -9055,13 +9043,14 @@ class SqlParser(Parser):
                     self._token('CONDITION')
                 self._error('expecting one of: CONDITION EXCEPTION')
         self._condition_number_()
-        self._condition_information_item_()
-        with self._optional():
-            def block1():
-                self._token(',')
-                self._condition_information_item_()
 
-            self._positive_closure(block1)
+        def sep1():
+            self._token(',')
+
+        def block1():
+            self._condition_information_item_()
+
+        self._positive_closure(block1, prefix=sep1)
 
     @graken
     def _condition_information_item_(self):
