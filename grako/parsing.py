@@ -48,14 +48,16 @@ class Parser(object):
         return rule()
 
     def _add_cst_node(self, node):
+        # node can be list, unicode, or none
         if node is None:
             return
         previous = self._concrete_stack[-1]
         if previous is None:
-            self._concrete_stack[-1] = self._copy_node(node)
+            self._concrete_stack[-1] = node
         elif isinstance(previous, list):
             previous.append(node)
         else:
+            # previous is unicode
             self._concrete_stack[-1] = [previous, node]
 
     def _extend_cst(self, node):
@@ -63,17 +65,12 @@ class Parser(object):
             return
         previous = self._concrete_stack[-1]
         if previous is None:
-            self._concrete_stack[-1] = self._copy_node(node)
-        elif isinstance(node, list):
-            if isinstance(previous, list):
-                previous.extend(node)
+            self._concrete_stack[-1] = node
+        elif isinstance(previous, list) and isinstance(previous, list):
+             previous.extend(node)
         else:
+            # previous is unicode
             self._concrete_stack[-1] = [previous, node]
-
-    @staticmethod
-    def _copy_node(node):
-        # unicode or list
-        return list(node) if isinstance(node, list) else node
 
     @staticmethod
     def _error(item, etype=FailedParse):
