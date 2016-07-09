@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from . import parser_base as parser_base
+from . import parser_base2003 as parser_base
 from grako.exceptions import FailedParse
 
 
@@ -12,7 +12,10 @@ def test_basic():
         SELECT 1 a,dual.b, triple.c as r, 2 b, 3 c, d
         FROM dual t, triple WHERE 1 = 4""")
     assert isinstance(ast, list)
+    ast = parser.parse("""SELECT 1, a , b FROM dual WHERE 1 = 4""")
+    print ast
 
+    assert 0
 
 def test_fail():
     parser = parser_base.SqlParser()
