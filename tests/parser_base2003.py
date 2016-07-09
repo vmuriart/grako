@@ -75,15 +75,12 @@ class SqlParser(Parser):
     @graken
     def _delimited_identifier_(self):
         self._token('"')
-        self._delimited_identifier_body_()
-        self._token('"')
 
-    @graken
-    def _delimited_identifier_body_(self):
         def block0():
             self._delimited_identifier_part_()
 
         self._positive_closure(block0)
+        self._token('"')
 
     @graken
     def _delimited_identifier_part_(self):
@@ -245,8 +242,8 @@ class SqlParser(Parser):
     @graken
     def _character_string_literal_(self):
         with self._optional():
-            self._introducer_()
-            self._character_set_specification_()
+            self._token('_')
+            self._character_set_name_()
         self._token("'")
         with self._optional():
             def block0():
@@ -266,10 +263,6 @@ class SqlParser(Parser):
                 self._token("'")
 
             self._positive_closure(block1)
-
-    @graken
-    def _introducer_(self):
-        self._token('_')
 
     @graken
     def _character_representation_(self):
@@ -310,8 +303,8 @@ class SqlParser(Parser):
     @graken
     def _unicode_character_string_literal_(self):
         with self._optional():
-            self._introducer_()
-            self._character_set_specification_()
+            self._token('_')
+            self._character_set_name_()
         self._token('U')
         self._token('&')
         self._token("'")
@@ -376,7 +369,7 @@ class SqlParser(Parser):
 
     @graken
     def _hexit_(self):
-        self._pattern(r'[\dA-Fa-f]')
+        self._pattern(r'[a-f\d]')
 
     @graken
     def _signed_numeric_literal_(self):
@@ -418,13 +411,9 @@ class SqlParser(Parser):
 
     @graken
     def _approximate_numeric_literal_(self):
-        self._mantissa_()
+        self._exact_numeric_literal_()
         self._token('E')
         self._exponent_()
-
-    @graken
-    def _mantissa_(self):
-        self._exact_numeric_literal_()
 
     @graken
     def _exponent_(self):
@@ -465,7 +454,7 @@ class SqlParser(Parser):
     @graken
     def _date_string_(self):
         self._token("'")
-        self._unquoted_date_string_()
+        self._date_value_()
         self._token("'")
 
     @graken
@@ -518,10 +507,6 @@ class SqlParser(Parser):
         self._token("'")
 
     @graken
-    def _unquoted_date_string_(self):
-        self._date_value_()
-
-    @graken
     def _unquoted_time_string_(self):
         self._time_value_()
         with self._optional():
@@ -529,7 +514,7 @@ class SqlParser(Parser):
 
     @graken
     def _unquoted_timestamp_string_(self):
-        self._unquoted_date_string_()
+        self._date_value_()
         self._whitespace_()
         self._unquoted_time_string_()
 
@@ -601,43 +586,31 @@ class SqlParser(Parser):
 
     @graken
     def _years_value_(self):
-        self._datetime_value_()
+        self._integer_()
 
     @graken
     def _months_value_(self):
-        self._datetime_value_()
+        self._integer_()
 
     @graken
     def _days_value_(self):
-        self._datetime_value_()
+        self._integer_()
 
     @graken
     def _hours_value_(self):
-        self._datetime_value_()
+        self._integer_()
 
     @graken
     def _minutes_value_(self):
-        self._datetime_value_()
+        self._integer_()
 
     @graken
     def _seconds_value_(self):
-        self._seconds_integer_value_()
+        self._integer_()
         with self._optional():
             self._token('.')
             with self._optional():
-                self._seconds_fraction_()
-
-    @graken
-    def _seconds_integer_value_(self):
-        self._integer_()
-
-    @graken
-    def _seconds_fraction_(self):
-        self._integer_()
-
-    @graken
-    def _datetime_value_(self):
-        self._integer_()
+                self._integer_()
 
     @graken
     def _boolean_literal_(self):
@@ -652,10 +625,6 @@ class SqlParser(Parser):
 
     @graken
     def _identifier_(self):
-        self._actual_identifier_()
-
-    @graken
-    def _actual_identifier_(self):
         with self._choice():
             with self._option():
                 self._regular_identifier_()
@@ -753,13 +722,9 @@ class SqlParser(Parser):
     @graken
     def _local_qualified_name_(self):
         with self._optional():
-            self._local_qualifier_()
+            self._token('MODULE')
             self._token('.')
         self._qualified_identifier_()
-
-    @graken
-    def _local_qualifier_(self):
-        self._token('MODULE')
 
     @graken
     def _host_parameter_name_(self):
@@ -933,7 +898,7 @@ class SqlParser(Parser):
                 with self._optional():
                     self._token('CHARACTER')
                     self._token('SET')
-                    self._character_set_specification_()
+                    self._character_set_name_()
                 with self._optional():
                     self._collate_clause_()
             with self._option():
@@ -945,12 +910,12 @@ class SqlParser(Parser):
             with self._option():
                 self._numeric_type_()
             with self._option():
-                self._boolean_type_()
+                self._token('BOOLEAN')
             with self._option():
                 self._datetime_type_()
             with self._option():
                 self._interval_type_()
-            self._error('no available options')
+            self._error('expecting one of: BOOLEAN')
 
     @graken
     def _character_string_type_(self):
@@ -959,30 +924,30 @@ class SqlParser(Parser):
                 self._token('CHARACTER')
                 with self._optional():
                     self._token('(')
-                    self._length_()
+                    self._integer_()
                     self._token(')')
             with self._option():
                 self._token('CHAR')
                 with self._optional():
                     self._token('(')
-                    self._length_()
+                    self._integer_()
                     self._token(')')
             with self._option():
                 self._token('CHARACTER')
                 self._token('VARYING')
                 self._token('(')
-                self._length_()
+                self._integer_()
                 self._token(')')
             with self._option():
                 self._token('CHAR')
                 self._token('VARYING')
                 self._token('(')
-                self._length_()
+                self._integer_()
                 self._token(')')
             with self._option():
                 self._token('VARCHAR')
                 self._token('(')
-                self._length_()
+                self._integer_()
                 self._token(')')
             with self._option():
                 self._token('CHARACTER')
@@ -1016,40 +981,40 @@ class SqlParser(Parser):
                 self._token('CHARACTER')
                 with self._optional():
                     self._token('(')
-                    self._length_()
+                    self._integer_()
                     self._token(')')
             with self._option():
                 self._token('NATIONAL')
                 self._token('CHAR')
                 with self._optional():
                     self._token('(')
-                    self._length_()
+                    self._integer_()
                     self._token(')')
             with self._option():
                 self._token('NCHAR')
                 with self._optional():
                     self._token('(')
-                    self._length_()
+                    self._integer_()
                     self._token(')')
             with self._option():
                 self._token('NATIONAL')
                 self._token('CHARACTER')
                 self._token('VARYING')
                 self._token('(')
-                self._length_()
+                self._integer_()
                 self._token(')')
             with self._option():
                 self._token('NATIONAL')
                 self._token('CHAR')
                 self._token('VARYING')
                 self._token('(')
-                self._length_()
+                self._integer_()
                 self._token(')')
             with self._option():
                 self._token('NCHAR')
                 self._token('VARYING')
                 self._token('(')
-                self._length_()
+                self._integer_()
                 self._token(')')
             with self._option():
                 self._token('NATIONAL')
@@ -1111,28 +1076,28 @@ class SqlParser(Parser):
                 self._token('NUMERIC')
                 with self._optional():
                     self._token('(')
-                    self._precision_()
+                    self._integer_()
                     with self._optional():
                         self._token(',')
-                        self._scale_()
+                        self._integer_()
                     self._token(')')
             with self._option():
                 self._token('DECIMAL')
                 with self._optional():
                     self._token('(')
-                    self._precision_()
+                    self._integer_()
                     with self._optional():
                         self._token(',')
-                        self._scale_()
+                        self._integer_()
                     self._token(')')
             with self._option():
                 self._token('DEC')
                 with self._optional():
                     self._token('(')
-                    self._precision_()
+                    self._integer_()
                     with self._optional():
                         self._token(',')
-                        self._scale_()
+                        self._integer_()
                     self._token(')')
             with self._option():
                 self._token('SMALLINT')
@@ -1152,18 +1117,14 @@ class SqlParser(Parser):
                 self._token('FLOAT')
                 with self._optional():
                     self._token('(')
-                    self._precision_()
+                    self._integer_()
                     self._token(')')
             with self._option():
                 self._token('REAL')
             with self._option():
                 self._token('DOUBLE')
-                self._token('PRECISION')
+                self._token('integer')
             self._error('expecting one of: DOUBLE FLOAT REAL')
-
-    @graken
-    def _length_(self):
-        self._integer_()
 
     @graken
     def _large_object_length_(self):
@@ -1192,18 +1153,6 @@ class SqlParser(Parser):
             self._error('expecting one of: CHARACTERS CODE_UNITS OCTETS')
 
     @graken
-    def _precision_(self):
-        self._integer_()
-
-    @graken
-    def _scale_(self):
-        self._integer_()
-
-    @graken
-    def _boolean_type_(self):
-        self._token('BOOLEAN')
-
-    @graken
     def _datetime_type_(self):
         with self._choice():
             with self._option():
@@ -1212,7 +1161,7 @@ class SqlParser(Parser):
                 self._token('TIME')
                 with self._optional():
                     self._token('(')
-                    self._time_precision_()
+                    self._integer_()
                     self._token(')')
                 with self._optional():
                     self._with_or_without_time_zone_()
@@ -1220,7 +1169,7 @@ class SqlParser(Parser):
                 self._token('TIMESTAMP')
                 with self._optional():
                     self._token('(')
-                    self._timestamp_precision_()
+                    self._integer_()
                     self._token(')')
                 with self._optional():
                     self._with_or_without_time_zone_()
@@ -1238,18 +1187,6 @@ class SqlParser(Parser):
                 self._token('TIME')
                 self._token('ZONE')
             self._error('expecting one of: WITH WITHOUT')
-
-    @graken
-    def _time_precision_(self):
-        self._time_fractional_seconds_precision_()
-
-    @graken
-    def _timestamp_precision_(self):
-        self._time_fractional_seconds_precision_()
-
-    @graken
-    def _time_fractional_seconds_precision_(self):
-        self._integer_()
 
     @graken
     def _interval_type_(self):
@@ -1352,7 +1289,7 @@ class SqlParser(Parser):
             with self._option():
                 self._window_function_()
             with self._option():
-                self._scalar_subquery_()
+                self._subquery_()
             with self._option():
                 self._case_expression_()
             with self._option():
@@ -1366,7 +1303,8 @@ class SqlParser(Parser):
             with self._option():
                 self._static_method_invocation_()
             with self._option():
-                self._new_specification_()
+                self._token('NEW')
+                self._routine_invocation_()
             with self._option():
                 self._attribute_or_method_reference_()
             with self._option():
@@ -1409,7 +1347,7 @@ class SqlParser(Parser):
             with self._option():
                 self._sql_parameter_reference_()
             with self._option():
-                self._dynamic_parameter_specification_()
+                self._token('?')
             with self._option():
                 self._current_collation_specification_()
             with self._option():
@@ -1458,8 +1396,8 @@ class SqlParser(Parser):
             with self._option():
                 self._target_array_element_specification_()
             with self._option():
-                self._dynamic_parameter_specification_()
-            self._error('no available options')
+                self._token('?')
+            self._error('expecting one of: ?')
 
     @graken
     def _simple_target_specification_(self):
@@ -1477,10 +1415,6 @@ class SqlParser(Parser):
         self._host_parameter_name_()
         with self._optional():
             self._indicator_parameter_()
-
-    @graken
-    def _dynamic_parameter_specification_(self):
-        self._token('?')
 
     @graken
     def _indicator_parameter_(self):
@@ -1606,15 +1540,13 @@ class SqlParser(Parser):
         with self._choice():
             with self._option():
                 self._rank_function_type_()
-                self._token('(')
-                self._token(')')
+                self._empty_grouping_set_()
             with self._option():
                 self._token('ROW_NUMBER')
-                self._token('(')
-                self._token(')')
+                self._empty_grouping_set_()
             with self._option():
                 self._aggregate_function_()
-            self._error('expecting one of: ROW_NUMBER')
+            self._error('no available options')
 
     @graken
     def _rank_function_type_(self):
@@ -1636,12 +1568,8 @@ class SqlParser(Parser):
             with self._option():
                 self._window_name_()
             with self._option():
-                self._in_line_window_specification_()
+                self._window_specification_()
             self._error('no available options')
-
-    @graken
-    def _in_line_window_specification_(self):
-        self._window_specification_()
 
     @graken
     def _case_expression_(self):
@@ -1743,36 +1671,112 @@ class SqlParser(Parser):
             with self._option():
                 self._row_value_predicand_()
             with self._option():
-                self._comparison_predicate_part_2_()
+                self._comp_op_()
+                self._row_value_predicand_()
             with self._option():
-                self._between_predicate_part_2_()
+                with self._optional():
+                    self._token('NOT')
+                self._token('BETWEEN')
+                with self._optional():
+                    with self._choice():
+                        with self._option():
+                            self._token('ASYMMETRIC')
+                        with self._option():
+                            self._token('SYMMETRIC')
+                        self._error('expecting one of: ASYMMETRIC SYMMETRIC')
+                self._row_value_predicand_()
+                self._token('AND')
+                self._row_value_predicand_()
             with self._option():
-                self._in_predicate_part_2_()
+                with self._optional():
+                    self._token('NOT')
+                self._token('IN')
+                self._in_predicate_value_()
             with self._option():
-                self._character_like_predicate_part_2_()
+                with self._optional():
+                    self._token('NOT')
+                self._token('LIKE')
+                self._character_pattern_()
+                with self._optional():
+                    self._token('ESCAPE')
+                    self._escape_character_()
             with self._option():
-                self._octet_like_predicate_part_2_()
+                with self._optional():
+                    self._token('NOT')
+                self._token('LIKE')
+                self._octet_pattern_()
+                with self._optional():
+                    self._token('ESCAPE')
+                    self._escape_octet_()
             with self._option():
-                self._similar_predicate_part_2_()
+                with self._optional():
+                    self._token('NOT')
+                self._token('SIMILAR')
+                self._token('TO')
+                self._similar_pattern_()
+                with self._optional():
+                    self._token('ESCAPE')
+                    self._escape_character_()
             with self._option():
-                self._null_predicate_part_2_()
+                self._token('IS')
+                with self._optional():
+                    self._token('NOT')
+                self._token('NULL')
             with self._option():
-                self._quantified_comparison_predicate_part_2_()
+                self._comp_op_()
+                self._quantifier_()
+                self._subquery_()
             with self._option():
-                self._match_predicate_part_2_()
+                self._token('MATCH')
+                with self._optional():
+                    self._token('UNIQUE')
+                with self._optional():
+                    with self._choice():
+                        with self._option():
+                            self._token('SIMPLE')
+                        with self._option():
+                            self._token('PARTIAL')
+                        with self._option():
+                            self._token('FULL')
+                        self._error('expecting one of: FULL PARTIAL SIMPLE')
+                self._subquery_()
             with self._option():
-                self._overlaps_predicate_part_2_()
+                self._token('OVERLAPS')
+                self._row_value_predicand_()
             with self._option():
-                self._distinct_predicate_part_2_()
+                self._token('IS')
+                self._token('DISTINCT')
+                self._token('FROM')
+                self._row_value_predicand_()
             with self._option():
-                self._member_predicate_part_2_()
+                with self._optional():
+                    self._token('NOT')
+                self._token('MEMBER')
+                with self._optional():
+                    self._token('OF')
+                self._multiset_value_expression_()
             with self._option():
-                self._submultiset_predicate_part_2_()
+                with self._optional():
+                    self._token('NOT')
+                self._token('SUBMULTISET')
+                with self._optional():
+                    self._token('OF')
+                self._multiset_value_expression_()
             with self._option():
-                self._set_predicate_part_2_()
+                self._token('IS')
+                with self._optional():
+                    self._token('NOT')
+                self._token('A')
+                self._token('SET')
             with self._option():
-                self._type_predicate_part_2_()
-            self._error('no available options')
+                self._token('IS')
+                with self._optional():
+                    self._token('NOT')
+                self._token('OF')
+                self._token('(')
+                self._type_list_()
+                self._token(')')
+            self._error('expecting one of: IS')
 
     @graken
     def _result_(self):
@@ -1885,11 +1889,6 @@ class SqlParser(Parser):
         self._method_name_()
         with self._optional():
             self._sql_argument_list_()
-
-    @graken
-    def _new_specification_(self):
-        self._token('NEW')
-        self._routine_invocation_()
 
     @graken
     def _attribute_or_method_reference_(self):
@@ -2195,18 +2194,10 @@ class SqlParser(Parser):
     def _power_function_(self):
         self._token('POWER')
         self._token('(')
-        self._numeric_value_expression_base_()
+        self._numeric_value_expression_()
         self._token(',')
-        self._numeric_value_expression_exponent_()
+        self._numeric_value_expression_()
         self._token(')')
-
-    @graken
-    def _numeric_value_expression_base_(self):
-        self._numeric_value_expression_()
-
-    @graken
-    def _numeric_value_expression_exponent_(self):
-        self._numeric_value_expression_()
 
     @graken
     def _square_root_(self):
@@ -2241,23 +2232,15 @@ class SqlParser(Parser):
         self._token('(')
         self._width_bucket_operand_()
         self._token(',')
-        self._width_bucket_bound_1_()
+        self._numeric_value_expression_()
         self._token(',')
-        self._width_bucket_bound_2_()
+        self._numeric_value_expression_()
         self._token(',')
         self._width_bucket_count_()
         self._token(')')
 
     @graken
     def _width_bucket_operand_(self):
-        self._numeric_value_expression_()
-
-    @graken
-    def _width_bucket_bound_1_(self):
-        self._numeric_value_expression_()
-
-    @graken
-    def _width_bucket_bound_2_(self):
         self._numeric_value_expression_()
 
     @graken
@@ -2309,12 +2292,8 @@ class SqlParser(Parser):
             with self._option():
                 self._blob_concatenation_()
             with self._option():
-                self._blob_factor_()
+                self._blob_primary_()
             self._error('no available options')
-
-    @graken
-    def _blob_factor_(self):
-        self._blob_primary_()
 
     @graken
     def _blob_primary_(self):
@@ -2329,7 +2308,7 @@ class SqlParser(Parser):
     def _blob_concatenation_(self):
         self._blob_value_expression_()
         self._token('||')
-        self._blob_factor_()
+        self._blob_primary_()
 
     @graken
     def _string_value_function_(self):
@@ -2522,16 +2501,8 @@ class SqlParser(Parser):
             with self._optional():
                 self._trim_specification_()
             with self._optional():
-                self._trim_octet_()
+                self._blob_value_expression_()
             self._token('FROM')
-        self._blob_trim_source_()
-
-    @graken
-    def _blob_trim_source_(self):
-        self._blob_value_expression_()
-
-    @graken
-    def _trim_octet_(self):
         self._blob_value_expression_()
 
     @graken
@@ -2634,7 +2605,7 @@ class SqlParser(Parser):
         self._token('CURRENT_TIME')
         with self._optional():
             self._token('(')
-            self._time_precision_()
+            self._integer_()
             self._token(')')
 
     @graken
@@ -2642,7 +2613,7 @@ class SqlParser(Parser):
         self._token('LOCALTIME')
         with self._optional():
             self._token('(')
-            self._time_precision_()
+            self._integer_()
             self._token(')')
 
     @graken
@@ -2650,7 +2621,7 @@ class SqlParser(Parser):
         self._token('CURRENT_TIMESTAMP')
         with self._optional():
             self._token('(')
-            self._timestamp_precision_()
+            self._integer_()
             self._token(')')
 
     @graken
@@ -2658,7 +2629,7 @@ class SqlParser(Parser):
         self._token('LOCALTIMESTAMP')
         with self._optional():
             self._token('(')
-            self._timestamp_precision_()
+            self._integer_()
             self._token(')')
 
     @graken
@@ -2667,13 +2638,13 @@ class SqlParser(Parser):
             with self._option():
                 self._interval_term_()
             with self._option():
-                self._interval_value_expression_1_()
+                self._interval_value_expression_()
                 self._token('+')
-                self._interval_term_1_()
+                self._interval_term_()
             with self._option():
-                self._interval_value_expression_1_()
+                self._interval_value_expression_()
                 self._token('-')
-                self._interval_term_1_()
+                self._interval_term_()
             with self._option():
                 self._token('(')
                 self._datetime_value_expression_()
@@ -2689,11 +2660,11 @@ class SqlParser(Parser):
             with self._option():
                 self._interval_factor_()
             with self._option():
-                self._interval_term_2_()
+                self._interval_term_()
                 self._token('*')
                 self._factor_()
             with self._option():
-                self._interval_term_2_()
+                self._interval_term_()
                 self._token('/')
                 self._factor_()
             with self._option():
@@ -2718,18 +2689,6 @@ class SqlParser(Parser):
             with self._option():
                 self._interval_value_function_()
             self._error('no available options')
-
-    @graken
-    def _interval_value_expression_1_(self):
-        self._interval_value_expression_()
-
-    @graken
-    def _interval_term_1_(self):
-        self._interval_term_()
-
-    @graken
-    def _interval_term_2_(self):
-        self._interval_term_()
 
     @graken
     def _interval_value_function_(self):
@@ -2825,13 +2784,9 @@ class SqlParser(Parser):
 
     @graken
     def _array_concatenation_(self):
-        self._array_value_expression_1_()
+        self._array_value_expression_()
         self._token('||')
         self._array_factor_()
-
-    @graken
-    def _array_value_expression_1_(self):
-        self._array_value_expression_()
 
     @graken
     def _array_factor_(self):
@@ -3018,7 +2973,7 @@ class SqlParser(Parser):
                 self._row_value_constructor_element_list_()
                 self._token(')')
             with self._option():
-                self._row_subquery_()
+                self._subquery_()
             self._error('no available options')
 
     @graken
@@ -3244,16 +3199,16 @@ class SqlParser(Parser):
                     self._correlation_name_()
                     with self._optional():
                         self._token('(')
-                        self._derived_column_list_()
+                        self._column_name_list_()
                         self._token(')')
             with self._option():
-                self._derived_table_()
+                self._subquery_()
                 with self._optional():
                     self._token('AS')
                 self._correlation_name_()
                 with self._optional():
                     self._token('(')
-                    self._derived_column_list_()
+                    self._column_name_list_()
                     self._token(')')
             with self._option():
                 self._lateral_derived_table_()
@@ -3262,7 +3217,7 @@ class SqlParser(Parser):
                 self._correlation_name_()
                 with self._optional():
                     self._token('(')
-                    self._derived_column_list_()
+                    self._column_name_list_()
                     self._token(')')
             with self._option():
                 self._collection_derived_table_()
@@ -3271,7 +3226,7 @@ class SqlParser(Parser):
                 self._correlation_name_()
                 with self._optional():
                     self._token('(')
-                    self._derived_column_list_()
+                    self._column_name_list_()
                     self._token(')')
             with self._option():
                 self._table_function_derived_table_()
@@ -3280,7 +3235,7 @@ class SqlParser(Parser):
                 self._correlation_name_()
                 with self._optional():
                     self._token('(')
-                    self._derived_column_list_()
+                    self._column_name_list_()
                     self._token(')')
             with self._option():
                 self._only_spec_()
@@ -3290,7 +3245,7 @@ class SqlParser(Parser):
                     self._correlation_name_()
                     with self._optional():
                         self._token('(')
-                        self._derived_column_list_()
+                        self._column_name_list_()
                         self._token(')')
             with self._option():
                 self._token('(')
@@ -3308,7 +3263,7 @@ class SqlParser(Parser):
     @graken
     def _lateral_derived_table_(self):
         self._token('LATERAL')
-        self._table_subquery_()
+        self._subquery_()
 
     @graken
     def _collection_derived_table_(self):
@@ -3328,10 +3283,6 @@ class SqlParser(Parser):
         self._token(')')
 
     @graken
-    def _derived_table_(self):
-        self._table_subquery_()
-
-    @graken
     def _table_or_query_name_(self):
         with self._choice():
             with self._option():
@@ -3339,10 +3290,6 @@ class SqlParser(Parser):
             with self._option():
                 self._query_name_()
             self._error('no available options')
-
-    @graken
-    def _derived_column_list_(self):
-        self._column_name_list_()
 
     @graken
     def _column_name_list_(self):
@@ -3417,7 +3364,7 @@ class SqlParser(Parser):
     def _named_columns_join_(self):
         self._token('USING')
         self._token('(')
-        self._join_column_list_()
+        self._column_name_list_()
         self._token(')')
 
     @graken
@@ -3441,10 +3388,6 @@ class SqlParser(Parser):
             with self._option():
                 self._token('FULL')
             self._error('expecting one of: FULL LEFT RIGHT')
-
-    @graken
-    def _join_column_list_(self):
-        self._column_name_list_()
 
     @graken
     def _where_clause_(self):
@@ -3698,16 +3641,8 @@ class SqlParser(Parser):
     @graken
     def _window_frame_between_(self):
         self._token('BETWEEN')
-        self._window_frame_bound_1_()
-        self._token('AND')
-        self._window_frame_bound_2_()
-
-    @graken
-    def _window_frame_bound_1_(self):
         self._window_frame_bound_()
-
-    @graken
-    def _window_frame_bound_2_(self):
+        self._token('AND')
         self._window_frame_bound_()
 
     @graken
@@ -3823,12 +3758,8 @@ class SqlParser(Parser):
         with self._optional():
             self._token('AS')
             self._token('(')
-            self._all_fields_column_name_list_()
+            self._column_name_list_()
             self._token(')')
-
-    @graken
-    def _all_fields_column_name_list_(self):
-        self._column_name_list_()
 
     @graken
     def _query_expression_(self):
@@ -3858,7 +3789,7 @@ class SqlParser(Parser):
         self._query_name_()
         with self._optional():
             self._token('(')
-            self._with_column_list_()
+            self._column_name_list_()
             self._token(')')
         self._token('AS')
         self._token('(')
@@ -3866,10 +3797,6 @@ class SqlParser(Parser):
         self._token(')')
         with self._optional():
             self._search_or_cycle_clause_()
-
-    @graken
-    def _with_column_list_(self):
-        self._column_name_list_()
 
     @graken
     def _query_expression_body_(self):
@@ -3984,12 +3911,8 @@ class SqlParser(Parser):
         with self._optional():
             self._token('BY')
             self._token('(')
-            self._corresponding_column_list_()
+            self._column_name_list_()
             self._token(')')
-
-    @graken
-    def _corresponding_column_list_(self):
-        self._column_name_list_()
 
     @graken
     def _search_or_cycle_clause_(self):
@@ -4008,7 +3931,7 @@ class SqlParser(Parser):
         self._token('SEARCH')
         self._recursive_search_order_()
         self._token('SET')
-        self._sequence_column_()
+        self._column_name_()
 
     @graken
     def _recursive_search_order_(self):
@@ -4026,43 +3949,27 @@ class SqlParser(Parser):
             self._error('no available options')
 
     @graken
-    def _sequence_column_(self):
-        self._column_name_()
-
-    @graken
     def _cycle_clause_(self):
         self._token('CYCLE')
         self._cycle_column_list_()
         self._token('SET')
-        self._cycle_mark_column_()
+        self._column_name_()
         self._token('TO')
         self._cycle_mark_value_()
         self._token('DEFAULT')
         self._non_cycle_mark_value_()
         self._token('USING')
-        self._path_column_()
+        self._column_name_()
 
     @graken
     def _cycle_column_list_(self):
-        self._cycle_column_()
+        self._column_name_()
         with self._optional():
             def block0():
                 self._token(',')
-                self._cycle_column_()
+                self._column_name_()
 
             self._positive_closure(block0)
-
-    @graken
-    def _cycle_column_(self):
-        self._column_name_()
-
-    @graken
-    def _cycle_mark_column_(self):
-        self._column_name_()
-
-    @graken
-    def _path_column_(self):
-        self._column_name_()
 
     @graken
     def _cycle_mark_value_(self):
@@ -4071,18 +3978,6 @@ class SqlParser(Parser):
     @graken
     def _non_cycle_mark_value_(self):
         self._value_expression_()
-
-    @graken
-    def _scalar_subquery_(self):
-        self._subquery_()
-
-    @graken
-    def _row_subquery_(self):
-        self._subquery_()
-
-    @graken
-    def _table_subquery_(self):
-        self._subquery_()
 
     @graken
     def _subquery_(self):
@@ -4132,10 +4027,6 @@ class SqlParser(Parser):
     @graken
     def _comparison_predicate_(self):
         self._row_value_predicand_()
-        self._comparison_predicate_part_2_()
-
-    @graken
-    def _comparison_predicate_part_2_(self):
         self._comp_op_()
         self._row_value_predicand_()
 
@@ -4159,10 +4050,6 @@ class SqlParser(Parser):
     @graken
     def _between_predicate_(self):
         self._row_value_predicand_()
-        self._between_predicate_part_2_()
-
-    @graken
-    def _between_predicate_part_2_(self):
         with self._optional():
             self._token('NOT')
         self._token('BETWEEN')
@@ -4180,10 +4067,6 @@ class SqlParser(Parser):
     @graken
     def _in_predicate_(self):
         self._row_value_predicand_()
-        self._in_predicate_part_2_()
-
-    @graken
-    def _in_predicate_part_2_(self):
         with self._optional():
             self._token('NOT')
         self._token('IN')
@@ -4193,7 +4076,7 @@ class SqlParser(Parser):
     def _in_predicate_value_(self):
         with self._choice():
             with self._option():
-                self._table_subquery_()
+                self._subquery_()
             with self._option():
                 self._token('(')
                 self._in_value_list_()
@@ -4222,10 +4105,6 @@ class SqlParser(Parser):
     @graken
     def _character_like_predicate_(self):
         self._row_value_predicand_()
-        self._character_like_predicate_part_2_()
-
-    @graken
-    def _character_like_predicate_part_2_(self):
         with self._optional():
             self._token('NOT')
         self._token('LIKE')
@@ -4245,10 +4124,6 @@ class SqlParser(Parser):
     @graken
     def _octet_like_predicate_(self):
         self._row_value_predicand_()
-        self._octet_like_predicate_part_2_()
-
-    @graken
-    def _octet_like_predicate_part_2_(self):
         with self._optional():
             self._token('NOT')
         self._token('LIKE')
@@ -4268,10 +4143,6 @@ class SqlParser(Parser):
     @graken
     def _similar_predicate_(self):
         self._row_value_predicand_()
-        self._similar_predicate_part_2_()
-
-    @graken
-    def _similar_predicate_part_2_(self):
         with self._optional():
             self._token('NOT')
         self._token('SIMILAR')
@@ -4328,7 +4199,7 @@ class SqlParser(Parser):
     @graken
     def _repeat_factor_(self):
         self._token('{')
-        self._low_value_()
+        self._integer_()
         with self._optional():
             self._upper_limit_()
         self._token('}')
@@ -4337,15 +4208,7 @@ class SqlParser(Parser):
     def _upper_limit_(self):
         self._token(',')
         with self._optional():
-            self._high_value_()
-
-    @graken
-    def _low_value_(self):
-        self._integer_()
-
-    @graken
-    def _high_value_(self):
-        self._integer_()
+            self._integer_()
 
     @graken
     def _regular_primary_(self):
@@ -4405,25 +4268,17 @@ class SqlParser(Parser):
                 self._token('[')
 
                 def block2():
-                    self._character_enumeration_include_()
+                    self._character_enumeration_()
 
                 self._positive_closure(block2)
                 self._token('^')
 
                 def block3():
-                    self._character_enumeration_exclude_()
+                    self._character_enumeration_()
 
                 self._positive_closure(block3)
                 self._token(']')
             self._error('expecting one of: _')
-
-    @graken
-    def _character_enumeration_include_(self):
-        self._character_enumeration_()
-
-    @graken
-    def _character_enumeration_exclude_(self):
-        self._character_enumeration_()
 
     @graken
     def _character_enumeration_(self):
@@ -4449,10 +4304,6 @@ class SqlParser(Parser):
     @graken
     def _null_predicate_(self):
         self._row_value_predicand_()
-        self._null_predicate_part_2_()
-
-    @graken
-    def _null_predicate_part_2_(self):
         self._token('IS')
         with self._optional():
             self._token('NOT')
@@ -4461,45 +4312,30 @@ class SqlParser(Parser):
     @graken
     def _quantified_comparison_predicate_(self):
         self._row_value_predicand_()
-        self._quantified_comparison_predicate_part_2_()
-
-    @graken
-    def _quantified_comparison_predicate_part_2_(self):
         self._comp_op_()
         self._quantifier_()
-        self._table_subquery_()
+        self._subquery_()
 
     @graken
     def _quantifier_(self):
         with self._choice():
             with self._option():
-                self._all_()
-            with self._option():
-                self._some_()
-            self._error('no available options')
-
-    @graken
-    def _all_(self):
-        self._token('ALL')
-
-    @graken
-    def _some_(self):
-        with self._choice():
+                self._token('ALL')
             with self._option():
                 self._token('SOME')
             with self._option():
                 self._token('ANY')
-            self._error('expecting one of: ANY SOME')
+            self._error('expecting one of: ALL ANY SOME')
 
     @graken
     def _exists_predicate_(self):
         self._token('EXISTS')
-        self._table_subquery_()
+        self._subquery_()
 
     @graken
     def _unique_predicate_(self):
         self._token('UNIQUE')
-        self._table_subquery_()
+        self._subquery_()
 
     @graken
     def _normalized_predicate_(self):
@@ -4512,10 +4348,6 @@ class SqlParser(Parser):
     @graken
     def _match_predicate_(self):
         self._row_value_predicand_()
-        self._match_predicate_part_2_()
-
-    @graken
-    def _match_predicate_part_2_(self):
         self._token('MATCH')
         with self._optional():
             self._token('UNIQUE')
@@ -4528,57 +4360,25 @@ class SqlParser(Parser):
                 with self._option():
                     self._token('FULL')
                 self._error('expecting one of: FULL PARTIAL SIMPLE')
-        self._table_subquery_()
+        self._subquery_()
 
     @graken
     def _overlaps_predicate_(self):
-        self._overlaps_predicate_part_1_()
-        self._overlaps_predicate_part_2_()
-
-    @graken
-    def _overlaps_predicate_part_1_(self):
-        self._row_value_predicand_1_()
-
-    @graken
-    def _overlaps_predicate_part_2_(self):
-        self._token('OVERLAPS')
-        self._row_value_predicand_2_()
-
-    @graken
-    def _row_value_predicand_1_(self):
         self._row_value_predicand_()
-
-    @graken
-    def _row_value_predicand_2_(self):
+        self._token('OVERLAPS')
         self._row_value_predicand_()
 
     @graken
     def _distinct_predicate_(self):
-        self._row_value_predicand_3_()
-        self._distinct_predicate_part_2_()
-
-    @graken
-    def _distinct_predicate_part_2_(self):
+        self._row_value_predicand_()
         self._token('IS')
         self._token('DISTINCT')
         self._token('FROM')
-        self._row_value_predicand_4_()
-
-    @graken
-    def _row_value_predicand_3_(self):
-        self._row_value_predicand_()
-
-    @graken
-    def _row_value_predicand_4_(self):
         self._row_value_predicand_()
 
     @graken
     def _member_predicate_(self):
         self._row_value_predicand_()
-        self._member_predicate_part_2_()
-
-    @graken
-    def _member_predicate_part_2_(self):
         with self._optional():
             self._token('NOT')
         self._token('MEMBER')
@@ -4589,10 +4389,6 @@ class SqlParser(Parser):
     @graken
     def _submultiset_predicate_(self):
         self._row_value_predicand_()
-        self._submultiset_predicate_part_2_()
-
-    @graken
-    def _submultiset_predicate_part_2_(self):
         with self._optional():
             self._token('NOT')
         self._token('SUBMULTISET')
@@ -4603,10 +4399,6 @@ class SqlParser(Parser):
     @graken
     def _set_predicate_(self):
         self._row_value_predicand_()
-        self._set_predicate_part_2_()
-
-    @graken
-    def _set_predicate_part_2_(self):
         self._token('IS')
         with self._optional():
             self._token('NOT')
@@ -4616,10 +4408,6 @@ class SqlParser(Parser):
     @graken
     def _type_predicate_(self):
         self._row_value_predicand_()
-        self._type_predicate_part_2_()
-
-    @graken
-    def _type_predicate_part_2_(self):
         self._token('IS')
         with self._optional():
             self._token('NOT')
@@ -4676,7 +4464,7 @@ class SqlParser(Parser):
         self._non_second_primary_datetime_field_()
         with self._optional():
             self._token('(')
-            self._interval_leading_field_precision_()
+            self._integer_()
             self._token(')')
 
     @graken
@@ -4688,7 +4476,7 @@ class SqlParser(Parser):
                 self._token('SECOND')
                 with self._optional():
                     self._token('(')
-                    self._interval_fractional_seconds_precision_()
+                    self._integer_()
                     self._token(')')
             self._error('expecting one of: SECOND')
 
@@ -4699,16 +4487,16 @@ class SqlParser(Parser):
                 self._non_second_primary_datetime_field_()
                 with self._optional():
                     self._token('(')
-                    self._interval_leading_field_precision_()
+                    self._integer_()
                     self._token(')')
             with self._option():
                 self._token('SECOND')
                 with self._optional():
                     self._token('(')
-                    self._interval_leading_field_precision_()
+                    self._integer_()
                     with self._optional():
                         self._token(',')
-                        self._interval_fractional_seconds_precision_()
+                        self._integer_()
                     self._token(')')
             self._error('expecting one of: SECOND')
 
@@ -4735,14 +4523,6 @@ class SqlParser(Parser):
             with self._option():
                 self._token('MINUTE')
             self._error('expecting one of: DAY HOUR MINUTE MONTH YEAR')
-
-    @graken
-    def _interval_fractional_seconds_precision_(self):
-        self._integer_()
-
-    @graken
-    def _interval_leading_field_precision_(self):
-        self._integer_()
 
     @graken
     def _language_clause_(self):
@@ -4827,29 +4607,6 @@ class SqlParser(Parser):
         self._value_expression_()
         self._token('AS')
         self._path_resolved_user_defined_type_name_()
-
-    @graken
-    def _character_set_specification_(self):
-        with self._choice():
-            with self._option():
-                self._standard_character_set_name_()
-            with self._option():
-                self._implementation_defined_character_set_name_()
-            with self._option():
-                self._user_defined_character_set_name_()
-            self._error('no available options')
-
-    @graken
-    def _standard_character_set_name_(self):
-        self._character_set_name_()
-
-    @graken
-    def _implementation_defined_character_set_name_(self):
-        self._character_set_name_()
-
-    @graken
-    def _user_defined_character_set_name_(self):
-        self._character_set_name_()
 
     @graken
     def _specific_routine_designator_(self):
@@ -5136,13 +4893,9 @@ class SqlParser(Parser):
     def _inverse_distribution_function_(self):
         self._inverse_distribution_function_type_()
         self._token('(')
-        self._inverse_distribution_function_argument_()
+        self._numeric_value_expression_()
         self._token(')')
         self._within_group_specification_()
-
-    @graken
-    def _inverse_distribution_function_argument_(self):
-        self._numeric_value_expression_()
 
     @graken
     def _inverse_distribution_function_type_(self):
@@ -5246,7 +4999,7 @@ class SqlParser(Parser):
         self._token('DEFAULT')
         self._token('CHARACTER')
         self._token('SET')
-        self._character_set_specification_()
+        self._character_set_name_()
 
     @graken
     def _schema_path_specification_(self):
@@ -5389,7 +5142,7 @@ class SqlParser(Parser):
     def _self_referencing_column_specification_(self):
         self._token('REF')
         self._token('IS')
-        self._self_referencing_column_name_()
+        self._column_name_()
         self._reference_generation_()
 
     @graken
@@ -5404,10 +5157,6 @@ class SqlParser(Parser):
             with self._option():
                 self._token('DERIVED')
             self._error('expecting one of: DERIVED SYSTEM USER')
-
-    @graken
-    def _self_referencing_column_name_(self):
-        self._column_name_()
 
     @graken
     def _column_options_(self):
@@ -5431,14 +5180,6 @@ class SqlParser(Parser):
     @graken
     def _subtable_clause_(self):
         self._token('UNDER')
-        self._supertable_clause_()
-
-    @graken
-    def _supertable_clause_(self):
-        self._supertable_name_()
-
-    @graken
-    def _supertable_name_(self):
         self._table_name_()
 
     @graken
@@ -5491,15 +5232,10 @@ class SqlParser(Parser):
 
     @graken
     def _with_or_without_data_(self):
-        with self._choice():
-            with self._option():
-                self._token('WITH')
-                self._token('NO')
-                self._token('DATA')
-            with self._option():
-                self._token('WITH')
-                self._token('DATA')
-            self._error('expecting one of: WITH')
+        self._token('WITH')
+        with self._optional():
+            self._token('NO')
+        self._token('DATA')
 
     @graken
     def _column_definition_(self):
@@ -5588,14 +5324,10 @@ class SqlParser(Parser):
 
     @graken
     def _generation_clause_(self):
-        self._generation_rule_()
-        self._token('AS')
-        self._generation_expression_()
-
-    @graken
-    def _generation_rule_(self):
         self._token('GENERATED')
         self._token('ALWAYS')
+        self._token('AS')
+        self._generation_expression_()
 
     @graken
     def _generation_expression_(self):
@@ -5657,7 +5389,7 @@ class SqlParser(Parser):
             with self._option():
                 self._unique_specification_()
                 self._token('(')
-                self._unique_column_list_()
+                self._column_name_list_()
                 self._token(')')
             with self._option():
                 self._token('UNIQUE')
@@ -5676,15 +5408,11 @@ class SqlParser(Parser):
             self._error('expecting one of: PRIMARY UNIQUE')
 
     @graken
-    def _unique_column_list_(self):
-        self._column_name_list_()
-
-    @graken
     def _referential_constraint_definition_(self):
         self._token('FOREIGN')
         self._token('KEY')
         self._token('(')
-        self._referencing_columns_()
+        self._column_name_list_()
         self._token(')')
         self._references_specification_()
 
@@ -5710,20 +5438,12 @@ class SqlParser(Parser):
             self._error('expecting one of: FULL PARTIAL SIMPLE')
 
     @graken
-    def _referencing_columns_(self):
-        self._reference_column_list_()
-
-    @graken
     def _referenced_table_and_columns_(self):
         self._table_name_()
         with self._optional():
             self._token('(')
-            self._reference_column_list_()
+            self._column_name_list_()
             self._token(')')
-
-    @graken
-    def _reference_column_list_(self):
-        self._column_name_list_()
 
     @graken
     def _referential_triggered_action_(self):
@@ -5818,7 +5538,7 @@ class SqlParser(Parser):
             with self._option():
                 self._set_column_default_clause_()
             with self._option():
-                self._drop_column_default_clause_()
+                self._drop_default_clause_()
             with self._option():
                 self._add_column_scope_clause_()
             with self._option():
@@ -5833,7 +5553,7 @@ class SqlParser(Parser):
         self._default_clause_()
 
     @graken
-    def _drop_column_default_clause_(self):
+    def _drop_default_clause_(self):
         self._token('DROP')
         self._token('DEFAULT')
 
@@ -5922,7 +5642,7 @@ class SqlParser(Parser):
     def _regular_view_specification_(self):
         with self._optional():
             self._token('(')
-            self._view_column_list_()
+            self._column_name_list_()
             self._token(')')
 
     @graken
@@ -5977,10 +5697,6 @@ class SqlParser(Parser):
             self._error('expecting one of: CASCADED LOCAL')
 
     @graken
-    def _view_column_list_(self):
-        self._column_name_list_()
-
-    @graken
     def _drop_view_statement_(self):
         self._token('DROP')
         self._token('VIEW')
@@ -6026,7 +5742,7 @@ class SqlParser(Parser):
             with self._option():
                 self._set_domain_default_clause_()
             with self._option():
-                self._drop_domain_default_clause_()
+                self._drop_default_clause_()
             with self._option():
                 self._add_domain_constraint_definition_()
             with self._option():
@@ -6037,11 +5753,6 @@ class SqlParser(Parser):
     def _set_domain_default_clause_(self):
         self._token('SET')
         self._default_clause_()
-
-    @graken
-    def _drop_domain_default_clause_(self):
-        self._token('DROP')
-        self._token('DEFAULT')
 
     @graken
     def _add_domain_constraint_definition_(self):
@@ -6076,7 +5787,7 @@ class SqlParser(Parser):
     @graken
     def _character_set_source_(self):
         self._token('GET')
-        self._character_set_specification_()
+        self._character_set_name_()
 
     @graken
     def _drop_character_set_statement_(self):
@@ -6091,15 +5802,11 @@ class SqlParser(Parser):
         self._token('COLLATION')
         self._collation_name_()
         self._token('FOR')
-        self._character_set_specification_()
+        self._character_set_name_()
         self._token('FROM')
-        self._existing_collation_name_()
+        self._collation_name_()
         with self._optional():
             self._pad_characteristic_()
-
-    @graken
-    def _existing_collation_name_(self):
-        self._collation_name_()
 
     @graken
     def _pad_characteristic_(self):
@@ -6125,36 +5832,20 @@ class SqlParser(Parser):
         self._token('TRANSLATION')
         self._transliteration_name_()
         self._token('FOR')
-        self._source_character_set_specification_()
+        self._character_set_name_()
         self._token('TO')
-        self._target_character_set_specification_()
+        self._character_set_name_()
         self._token('FROM')
         self._transliteration_source_()
-
-    @graken
-    def _source_character_set_specification_(self):
-        self._character_set_specification_()
-
-    @graken
-    def _target_character_set_specification_(self):
-        self._character_set_specification_()
 
     @graken
     def _transliteration_source_(self):
         with self._choice():
             with self._option():
-                self._existing_transliteration_name_()
+                self._transliteration_name_()
             with self._option():
-                self._transliteration_routine_()
+                self._specific_routine_designator_()
             self._error('no available options')
-
-    @graken
-    def _existing_transliteration_name_(self):
-        self._transliteration_name_()
-
-    @graken
-    def _transliteration_routine_(self):
-        self._specific_routine_designator_()
 
     @graken
     def _drop_transliteration_statement_(self):
@@ -6191,7 +5882,11 @@ class SqlParser(Parser):
         self._table_name_()
         with self._optional():
             self._token('REFERENCING')
-            self._old_or_new_values_alias_list_()
+
+            def block0():
+                self._old_or_new_values_alias_()
+
+            self._positive_closure(block0)
         self._triggered_action_()
 
     @graken
@@ -6214,12 +5909,8 @@ class SqlParser(Parser):
                 self._token('UPDATE')
                 with self._optional():
                     self._token('OF')
-                    self._trigger_column_list_()
+                    self._column_name_list_()
             self._error('expecting one of: DELETE INSERT UPDATE')
-
-    @graken
-    def _trigger_column_list_(self):
-        self._column_name_list_()
 
     @graken
     def _triggered_action_(self):
@@ -6256,13 +5947,6 @@ class SqlParser(Parser):
                 self._positive_closure(block0)
                 self._token('END')
             self._error('no available options')
-
-    @graken
-    def _old_or_new_values_alias_list_(self):
-        def block0():
-            self._old_or_new_values_alias_()
-
-        self._positive_closure(block0)
 
     @graken
     def _old_or_new_values_alias_(self):
@@ -6363,10 +6047,6 @@ class SqlParser(Parser):
     @graken
     def _subtype_clause_(self):
         self._token('UNDER')
-        self._supertype_name_()
-
-    @graken
-    def _supertype_name_(self):
         self._path_resolved_user_defined_type_name_()
 
     @graken
@@ -6396,23 +6076,15 @@ class SqlParser(Parser):
 
     @graken
     def _instantiable_clause_(self):
-        with self._choice():
-            with self._option():
-                self._token('INSTANTIABLE')
-            with self._option():
-                self._token('NOT')
-                self._token('INSTANTIABLE')
-            self._error('expecting one of: INSTANTIABLE NOT')
+        with self._optional():
+            self._token('NOT')
+        self._token('INSTANTIABLE')
 
     @graken
     def _finality_(self):
-        with self._choice():
-            with self._option():
-                self._token('FINAL')
-            with self._option():
-                self._token('NOT')
-                self._token('FINAL')
-            self._error('expecting one of: FINAL NOT')
+        with self._optional():
+            self._token('NOT')
+        self._token('FINAL')
 
     @graken
     def _reference_type_specification_(self):
@@ -6460,10 +6132,6 @@ class SqlParser(Parser):
         self._token('REF')
         self._token(')')
         self._token('WITH')
-        self._cast_to_ref_identifier_()
-
-    @graken
-    def _cast_to_ref_identifier_(self):
         self._identifier_()
 
     @graken
@@ -6475,10 +6143,6 @@ class SqlParser(Parser):
         self._token('SOURCE')
         self._token(')')
         self._token('WITH')
-        self._cast_to_type_identifier_()
-
-    @graken
-    def _cast_to_type_identifier_(self):
         self._identifier_()
 
     @graken
@@ -6509,10 +6173,6 @@ class SqlParser(Parser):
         self._token('DISTINCT')
         self._token(')')
         self._token('WITH')
-        self._cast_to_distinct_identifier_()
-
-    @graken
-    def _cast_to_distinct_identifier_(self):
         self._identifier_()
 
     @graken
@@ -6524,10 +6184,6 @@ class SqlParser(Parser):
         self._token('SOURCE')
         self._token(')')
         self._token('WITH')
-        self._cast_to_source_identifier_()
-
-    @graken
-    def _cast_to_source_identifier_(self):
         self._identifier_()
 
     @graken
@@ -6561,7 +6217,10 @@ class SqlParser(Parser):
             self._token('AS')
             self._token('LOCATOR')
         with self._optional():
-            self._method_characteristics_()
+            def block0():
+                self._method_characteristic_()
+
+            self._positive_closure(block0)
 
     @graken
     def _overriding_method_specification_(self):
@@ -6595,13 +6254,6 @@ class SqlParser(Parser):
         self._qualified_identifier_()
 
     @graken
-    def _method_characteristics_(self):
-        def block0():
-            self._method_characteristic_()
-
-        self._positive_closure(block0)
-
-    @graken
     def _method_characteristic_(self):
         with self._choice():
             with self._option():
@@ -6623,13 +6275,9 @@ class SqlParser(Parser):
         with self._optional():
             self._reference_scope_check_()
         with self._optional():
-            self._attribute_default_()
+            self._default_clause_()
         with self._optional():
             self._collate_clause_()
-
-    @graken
-    def _attribute_default_(self):
-        self._default_clause_()
 
     @graken
     def _alter_type_statement_(self):
@@ -6705,10 +6353,6 @@ class SqlParser(Parser):
         self._drop_behavior_()
 
     @graken
-    def _sql_invoked_routine_(self):
-        self._schema_routine_()
-
-    @graken
     def _schema_routine_(self):
         with self._choice():
             with self._option():
@@ -6732,7 +6376,11 @@ class SqlParser(Parser):
         self._token('PROCEDURE')
         self._schema_qualified_routine_name_()
         self._sql_parameter_declaration_list_()
-        self._routine_characteristics_()
+        with self._optional():
+            def block0():
+                self._routine_characteristic_()
+
+            self._positive_closure(block0)
         self._routine_body_()
 
     @graken
@@ -6784,12 +6432,8 @@ class SqlParser(Parser):
     def _parameter_type_(self):
         self._data_type_()
         with self._optional():
-            self._locator_indication_()
-
-    @graken
-    def _locator_indication_(self):
-        self._token('AS')
-        self._token('LOCATOR')
+            self._token('AS')
+            self._token('LOCATOR')
 
     @graken
     def _function_specification_(self):
@@ -6797,9 +6441,14 @@ class SqlParser(Parser):
         self._schema_qualified_routine_name_()
         self._sql_parameter_declaration_list_()
         self._returns_clause_()
-        self._routine_characteristics_()
         with self._optional():
-            self._dispatch_clause_()
+            def block0():
+                self._routine_characteristic_()
+
+            self._positive_closure(block0)
+        with self._optional():
+            self._token('STATIC')
+            self._token('DISPATCH')
 
     @graken
     def _method_specification_designator_(self):
@@ -6827,14 +6476,6 @@ class SqlParser(Parser):
                 self._token('FOR')
                 self._schema_resolved_user_defined_type_name_()
             self._error('no available options')
-
-    @graken
-    def _routine_characteristics_(self):
-        with self._optional():
-            def block0():
-                self._routine_characteristic_()
-
-            self._positive_closure(block0)
 
     @graken
     def _routine_characteristic_(self):
@@ -6876,18 +6517,13 @@ class SqlParser(Parser):
         self._token('DYNAMIC')
         self._token('RESULT')
         self._token('SETS')
-        self._maximum_dynamic_result_sets_()
+        self._integer_()
 
     @graken
     def _parameter_style_clause_(self):
         self._token('PARAMETER')
         self._token('STYLE')
         self._parameter_style_()
-
-    @graken
-    def _dispatch_clause_(self):
-        self._token('STATIC')
-        self._token('DISPATCH')
 
     @graken
     def _returns_clause_(self):
@@ -6937,13 +6573,15 @@ class SqlParser(Parser):
     def _result_cast_from_type_(self):
         self._data_type_()
         with self._optional():
-            self._locator_indication_()
+            self._token('AS')
+            self._token('LOCATOR')
 
     @graken
     def _returns_data_type_(self):
         self._data_type_()
         with self._optional():
-            self._locator_indication_()
+            self._token('AS')
+            self._token('LOCATOR')
 
     @graken
     def _routine_body_(self):
@@ -6958,7 +6596,7 @@ class SqlParser(Parser):
     def _sql_routine_spec_(self):
         with self._optional():
             self._rights_clause_()
-        self._sql_routine_body_()
+        self._sql_procedure_statement_()
 
     @graken
     def _rights_clause_(self):
@@ -6972,10 +6610,6 @@ class SqlParser(Parser):
                 self._token('SECURITY')
                 self._token('DEFINER')
             self._error('expecting one of: SQL')
-
-    @graken
-    def _sql_routine_body_(self):
-        self._sql_procedure_statement_()
 
     @graken
     def _external_body_reference_(self):
@@ -7019,13 +6653,9 @@ class SqlParser(Parser):
 
     @graken
     def _deterministic_characteristic_(self):
-        with self._choice():
-            with self._option():
-                self._token('DETERMINISTIC')
-            with self._option():
-                self._token('NOT')
-                self._token('DETERMINISTIC')
-            self._error('expecting one of: DETERMINISTIC NOT')
+        with self._optional():
+            self._token('NOT')
+        self._token('DETERMINISTIC')
 
     @graken
     def _sql_data_access_indication_(self):
@@ -7063,24 +6693,16 @@ class SqlParser(Parser):
             self._error('expecting one of: CALLED RETURNS')
 
     @graken
-    def _maximum_dynamic_result_sets_(self):
-        self._integer_()
-
-    @graken
     def _transform_group_specification_(self):
         self._token('TRANSFORM')
         self._token('GROUP')
         with self._group():
             with self._choice():
                 with self._option():
-                    self._single_group_specification_()
+                    self._group_name_()
                 with self._option():
                     self._multiple_group_specification_()
                 self._error('no available options')
-
-    @graken
-    def _single_group_specification_(self):
-        self._group_name_()
 
     @graken
     def _multiple_group_specification_(self):
@@ -7104,7 +6726,7 @@ class SqlParser(Parser):
         self._token('ALTER')
         self._specific_routine_designator_()
         self._alter_routine_characteristics_()
-        self._alter_routine_behavior_()
+        self._token('RESTRICT')
 
     @graken
     def _alter_routine_characteristics_(self):
@@ -7132,10 +6754,6 @@ class SqlParser(Parser):
             self._error('no available options')
 
     @graken
-    def _alter_routine_behavior_(self):
-        self._token('RESTRICT')
-
-    @graken
     def _drop_routine_statement_(self):
         self._token('DROP')
         self._specific_routine_designator_()
@@ -7146,9 +6764,9 @@ class SqlParser(Parser):
         self._token('CREATE')
         self._token('CAST')
         self._token('(')
-        self._source_data_type_()
+        self._data_type_()
         self._token('AS')
-        self._target_data_type_()
+        self._data_type_()
         self._token(')')
         self._token('WITH')
         self._cast_function_()
@@ -7161,21 +6779,13 @@ class SqlParser(Parser):
         self._specific_routine_designator_()
 
     @graken
-    def _source_data_type_(self):
-        self._data_type_()
-
-    @graken
-    def _target_data_type_(self):
-        self._data_type_()
-
-    @graken
     def _drop_user_defined_cast_statement_(self):
         self._token('DROP')
         self._token('CAST')
         self._token('(')
-        self._source_data_type_()
+        self._data_type_()
         self._token('AS')
-        self._target_data_type_()
+        self._data_type_()
         self._token(')')
         self._drop_behavior_()
 
@@ -7225,27 +6835,19 @@ class SqlParser(Parser):
     def _relative_category_(self):
         self._token('RELATIVE')
         self._token('WITH')
-        self._relative_function_specification_()
+        self._specific_routine_designator_()
 
     @graken
     def _map_category_(self):
         self._token('MAP')
         self._token('WITH')
-        self._map_function_specification_()
+        self._specific_routine_designator_()
 
     @graken
     def _state_category_(self):
         self._token('STATE')
         with self._optional():
             self._specific_name_()
-
-    @graken
-    def _relative_function_specification_(self):
-        self._specific_routine_designator_()
-
-    @graken
-    def _map_function_specification_(self):
-        self._specific_routine_designator_()
 
     @graken
     def _drop_user_defined_ordering_statement_(self):
@@ -7293,33 +6895,8 @@ class SqlParser(Parser):
 
     @graken
     def _transform_element_(self):
-        with self._choice():
-            with self._option():
-                self._to_sql_()
-            with self._option():
-                self._from_sql_()
-            self._error('no available options')
-
-    @graken
-    def _to_sql_(self):
-        self._token('TO')
-        self._token('SQL')
+        self._transform_kind_()
         self._token('WITH')
-        self._to_sql_function_()
-
-    @graken
-    def _from_sql_(self):
-        self._token('FROM')
-        self._token('SQL')
-        self._token('WITH')
-        self._from_sql_function_()
-
-    @graken
-    def _to_sql_function_(self):
-        self._specific_routine_designator_()
-
-    @graken
-    def _from_sql_function_(self):
         self._specific_routine_designator_()
 
     @graken
@@ -7416,12 +6993,8 @@ class SqlParser(Parser):
             with self._option():
                 self._token('ALL')
             with self._option():
-                self._transform_group_element_()
+                self._group_name_()
             self._error('expecting one of: ALL')
-
-    @graken
-    def _transform_group_element_(self):
-        self._group_name_()
 
     @graken
     def _sequence_generator_definition_(self):
@@ -7485,20 +7058,12 @@ class SqlParser(Parser):
     def _sequence_generator_start_with_option_(self):
         self._token('START')
         self._token('WITH')
-        self._sequence_generator_start_value_()
-
-    @graken
-    def _sequence_generator_start_value_(self):
         self._signed_numeric_literal_()
 
     @graken
     def _sequence_generator_increment_by_option_(self):
         self._token('INCREMENT')
         self._token('BY')
-        self._sequence_generator_increment_()
-
-    @graken
-    def _sequence_generator_increment_(self):
         self._signed_numeric_literal_()
 
     @graken
@@ -7506,40 +7071,28 @@ class SqlParser(Parser):
         with self._choice():
             with self._option():
                 self._token('MAXVALUE')
-                self._sequence_generator_max_value_()
+                self._signed_numeric_literal_()
             with self._option():
                 self._token('NO')
                 self._token('MAXVALUE')
             self._error('expecting one of: NO')
 
     @graken
-    def _sequence_generator_max_value_(self):
-        self._signed_numeric_literal_()
-
-    @graken
     def _sequence_generator_minvalue_option_(self):
         with self._choice():
             with self._option():
                 self._token('MINVALUE')
-                self._sequence_generator_min_value_()
+                self._signed_numeric_literal_()
             with self._option():
                 self._token('NO')
                 self._token('MINVALUE')
             self._error('expecting one of: NO')
 
     @graken
-    def _sequence_generator_min_value_(self):
-        self._signed_numeric_literal_()
-
-    @graken
     def _sequence_generator_cycle_option_(self):
-        with self._choice():
-            with self._option():
-                self._token('CYCLE')
-            with self._option():
-                self._token('NO')
-                self._token('CYCLE')
-            self._error('expecting one of: CYCLE NO')
+        with self._optional():
+            self._token('NO')
+        self._token('CYCLE')
 
     @graken
     def _alter_sequence_generator_statement_(self):
@@ -7568,10 +7121,6 @@ class SqlParser(Parser):
     def _alter_sequence_generator_restart_option_(self):
         self._token('RESTART')
         self._token('WITH')
-        self._sequence_generator_restart_value_()
-
-    @graken
-    def _sequence_generator_restart_value_(self):
         self._signed_numeric_literal_()
 
     @graken
@@ -7675,7 +7224,7 @@ class SqlParser(Parser):
             with self._option():
                 self._token('SELECT')
                 self._token('(')
-                self._privilege_column_list_()
+                self._column_name_list_()
                 self._token(')')
             with self._option():
                 self._token('SELECT')
@@ -7688,19 +7237,19 @@ class SqlParser(Parser):
                 self._token('INSERT')
                 with self._optional():
                     self._token('(')
-                    self._privilege_column_list_()
+                    self._column_name_list_()
                     self._token(')')
             with self._option():
                 self._token('UPDATE')
                 with self._optional():
                     self._token('(')
-                    self._privilege_column_list_()
+                    self._column_name_list_()
                     self._token(')')
             with self._option():
                 self._token('REFERENCES')
                 with self._optional():
                     self._token('(')
-                    self._privilege_column_list_()
+                    self._column_name_list_()
                     self._token(')')
             with self._option():
                 self._token('USAGE')
@@ -7722,10 +7271,6 @@ class SqlParser(Parser):
                 self._specific_routine_designator_()
 
             self._positive_closure(block0)
-
-    @graken
-    def _privilege_column_list_(self):
-        self._column_name_list_()
 
     @graken
     def _grantee_(self):
@@ -7758,11 +7303,11 @@ class SqlParser(Parser):
     @graken
     def _grant_role_statement_(self):
         self._token('GRANT')
-        self._role_granted_()
+        self._role_name_()
         with self._optional():
             def block0():
                 self._token(',')
-                self._role_granted_()
+                self._role_name_()
 
             self._positive_closure(block0)
         self._token('TO')
@@ -7781,10 +7326,6 @@ class SqlParser(Parser):
             self._token('GRANTED')
             self._token('BY')
             self._grantor_()
-
-    @graken
-    def _role_granted_(self):
-        self._role_name_()
 
     @graken
     def _drop_role_statement_(self):
@@ -7841,11 +7382,11 @@ class SqlParser(Parser):
             self._token('ADMIN')
             self._token('OPTION')
             self._token('FOR')
-        self._role_revoked_()
+        self._role_name_()
         with self._optional():
             def block0():
                 self._token(',')
-                self._role_revoked_()
+                self._role_name_()
 
             self._positive_closure(block0)
         self._token('FROM')
@@ -7863,16 +7404,12 @@ class SqlParser(Parser):
         self._drop_behavior_()
 
     @graken
-    def _role_revoked_(self):
-        self._role_name_()
-
-    @graken
     def _character_set_specification_list_(self):
-        self._character_set_specification_()
+        self._character_set_name_()
         with self._optional():
             def block0():
                 self._token(',')
-                self._character_set_specification_()
+                self._character_set_name_()
 
             self._positive_closure(block0)
 
@@ -7920,7 +7457,7 @@ class SqlParser(Parser):
             with self._option():
                 self._view_definition_()
             with self._option():
-                self._sql_invoked_routine_()
+                self._schema_routine_()
             with self._option():
                 self._grant_statement_()
             with self._option():
@@ -8101,10 +7638,6 @@ class SqlParser(Parser):
             self._error('no available options')
 
     @graken
-    def _sql_diagnostics_statement_(self):
-        self._get_diagnostics_statement_()
-
-    @graken
     def _sql_dynamic_statement_(self):
         with self._choice():
             with self._option():
@@ -8166,13 +7699,9 @@ class SqlParser(Parser):
 
     @graken
     def _cursor_scrollability_(self):
-        with self._choice():
-            with self._option():
-                self._token('SCROLL')
-            with self._option():
-                self._token('NO')
-                self._token('SCROLL')
-            self._error('expecting one of: NO SCROLL')
+        with self._optional():
+            self._token('NO')
+        self._token('SCROLL')
 
     @graken
     def _cursor_holdability_(self):
@@ -8195,14 +7724,6 @@ class SqlParser(Parser):
                 self._token('WITHOUT')
                 self._token('RETURN')
             self._error('expecting one of: WITH WITHOUT')
-
-    @graken
-    def _cursor_specification_(self):
-        self._query_expression_()
-        with self._optional():
-            self._order_by_clause_()
-        with self._optional():
-            self._updatability_clause_()
 
     @graken
     def _updatability_clause_(self):
@@ -8333,12 +7854,8 @@ class SqlParser(Parser):
     def _insert_statement_(self):
         self._token('INSERT')
         self._token('INTO')
-        self._insertion_target_()
-        self._insert_columns_and_source_()
-
-    @graken
-    def _insertion_target_(self):
         self._table_name_()
+        self._insert_columns_and_source_()
 
     @graken
     def _insert_columns_and_source_(self):
@@ -8348,14 +7865,15 @@ class SqlParser(Parser):
             with self._option():
                 self._from_constructor_()
             with self._option():
-                self._from_default_()
-            self._error('no available options')
+                self._token('DEFAULT')
+                self._token('VALUES')
+            self._error('expecting one of: DEFAULT')
 
     @graken
     def _from_subquery_(self):
         with self._optional():
             self._token('(')
-            self._insert_column_list_()
+            self._column_name_list_()
             self._token(')')
         with self._optional():
             self._override_clause_()
@@ -8365,7 +7883,7 @@ class SqlParser(Parser):
     def _from_constructor_(self):
         with self._optional():
             self._token('(')
-            self._insert_column_list_()
+            self._column_name_list_()
             self._token(')')
         with self._optional():
             self._override_clause_()
@@ -8385,15 +7903,6 @@ class SqlParser(Parser):
             self._error('expecting one of: OVERRIDING')
 
     @graken
-    def _from_default_(self):
-        self._token('DEFAULT')
-        self._token('VALUES')
-
-    @graken
-    def _insert_column_list_(self):
-        self._column_name_list_()
-
-    @graken
     def _merge_statement_(self):
         self._token('MERGE')
         self._token('INTO')
@@ -8401,16 +7910,12 @@ class SqlParser(Parser):
         with self._optional():
             with self._optional():
                 self._token('AS')
-            self._merge_correlation_name_()
+            self._correlation_name_()
         self._token('USING')
         self._table_reference_()
         self._token('ON')
         self._search_condition_()
         self._merge_operation_specification_()
-
-    @graken
-    def _merge_correlation_name_(self):
-        self._correlation_name_()
 
     @graken
     def _merge_operation_specification_(self):
@@ -8454,7 +7959,7 @@ class SqlParser(Parser):
         self._token('INSERT')
         with self._optional():
             self._token('(')
-            self._insert_column_list_()
+            self._column_name_list_()
             self._token(')')
         with self._optional():
             self._override_clause_()
@@ -8537,7 +8042,7 @@ class SqlParser(Parser):
     def _multiple_column_assignment_(self):
         self._set_target_list_()
         self._token('=')
-        self._assigned_row_()
+        self._contextually_typed_row_value_expression_()
 
     @graken
     def _set_target_list_(self):
@@ -8552,24 +8057,12 @@ class SqlParser(Parser):
         self._token(')')
 
     @graken
-    def _assigned_row_(self):
-        self._contextually_typed_row_value_expression_()
-
-    @graken
     def _update_target_(self):
-        with self._choice():
-            with self._option():
-                self._object_column_()
-            with self._option():
-                self._object_column_()
-                self._left_bracket_or_trigraph_()
-                self._simple_value_specification_()
-                self._right_bracket_or_trigraph_()
-            self._error('no available options')
-
-    @graken
-    def _object_column_(self):
         self._column_name_()
+        with self._optional():
+            self._left_bracket_or_trigraph_()
+            self._simple_value_specification_()
+            self._right_bracket_or_trigraph_()
 
     @graken
     def _mutated_set_clause_(self):
@@ -8581,7 +8074,7 @@ class SqlParser(Parser):
     def _mutated_target_(self):
         with self._choice():
             with self._option():
-                self._object_column_()
+                self._column_name_()
             with self._option():
                 self._mutated_set_clause_()
             self._error('no available options')
@@ -8613,27 +8106,23 @@ class SqlParser(Parser):
     def _free_locator_statement_(self):
         self._token('FREE')
         self._token('LOCATOR')
-        self._locator_reference_()
+        self._host_parameter_name_()
         with self._optional():
             def block0():
                 self._token(',')
-                self._locator_reference_()
+                self._host_parameter_name_()
 
             self._positive_closure(block0)
-
-    @graken
-    def _locator_reference_(self):
-        self._host_parameter_name_()
 
     @graken
     def _hold_locator_statement_(self):
         self._token('HOLD')
         self._token('LOCATOR')
-        self._locator_reference_()
+        self._host_parameter_name_()
         with self._optional():
             def block0():
                 self._token(',')
-                self._locator_reference_()
+                self._host_parameter_name_()
 
             self._positive_closure(block0)
 
@@ -8772,17 +8261,13 @@ class SqlParser(Parser):
     @graken
     def _savepoint_statement_(self):
         self._token('SAVEPOINT')
-        self._savepoint_specifier_()
-
-    @graken
-    def _savepoint_specifier_(self):
         self._savepoint_name_()
 
     @graken
     def _release_savepoint_statement_(self):
         self._token('RELEASE')
         self._token('SAVEPOINT')
-        self._savepoint_specifier_()
+        self._savepoint_name_()
 
     @graken
     def _commit_statement_(self):
@@ -8812,7 +8297,7 @@ class SqlParser(Parser):
     def _savepoint_clause_(self):
         self._token('TO')
         self._token('SAVEPOINT')
-        self._savepoint_specifier_()
+        self._savepoint_name_()
 
     @graken
     def _connect_statement_(self):
@@ -8876,17 +8361,13 @@ class SqlParser(Parser):
 
     @graken
     def _session_characteristic_list_(self):
-        self._session_characteristic_()
+        self._transaction_characteristics_()
         with self._optional():
             def block0():
                 self._token(',')
-                self._session_characteristic_()
+                self._transaction_characteristics_()
 
             self._positive_closure(block0)
-
-    @graken
-    def _session_characteristic_(self):
-        self._transaction_characteristics_()
 
     @graken
     def _set_session_user_identifier_statement_(self):
@@ -8929,40 +8410,24 @@ class SqlParser(Parser):
     @graken
     def _set_catalog_statement_(self):
         self._token('SET')
-        self._catalog_name_characteristic_()
-
-    @graken
-    def _catalog_name_characteristic_(self):
         self._token('CATALOG')
         self._value_specification_()
 
     @graken
     def _set_schema_statement_(self):
         self._token('SET')
-        self._schema_name_characteristic_()
-
-    @graken
-    def _schema_name_characteristic_(self):
         self._token('SCHEMA')
         self._value_specification_()
 
     @graken
     def _set_names_statement_(self):
         self._token('SET')
-        self._character_set_name_characteristic_()
-
-    @graken
-    def _character_set_name_characteristic_(self):
         self._token('NAMES')
         self._value_specification_()
 
     @graken
     def _set_path_statement_(self):
         self._token('SET')
-        self._sql_path_characteristic_()
-
-    @graken
-    def _sql_path_characteristic_(self):
         self._token('PATH')
         self._value_specification_()
 
@@ -9069,7 +8534,7 @@ class SqlParser(Parser):
 
     @graken
     def _get_header_information_(self):
-        self._simple_target_specification_1_()
+        self._simple_target_specification_()
         self._token('=')
         self._header_item_name_()
 
@@ -9091,21 +8556,13 @@ class SqlParser(Parser):
 
     @graken
     def _get_item_information_(self):
-        self._simple_target_specification_2_()
+        self._simple_target_specification_()
         self._token('=')
         self._descriptor_item_name_()
 
     @graken
     def _item_number_(self):
         self._simple_value_specification_()
-
-    @graken
-    def _simple_target_specification_1_(self):
-        self._simple_target_specification_()
-
-    @graken
-    def _simple_target_specification_2_(self):
-        self._simple_target_specification_()
 
     @graken
     def _descriptor_item_name_(self):
@@ -9235,20 +8692,12 @@ class SqlParser(Parser):
     def _set_header_information_(self):
         self._header_item_name_()
         self._token('=')
-        self._simple_value_specification_1_()
+        self._simple_value_specification_()
 
     @graken
     def _set_item_information_(self):
         self._descriptor_item_name_()
         self._token('=')
-        self._simple_value_specification_2_()
-
-    @graken
-    def _simple_value_specification_1_(self):
-        self._simple_value_specification_()
-
-    @graken
-    def _simple_value_specification_2_(self):
         self._simple_value_specification_()
 
     @graken
@@ -9343,7 +8792,7 @@ class SqlParser(Parser):
             with self._option():
                 self._using_arguments_()
             with self._option():
-                self._using_input_descriptor_()
+                self._using_descriptor_()
             self._error('no available options')
 
     @graken
@@ -9362,10 +8811,6 @@ class SqlParser(Parser):
         self._general_value_specification_()
 
     @graken
-    def _using_input_descriptor_(self):
-        self._using_descriptor_()
-
-    @graken
     def _output_using_clause_(self):
         with self._choice():
             with self._option():
@@ -9377,17 +8822,13 @@ class SqlParser(Parser):
     @graken
     def _into_arguments_(self):
         self._token('INTO')
-        self._into_argument_()
+        self._target_specification_()
         with self._optional():
             def block0():
                 self._token(',')
-                self._into_argument_()
+                self._target_specification_()
 
             self._positive_closure(block0)
-
-    @graken
-    def _into_argument_(self):
-        self._target_specification_()
 
     @graken
     def _into_descriptor_(self):
@@ -9538,10 +8979,14 @@ class SqlParser(Parser):
 
     @graken
     def _direct_select_statement_multiple_rows_(self):
-        self._cursor_specification_()
+        self._query_expression_()
+        with self._optional():
+            self._order_by_clause_()
+        with self._optional():
+            self._updatability_clause_()
 
     @graken
-    def _get_diagnostics_statement_(self):
+    def _sql_diagnostics_statement_(self):
         self._token('GET')
         self._token('DIAGNOSTICS')
         self._sql_diagnostics_information_()
