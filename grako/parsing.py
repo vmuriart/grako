@@ -67,7 +67,7 @@ class Parser(object):
         if previous is None:
             self._concrete_stack[-1] = node
         elif isinstance(previous, list) and isinstance(previous, list):
-             previous.extend(node)
+            previous.extend(node)
         else:
             # previous is unicode
             self._concrete_stack[-1] = [previous, node]
@@ -172,11 +172,13 @@ class Parser(object):
             node = self._concrete_stack.pop()
         self._extend_cst(node)
 
-    def _repeater(self, block):
+    def _repeater(self, block, prefix=None):
         while True:
             self._concrete_stack.append(None)
             try:
                 with self._try():
+                    if prefix:
+                        prefix()
                     block()
             except FailedParse:
                 break
@@ -190,7 +192,7 @@ class Parser(object):
             with self._try():
                 block()
             self._concrete_stack[-1] = [self._concrete_stack[-1]]
-            self._repeater(block)
+            self._repeater(block, prefix=prefix)
         finally:
             node = self._concrete_stack.pop()
         self._extend_cst(node)
