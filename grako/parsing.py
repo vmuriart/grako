@@ -185,7 +185,7 @@ class Parser(object):
                 break
             finally:
                 node = self._concrete_stack.pop()
-            self._add_cst_node(node)
+            self._extend_cst(node)
 
     def _positive_closure(self, block, prefix=None):
         self._concrete_stack.append(None)
@@ -196,7 +196,7 @@ class Parser(object):
             self._repeater(block)
         finally:
             node = self._concrete_stack.pop()
-        self._add_cst_node(node)
+        self._extend_cst(node)
 
     def _check_name(self, token):
         name = token.upper()  # bcuz ignorecase == True
