@@ -8929,7 +8929,13 @@ class SqlParser(Parser):
 
     @graken
     def _direct_sql_statement_(self):
-        self._directly_executable_statement_()
+        def sep0():
+            self._token(';')
+
+        def block0():
+            self._directly_executable_statement_()
+
+        self._positive_closure(block0, prefix=sep0)
         with self._optional():
             self._token(';')
 
