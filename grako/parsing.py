@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, unicode_literals
 
-from contextlib import contextmanager
 import functools
+from collections import namedtuple
+from contextlib import contextmanager
 
 from grako.buffering import Buffer
 from grako.exceptions import FailedLeftRecursion, FailedParse, OptionSucceeded
+
+CacheKey = namedtuple('CacheKey', ['pos', 'rule', 'trace'])
 
 
 @contextmanager
@@ -34,11 +37,13 @@ class Parser(object):
         self.keywords = set(keywords)
 
         self._concrete_stack = [None]
+        self._choice_stack = [0]
         self._memoization_cache = dict()
         self._buffer = None
 
     def _reset(self, text=None):
         self._concrete_stack = [None]
+        self._choice_stack = [0]
         self._memoization_cache = dict()
         self._buffer = Buffer(text, eol_comments_re=self.eol_comments_re)
 
@@ -46,6 +51,11 @@ class Parser(object):
         self._reset(text=text)
         rule = getattr(self, '_' + rule_name + '_', None)
         return rule()
+
+    def _choice_key(self):
+        # WARNING: magic number, MUST BE Odd
+        n = 3
+        return tuple(reversed(self._choice_stack[-n:]))
 
     def _add_cst_node(self, node):
         # node can be list, unicode, or none
@@ -91,7 +101,7 @@ class Parser(object):
     def _invoke_rule(self, rule, name):
         if name[0].islower():
             self._buffer.next_token()
-        key = self._buffer.pos, rule
+        key = CacheKey(self._buffer.pos, name, self._choice_key())
         if key in self._memoization_cache:
             memo = self._memoization_cache[key]
             if isinstance(memo, Exception):
@@ -111,6 +121,15 @@ class Parser(object):
         result = node, self._buffer.pos
         self._memoization_cache[key] = result
         return result
+
+    def _new_choice_option(self):
+        self._choice_stack[-1] += 1
+
+    def _new_choice(self):
+        self._choice_stack.append(0)
+
+    def _close_choice(self):
+        self._choice_stack.pop()
 
     def _token(self, token):
         self._buffer.next_token()
@@ -146,6 +165,7 @@ class Parser(object):
 
     @contextmanager
     def _option(self):
+        self._new_choice_option()
         with suppress(FailedParse):
             with self._try():
                 yield
@@ -153,9 +173,13 @@ class Parser(object):
 
     @contextmanager
     def _choice(self):
-        with self._try():
-            with suppress(OptionSucceeded):
-                yield
+        self._new_choice()
+        try:
+            with self._try():
+                with suppress(OptionSucceeded):
+                    yield
+        finally:
+            self._close_choice()
 
     @contextmanager
     def _optional(self):

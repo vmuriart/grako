@@ -22,8 +22,6 @@ select 1 from dual
 """)
     print ast
 
-    assert 0
-
 def test_fail():
     parser = parser_base.SqlParser()
     with pytest.raises(FailedParse):
