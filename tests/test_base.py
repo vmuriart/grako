@@ -2,8 +2,13 @@
 
 import pytest
 from . import parser_base2003 as parser_base
+from . import simple_parser_base as bse
 from grako.exceptions import FailedParse
 
+
+def test_simple():
+    parser = bse.SqlParser()
+    parser.parse('1=1+1')
 
 def test_basic():
     parser = parser_base.SqlParser()
